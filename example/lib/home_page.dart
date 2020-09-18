@@ -85,6 +85,12 @@ class _HomePageState extends State<HomePage>
                 );
               },
             ),
+            RaisedButton(
+              child: Text('Open MyPageView'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('pageview');
+              },
+            ),
           ],
         ),
       ),

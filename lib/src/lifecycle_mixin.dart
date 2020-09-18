@@ -14,6 +14,4 @@ mixin LifecycleMixin<T extends StatefulWidget> on State<T>, LifecycleAware {
     lifecycleObserver.unsubscribe(this);
     super.dispose();
   }
-
-  void onLifecycleEvent(LifecycleEvent event) {}
 }

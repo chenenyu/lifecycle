@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
 import 'home_page.dart';
+import 'pageview.dart';
 import 'sub1_page.dart';
 import 'sub2_page.dart';
 
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
         '/': (_) => HomePage(),
         'sub1': (_) => Sub1Page(),
         'sub2': (_) => Sub2Page(),
+        'pageview': (_) => MyPageView(),
       },
     );
   }
