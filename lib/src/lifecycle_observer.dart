@@ -144,4 +144,4 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver {
   }
 }
 
-final LifecycleObserver lifecycleObserver = LifecycleObserver();
+final LifecycleObserver defaultLifecycleObserver = LifecycleObserver();
