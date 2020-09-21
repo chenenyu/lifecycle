@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
+import 'overlay_log.dart';
+
 class MyTabView extends StatefulWidget {
   const MyTabView({Key key}) : super(key: key);
 
@@ -42,7 +44,7 @@ class _MyTabViewState extends State<MyTabView>
       body: PageViewLifecycleWrapper(
         controller: _tabController,
         onLifecycleEvent: (event) {
-          print('MyTabView#${event.toString()}');
+          log.add('MyTabView#${event.toString()}');
         },
         child: TabBarView(
           controller: _tabController,
@@ -53,7 +55,7 @@ class _MyTabViewState extends State<MyTabView>
               index: index,
               wantKeepAlive: true,
               onLifecycleEvent: (event) {
-                print('Page@$index#${event.toString()}');
+                log.add('Page@$index#${event.toString()}');
               },
               child: Center(
                 child: Text(

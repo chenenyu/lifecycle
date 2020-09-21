@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
+import 'overlay_log.dart';
+
 class MyPageView extends StatefulWidget {
   MyPageView({Key key}) : super(key: key);
 
@@ -34,7 +36,7 @@ class _MyPageViewState extends State<MyPageView> {
       body: PageViewLifecycleWrapper(
         controller: _pageController,
         onLifecycleEvent: (event) {
-          print('MyPageView#${event.toString()}');
+          log.add('MyPageView#${event.toString()}');
         },
         child: PageView(
           controller: _pageController,
@@ -43,7 +45,7 @@ class _MyPageViewState extends State<MyPageView> {
               index: 0,
               wantKeepAlive: true,
               onLifecycleEvent: (event) {
-                print('Page@0#${event.toString()}');
+                log.add('Page@0#${event.toString()}');
               },
               child: Container(
                 color: Colors.teal,
@@ -72,7 +74,7 @@ class _MyPageViewState extends State<MyPageView> {
                             builder: (context) {
                               return LifecycleWrapper(
                                 onLifecycleEvent: (event) {
-                                  print('Dialog#${event.toString()}');
+                                  log.add('Dialog#${event.toString()}');
                                 },
                                 child: AlertDialog(
                                   content: Text(
@@ -108,7 +110,7 @@ class _MyPageViewState extends State<MyPageView> {
               index: 1,
               wantKeepAlive: true,
               onLifecycleEvent: (event) {
-                print('Page@1#${event.toString()}');
+                log.add('Page@1#${event.toString()}');
               },
               child: Container(
                 color: Colors.blue,

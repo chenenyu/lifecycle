@@ -1,3 +1,4 @@
+import 'package:example/overlay_log.dart';
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
@@ -24,7 +25,7 @@ class _HomePageState extends State<HomePage>
 
   @override
   void onLifecycleEvent(LifecycleEvent event) {
-    print('HomePage#${event.toString()}');
+    log.add('HomePage#${event.toString()}');
   }
 
   @override
@@ -59,7 +60,7 @@ class _HomePageState extends State<HomePage>
                   builder: (context) {
                     return LifecycleWrapper(
                       onLifecycleEvent: (event) {
-                        print('Dialog#${event.toString()}');
+                        log.add('Dialog#${event.toString()}');
                       },
                       child: AlertDialog(
                         content: Text(
