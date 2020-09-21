@@ -29,6 +29,7 @@ class PageLifecycleWrapper extends StatefulWidget {
   }
 }
 
+/// 不实现[LifecycleMixin],通过parent转发
 class _PageLifecycleWrapperState extends State<PageLifecycleWrapper>
     with LifecycleAware, AutomaticKeepAliveClientMixin {
   StreamSubscription<LifecycleEvent> _ss;

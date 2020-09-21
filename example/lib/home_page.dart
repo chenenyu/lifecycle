@@ -91,6 +91,12 @@ class _HomePageState extends State<HomePage>
                 Navigator.of(context).pushNamed('pageview');
               },
             ),
+            RaisedButton(
+              child: Text('Open MyTabView'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('tabview');
+              },
+            ),
           ],
         ),
       ),

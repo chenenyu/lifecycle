@@ -113,18 +113,22 @@ class _MyPageViewState extends State<MyPageView> {
               child: Container(
                 color: Colors.blue,
                 child: Center(
-                  child: RaisedButton(
-                    color: Colors.white,
-                    onPressed: () {
-                      if (_pageController.hasClients) {
-                        _pageController.animateToPage(
-                          0,
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeInOut,
-                        );
-                      }
-                    },
-                    child: Text('Previous'),
+                  child: Column(
+                    children: <Widget>[
+                      RaisedButton(
+                        color: Colors.white,
+                        onPressed: () {
+                          if (_pageController.hasClients) {
+                            _pageController.animateToPage(
+                              0,
+                              duration: const Duration(milliseconds: 400),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        },
+                        child: Text('Previous'),
+                      ),
+                    ],
                   ),
                 ),
               ),

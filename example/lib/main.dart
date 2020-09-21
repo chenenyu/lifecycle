@@ -1,3 +1,4 @@
+import 'package:example/tabview.dart';
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
         'sub1': (_) => Sub1Page(),
         'sub2': (_) => Sub2Page(),
         'pageview': (_) => MyPageView(),
+        'tabview': (_) => MyTabView(),
       },
     );
   }
