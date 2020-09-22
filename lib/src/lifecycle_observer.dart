@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import 'lifecycle_aware.dart';
 
+final LifecycleObserver defaultLifecycleObserver = LifecycleObserver();
+
 class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver {
   final List<Route> _routes = [];
   final Map<R, Set<LifecycleAware>> _listeners = <R, Set<LifecycleAware>>{};
@@ -38,7 +40,9 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver {
   /// 启动第一个页面时,previousRoute = null.
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
-    // print('LifecycleObserver#didPush');
+    super.didPush(route, previousRoute);
+    print('LifecycleObserver#didPush(route: ${route.settings.name}, '
+        'previousRoute: ${previousRoute?.settings?.name})');
 
     if (previousRoute != null) {
       if (route is PageRoute) {
@@ -73,7 +77,9 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver {
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
-    // print('LifecycleObserver#didPop');
+    super.didPop(route, previousRoute);
+    print('LifecycleObserver#didPop(route: ${route.settings.name}, '
+        'previousRoute: ${previousRoute.settings.name})');
 
     final Set<LifecycleAware> subscribers = _listeners[route];
     subscribers?.forEach((lifecycleAware) {
@@ -83,6 +89,7 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver {
 
     if (previousRoute != null) {
       if (route is PageRoute) {
+        // 上一个 Route 触发 resume
         final Set<LifecycleAware> previousSubscribers =
             _listeners[previousRoute];
         previousSubscribers?.forEach((lifecycleAware) {
@@ -92,6 +99,7 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver {
         if (previousRoute is PopupRoute) {
           Route lastPageRoute =
               _routes.lastWhere((r) => r is PageRoute, orElse: () => null);
+          // 上一个 PageRoute 触发 visible
           if (lastPageRoute != null) {
             final Set<LifecycleAware> previousPageSubscribers =
                 _listeners[lastPageRoute];
@@ -101,6 +109,7 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver {
           }
         }
       } else if (route is PopupRoute) {
+        // 上一个 Route 触发 resume
         final Set<LifecycleAware> previousSubscribers =
             _listeners[previousRoute];
         previousSubscribers?.forEach((lifecycleAware) {
@@ -112,36 +121,69 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver {
 
   @override
   void didReplace({Route newRoute, Route oldRoute}) {
-    super.didReplace();
-    print('LifecycleObserver#didReplace');
-
-    // todo ?
-
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     int index = _routes.indexOf(oldRoute);
     assert(index != -1);
-    _routes.removeAt(index);
+    bool isLast = _routes.last == oldRoute;
+    print('LifecycleObserver#didReplace(newRoute: ${newRoute.settings.name}, '
+        'oldRoute: ${oldRoute.settings.name}, isLast: $isLast)');
+
+    final Set<LifecycleAware> oldSubscribers = _listeners[oldRoute];
+    oldSubscribers?.forEach((lifecycleAware) {
+      lifecycleAware.onLifecycleEvent(LifecycleEvent.pop);
+    });
+
+    _routes.remove(oldRoute);
+
+    if (isLast) {
+      if (oldRoute is PageRoute && newRoute is PopupRoute) {
+        PageRoute lastPageRoute =
+            _routes.lastWhere((r) => r is PageRoute, orElse: () => null);
+        // 上一个PageRoute触发visible
+        if (lastPageRoute != null) {
+          final Set<LifecycleAware> lastPageSubscribers =
+              _listeners[lastPageRoute];
+          lastPageSubscribers?.forEach((lifecycleAware) {
+            lifecycleAware.onLifecycleEvent(LifecycleEvent.visible);
+          });
+        }
+      } else if (oldRoute is PopupRoute && newRoute is PageRoute) {
+        //  fixme: 之前的PopupRoute是否触发invisible ？
+        PageRoute lastPageRoute =
+            _routes.lastWhere((r) => r is PageRoute, orElse: () => null);
+        if (lastPageRoute != null) {
+          // 之前的Route触发invisible
+          final Set<LifecycleAware> lastPageSubscribers =
+              _listeners[lastPageRoute];
+          lastPageSubscribers?.forEach((lifecycleAware) {
+            lifecycleAware.onLifecycleEvent(LifecycleEvent.invisible);
+          });
+        }
+      }
+    }
+
     _routes.insert(index, newRoute);
   }
 
+  /// [route] 被移除的route
+  /// [previousRoute] 被移除route下面的route,移除多个route时,该参数值不变
   @override
   void didRemove(Route route, Route previousRoute) {
     super.didRemove(route, previousRoute);
-    print('LifecycleObserver#didRemove');
+    print('LifecycleObserver#didRemove(route: ${route.settings.name}, '
+        'previousRoute: ${previousRoute.settings.name})');
 
-    // todo?
-    // final Set<LifecycleAware> subscribers = _listeners[route];
-    // subscribers?.forEach((lifecycleAware) {
-    //   lifecycleAware.onPop();
-    // });
-    // if (route.isCurrent) {
-    //   final Set<LifecycleAware> previousSubscribers = _listeners[previousRoute];
-    //   previousSubscribers?.forEach((lifecycleAware) {
-    //     lifecycleAware.onResume();
-    //   });
-    // }
+    final Set<LifecycleAware> subscribers = _listeners[route];
+    subscribers?.forEach((lifecycleAware) {
+      lifecycleAware.onLifecycleEvent(LifecycleEvent.pop);
+    });
+    if (previousRoute.isCurrent) {
+      final Set<LifecycleAware> previousSubscribers = _listeners[previousRoute];
+      previousSubscribers?.forEach((lifecycleAware) {
+        lifecycleAware.onLifecycleEvent(LifecycleEvent.resume);
+      });
+    }
 
     _routes.remove(route);
   }
 }
-
-final LifecycleObserver defaultLifecycleObserver = LifecycleObserver();

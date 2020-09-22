@@ -12,7 +12,8 @@ class Sub1Page extends StatefulWidget {
   }
 }
 
-class _Sub1PageState extends State<Sub1Page> with LifecycleAware, LifecycleMixin {
+class _Sub1PageState extends State<Sub1Page>
+    with LifecycleAware, LifecycleMixin {
   @override
   void initState() {
     super.initState();
@@ -33,7 +34,7 @@ class _Sub1PageState extends State<Sub1Page> with LifecycleAware, LifecycleMixin
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Stateful Page',
+          'Sub1Page',
         ),
       ),
       body: Center(
@@ -43,19 +44,31 @@ class _Sub1PageState extends State<Sub1Page> with LifecycleAware, LifecycleMixin
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('pop'),
+              child: Text("pop()"),
             ),
             RaisedButton(
               onPressed: () {
                 Navigator.of(context).popUntil(ModalRoute.withName('/'));
               },
-              child: Text('popUntil /'),
+              child: Text("popUntil('/')"),
+            ),
+            RaisedButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed('sub2');
+              },
+              child: Text("push('sub2')"),
             ),
             RaisedButton(
               onPressed: () {
                 Navigator.of(context).popAndPushNamed('sub2');
               },
-              child: Text('popAndPushNamed sub2'),
+              child: Text("popAndPushNamed('sub2')"),
+            ),
+            RaisedButton(
+              onPressed: () {
+                Navigator.of(context).pushReplacementNamed('sub2');
+              },
+              child: Text("pushReplacementNamed('sub2')"),
             ),
           ],
         ),

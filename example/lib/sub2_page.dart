@@ -15,15 +15,40 @@ class Sub2Page extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            'Stateless Page',
+            'Sub2Page',
           ),
         ),
         body: Center(
-          child: RaisedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text('pop'),
+          child: Column(
+            children: <Widget>[
+              RaisedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text("pop()"),
+              ),
+              RaisedButton(
+                onPressed: () {
+                  Navigator.of(context).removeRoute(ModalRoute.of(context));
+                },
+                child: Text("removeRoute(current)"),
+              ),
+              RaisedButton(
+                onPressed: () {
+                  Navigator.of(context)
+                      .removeRouteBelow(ModalRoute.of(context));
+                },
+                child: Text("removeRouteBelow(current)"),
+              ),
+              RaisedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      'sub1', ModalRoute.withName('/'));
+                },
+                child: Text(
+                    "pushNamedAndRemoveUntil('sub1', ModalRoute.withName('/'))"),
+              ),
+            ],
           ),
         ),
       ),

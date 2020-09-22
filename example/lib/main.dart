@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      navigatorObservers: [lifecycleObserver],
+      navigatorObservers: [defaultLifecycleObserver],
       routes: {
         // '/': (_) => HomePage(),
         'sub1': (_) => Sub1Page(),
