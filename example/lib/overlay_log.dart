@@ -54,31 +54,48 @@ class LogEntryState extends State<LogEntry> {
 
   @override
   Widget build(BuildContext context) {
-    return IgnorePointer(
+    return Container(
+      // height: MediaQuery.of(context).size.height / 2,
+      margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 2 / 3),
+      color: Colors.black54,
       child: Material(
         type: MaterialType.transparency,
-        child: Container(
-          // height: MediaQuery.of(context).size.height / 2,
-          margin:
-              EdgeInsets.only(top: MediaQuery.of(context).size.height * 2 / 3),
-          padding: EdgeInsets.all(16),
-          color: Colors.black54,
-          child: ListView.builder(
-            controller: _controller,
-            shrinkWrap: true,
-            padding: EdgeInsets.zero,
-            itemCount: _logs.length,
-            itemBuilder: (context, index) {
-              final String log = _logs[index];
-              return Text(
-                log,
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
+        child: Stack(
+          children: <Widget>[
+            ListView.builder(
+              controller: _controller,
+              shrinkWrap: true,
+              padding: EdgeInsets.all(16),
+              itemCount: _logs.length,
+              itemBuilder: (context, index) {
+                final String log = _logs[index];
+                return Text(
+                  log,
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                );
+              },
+            ),
+            PositionedDirectional(
+              top: 0,
+              end: 0,
+              child: IconButton(
+                iconSize: 16,
+                padding: EdgeInsets.zero,
+                icon: Icon(
+                  Icons.clear,
+                  color: Colors.white,
                 ),
-              );
-            },
-          ),
+                onPressed: () {
+                  setState(() {
+                    _logs.clear();
+                  });
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
