@@ -1,13 +1,5 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
 .DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
+pubspec.lock
 
 # IntelliJ related
 *.iml
