@@ -25,7 +25,6 @@ class LogEntry extends StatefulWidget {
 
 class LogEntryState extends State<LogEntry> {
   ScrollController _controller = ScrollController();
-  List<String> _logs = [];
 
   @override
   void initState() {
@@ -39,7 +38,6 @@ class LogEntryState extends State<LogEntry> {
   }
 
   void add(String log) {
-    _logs.add(log);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         setState(() {});
@@ -103,9 +101,11 @@ class LogEntryState extends State<LogEntry> {
 }
 
 final GlobalKey<LogEntryState> entryKey = GlobalKey();
+final List<String> _logs = [];
 
 class LogManager {
   void add(String log) {
+    _logs.add(log);
     print(log);
     entryKey.currentState?.add(log);
   }
