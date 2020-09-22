@@ -77,8 +77,8 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
     super.didPush(route, previousRoute);
-    print('LifecycleObserver#didPush(route: ${route.settings.name}, '
-        'previousRoute: ${previousRoute?.settings?.name})');
+    // print('LifecycleObserver#didPush(route: ${route.settings.name}, '
+    //     'previousRoute: ${previousRoute?.settings?.name})');
 
     if (previousRoute != null) {
       if (route is PageRoute) {
@@ -100,8 +100,8 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   @override
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
     super.didPop(route, previousRoute);
-    print('LifecycleObserver#didPop(route: ${route.settings.name}, '
-        'previousRoute: ${previousRoute.settings.name})');
+    // print('LifecycleObserver#didPop(route: ${route.settings.name}, '
+    //     'previousRoute: ${previousRoute.settings.name})');
 
     // 当前 route 触发 pop
     _sendEventToRoute(route, LifecycleEvent.pop);
@@ -128,8 +128,8 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     int index = _routes.indexOf(oldRoute);
     assert(index != -1);
     bool isLast = _routes.last == oldRoute;
-    print('LifecycleObserver#didReplace(newRoute: ${newRoute.settings.name}, '
-        'oldRoute: ${oldRoute.settings.name}, isLast: $isLast)');
+    // print('LifecycleObserver#didReplace(newRoute: ${newRoute.settings.name}, '
+    //     'oldRoute: ${oldRoute.settings.name}, isLast: $isLast)');
 
     _sendEventToRoute(oldRoute, LifecycleEvent.pop);
     _routes.remove(oldRoute);
@@ -139,7 +139,7 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
         // 上一个PageRoute触发visible
         _sendEventToLastPageRoute(LifecycleEvent.visible);
       } else if (oldRoute is PopupRoute && newRoute is PageRoute) {
-        // fixme: 之前的PopupRoute是否触发invisible ？
+        // todo: 之前的PopupRoute是否触发invisible ？
         // 之前的PageRoute触发invisible
         _sendEventToLastPageRoute(LifecycleEvent.invisible);
       }
@@ -153,8 +153,8 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   @override
   void didRemove(Route route, Route previousRoute) {
     super.didRemove(route, previousRoute);
-    print('LifecycleObserver#didRemove(route: ${route.settings.name}, '
-        'previousRoute: ${previousRoute.settings.name})');
+    // print('LifecycleObserver#didRemove(route: ${route.settings.name}, '
+    //     'previousRoute: ${previousRoute.settings.name})');
 
     _sendEventToRoute(route, LifecycleEvent.pop);
     if (previousRoute.isCurrent) {
@@ -177,7 +177,7 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     if (_routes.isEmpty) return;
     PageRoute route = _routes.last;
     if (route != null) {
-      // 之前的Route触发invisible
+      // 之前的 route 触发 invisible
       final Set<LifecycleAware> subscribers = _listeners[route];
       subscribers?.forEach((lifecycleAware) {
         lifecycleAware.onLifecycleEvent(event);
