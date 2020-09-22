@@ -48,6 +48,9 @@ dependencies:
 
 First of all, you should register a observer in `WidgetsApp`/`MaterialApp`:  
 ```dart
+import 'package:flutter/material.dart';
+import 'package:lifecycle/lifecycle.dart';
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -128,7 +131,7 @@ showDialog(
       onLifecycleEvent: (event) {
         print(event);
       },
-      child: AlertDialog(),
+      child: Dialog(),
     );
   },
 );
