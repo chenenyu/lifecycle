@@ -14,8 +14,8 @@ class LifecycleObserverProvider<R extends Route<dynamic>>
 
   @override
   bool updateShouldNotify(LifecycleObserverProvider oldWidget) {
-    if (lifecycleObserver != oldWidget.lifecycleObserver) return true;
-    return false;
+    return !identical(this, oldWidget) &&
+        lifecycleObserver != oldWidget.lifecycleObserver;
   }
 
   static LifecycleObserver of(BuildContext context) {

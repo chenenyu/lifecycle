@@ -16,8 +16,8 @@ typedef OnLifecycleEvent = void Function(LifecycleEvent event);
 enum LifecycleEvent {
   push,
   visible,
-  resume,
-  pause,
+  active,
+  inactive,
   invisible,
   pop,
 }

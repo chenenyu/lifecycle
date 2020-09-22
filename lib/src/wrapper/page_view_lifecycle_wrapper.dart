@@ -88,8 +88,8 @@ abstract class BasePageViewLifecycleWrapperState
       case LifecycleEvent.pop:
         break;
       case LifecycleEvent.visible:
-      case LifecycleEvent.resume:
-      case LifecycleEvent.pause:
+      case LifecycleEvent.active:
+      case LifecycleEvent.inactive:
       case LifecycleEvent.invisible:
         dispatchEvent(event);
         break;
