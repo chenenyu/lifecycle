@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../lifecycle_aware.dart';
-import '../lifecycle_mixin.dart';
+import 'lifecycle_aware.dart';
+import 'lifecycle_mixin.dart';
 
 /// Lifecycle wrapper for normal widget, such as [Dialog] and [StatelessWidget].
 class LifecycleWrapper extends StatefulWidget {

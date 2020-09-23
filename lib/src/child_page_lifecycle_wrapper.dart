@@ -1,22 +1,22 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
-import '../lifecycle_aware.dart';
-import 'page_view_lifecycle_wrapper.dart';
+import 'dispatch_lifecycle_to_parent_page_mixin.dart';
+import 'lifecycle_aware.dart';
+import 'parent_page_lifecycle_wrapper.dart';
+import 'subscribe_lifecycle_from_parent_page_mixin.dart';
 
 /// Lifecycle wrapper for children of [PageView] and [TabBarView].
-/// See [PageViewLifecycleWrapper].
-class PageLifecycleWrapper extends StatefulWidget {
+/// See [ParentPageLifecycleWrapper].
+class ChildPageLifecycleWrapper extends StatefulWidget {
   final int index;
   final OnLifecycleEvent onLifecycleEvent;
   final bool wantKeepAlive;
   final Widget child;
 
-  PageLifecycleWrapper({
+  ChildPageLifecycleWrapper({
     Key key,
     @required this.index,
-    @required this.onLifecycleEvent,
+    this.onLifecycleEvent,
     this.wantKeepAlive = false,
     @required this.child,
   })  : assert(index != null && index >= 0),
@@ -24,43 +24,36 @@ class PageLifecycleWrapper extends StatefulWidget {
         super(key: key);
 
   @override
-  _PageLifecycleWrapperState createState() {
-    return _PageLifecycleWrapperState();
+  ChildPageLifecycleWrapperState createState() {
+    return ChildPageLifecycleWrapperState();
+  }
+
+  static ChildPageLifecycleWrapperState of(BuildContext context) {
+    return context.findAncestorStateOfType<ChildPageLifecycleWrapperState>();
   }
 }
 
 /// 不实现[LifecycleMixin],通过parent转发
-class _PageLifecycleWrapperState extends State<PageLifecycleWrapper>
-    with LifecycleAware, AutomaticKeepAliveClientMixin {
-  StreamSubscription<LifecycleEvent> _ss;
-
+class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
+    with
+        LifecycleAware,
+        DispatchLifecycleToParentPageMixin,
+        SubscribeLifecycleFromParentPageMixin,
+        AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => widget.wantKeepAlive ?? false;
 
   @override
   void initState() {
     super.initState();
-    // print('_PageLifecycleWrapperState#initState');
+    // print('ChildPageLifecycleWrapperState#initState');
     onLifecycleEvent(LifecycleEvent.push);
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_ss == null) {
-      Stream<LifecycleEvent> stream =
-          PageViewLifecycleWrapper.of(context, widget.index);
-      if (stream != null) {
-        _ss = stream.listen(onLifecycleEvent);
-      }
-    }
-  }
-
-  @override
   void dispose() {
-    // print('_PageLifecycleWrapperState#dispose');
+    // print('ChildPageLifecycleWrapperState#dispose');
     onLifecycleEvent(LifecycleEvent.pop);
-    _ss?.cancel();
     super.dispose();
   }
 
@@ -72,8 +65,11 @@ class _PageLifecycleWrapperState extends State<PageLifecycleWrapper>
 
   @override
   void onLifecycleEvent(LifecycleEvent event) {
+    // callback
     if (widget.onLifecycleEvent != null) {
       widget.onLifecycleEvent(event);
     }
+    // dispatch event to subscribers
+    dispatchEvent(event);
   }
 }
