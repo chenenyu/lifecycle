@@ -1,6 +1,5 @@
-
-
-
+[![Pub Version](https://img.shields.io/pub/v/lifecycle)](https://pub.dev/packages/lifecycle) [![pub points](https://badges.bar/lifecycle/pub%20points)](https://pub.dev/packages/lifecycle/score) [![likes](https://badges.bar/lifecycle/likes)](https://pub.dev/packages/lifecycle/score)
+![PR](https://img.shields.io/badge/PRs-welcome-blue)
 
 # lifecycle
 
@@ -12,6 +11,7 @@ Lifecycle support for Flutter widgets.
 - [x] `StatelessWidget`(include `Dialog`).
 - [x] `PageView` and it's children.
 - [x] `TabBarView` and it's children.
+- [x] Nested page view.
 
 ### Supported lifecycle event
 ```dart
@@ -195,6 +195,107 @@ class _MyPageViewState extends State<MyPageView> {
                 print('Page@1#${event.toString()}');
               },
               child: Container(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+```
+
+* Nested PageView
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:lifecycle/lifecycle.dart';
+
+class NestedPageView extends StatefulWidget {
+  NestedPageView({Key key}) : super(key: key);
+
+  _NestedPageViewState createState() => _NestedPageViewState();
+}
+
+class _NestedPageViewState extends State<NestedPageView> with SingleTickerProviderStateMixin {
+  PageController _pageController;
+  TabController _tabController;
+
+  final List<Tab> myTabs = <Tab>[
+    Tab(text: 'left'),
+    Tab(text: 'right'),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    _tabController = TabController(vsync: this, length: myTabs.length);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('NestedPageView'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: myTabs,
+        ),
+      ),
+      body: ParentPageLifecycleWrapper( // Outer PageView
+        controller: _tabController,
+        onLifecycleEvent: (event) {
+          print('NestedPageView#${event.toString()}');
+        },
+        child: TabBarView(
+          controller: _tabController,
+          children: <Widget>[
+            ChildPageLifecycleWrapper(
+              index: 0,
+              wantKeepAlive: true,
+              onLifecycleEvent: (event) {
+                print('OuterPage@0#${event.toString()}');
+              },
+              child: Container(),
+            ),
+            ChildPageLifecycleWrapper(
+              index: 1,
+              wantKeepAlive: true,
+              onLifecycleEvent: (event) {
+                print('OuterPage@1#${event.toString()}');
+              },
+              child: ParentPageLifecycleWrapper( // Inner PageView
+                controller: _pageController,
+                child: PageView(
+                  controller: _pageController,
+                  children: [
+                    ChildPageLifecycleWrapper(
+                      index: 0,
+                      wantKeepAlive: false,
+                      onLifecycleEvent: (event) {
+                        log.add('InnerPage@0#${event.toString()}');
+                      },
+                      child: Container(),
+                    ),
+                    ChildPageLifecycleWrapper(
+                      index: 1,
+                      wantKeepAlive: false,
+                      onLifecycleEvent: (event) {
+                        log.add('InnerPage@1#${event.toString()}');
+                      },
+                      child: Container(),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
