@@ -98,6 +98,12 @@ class _HomePageState extends State<HomePage>
                 Navigator.of(context).pushNamed('tabview');
               },
             ),
+            RaisedButton(
+              child: Text('Open NestedPageView'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('nested');
+              },
+            ),
           ],
         ),
       ),

@@ -12,9 +12,6 @@ class MyPageView extends StatefulWidget {
 class _MyPageViewState extends State<MyPageView> {
   PageController _pageController;
 
-  // @override
-  // bool get wantKeepAlive => true;
-
   @override
   void initState() {
     super.initState();
@@ -33,7 +30,7 @@ class _MyPageViewState extends State<MyPageView> {
       appBar: AppBar(
         title: Text('MyPageView'),
       ),
-      body: PageViewLifecycleWrapper(
+      body: ParentPageLifecycleWrapper(
         controller: _pageController,
         onLifecycleEvent: (event) {
           log.add('MyPageView#${event.toString()}');
@@ -41,9 +38,9 @@ class _MyPageViewState extends State<MyPageView> {
         child: PageView(
           controller: _pageController,
           children: [
-            PageLifecycleWrapper(
+            ChildPageLifecycleWrapper(
               index: 0,
-              wantKeepAlive: true,
+              wantKeepAlive: false,
               onLifecycleEvent: (event) {
                 log.add('Page@0#${event.toString()}');
               },
@@ -106,9 +103,9 @@ class _MyPageViewState extends State<MyPageView> {
                 ),
               ),
             ),
-            PageLifecycleWrapper(
+            ChildPageLifecycleWrapper(
               index: 1,
-              wantKeepAlive: true,
+              wantKeepAlive: false,
               onLifecycleEvent: (event) {
                 log.add('Page@1#${event.toString()}');
               },

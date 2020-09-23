@@ -41,7 +41,7 @@ class _MyTabViewState extends State<MyTabView>
           tabs: myTabs,
         ),
       ),
-      body: PageViewLifecycleWrapper(
+      body: ParentPageLifecycleWrapper(
         controller: _tabController,
         onLifecycleEvent: (event) {
           log.add('MyTabView#${event.toString()}');
@@ -51,7 +51,7 @@ class _MyTabViewState extends State<MyTabView>
           children: myTabs.map((Tab tab) {
             final String label = tab.text.toLowerCase();
             final int index = myTabs.indexOf(tab);
-            return PageLifecycleWrapper(
+            return ChildPageLifecycleWrapper(
               index: index,
               wantKeepAlive: true,
               onLifecycleEvent: (event) {
