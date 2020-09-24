@@ -171,7 +171,7 @@ class _MyPageViewState extends State<MyPageView> {
         title: Text('MyPageView'),
       ),
       // Wrap PageView
-      body: PageViewLifecycleWrapper(
+      body: ParentPageLifecycleWrapper(
         controller: _pageController,
         onLifecycleEvent: (event) { // optional.
           print('MyPageView#${event.toString()}');
@@ -180,7 +180,7 @@ class _MyPageViewState extends State<MyPageView> {
           controller: _pageController,
           children: [
             // Wrap child of PageView
-            PageLifecycleWrapper(
+            ChildPageLifecycleWrapper(
               index: 0,
               wantKeepAlive: true,
               onLifecycleEvent: (event) {
@@ -188,7 +188,7 @@ class _MyPageViewState extends State<MyPageView> {
               },
               child: Container(),
             ),
-            PageLifecycleWrapper(
+            ChildPageLifecycleWrapper(
               index: 1,
               wantKeepAlive: true,
               onLifecycleEvent: (event) {

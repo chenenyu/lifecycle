@@ -50,17 +50,10 @@ class _NestedPageViewState extends State<NestedPageView> with SingleTickerProvid
         child: TabBarView(
           controller: _tabController,
           children: <Widget>[
-            ChildPageLifecycleWrapper(
-              index: 0,
-              wantKeepAlive: true,
-              onLifecycleEvent: (event) {
-                log.add('OuterPage@0#${event.toString()}');
-              },
-              child: Center(
-                child: Text(
-                  'This is the first tab',
-                  style: const TextStyle(fontSize: 20),
-                ),
+            Center(
+              child: Text(
+                'This is the first tab',
+                style: const TextStyle(fontSize: 20),
               ),
             ),
             ChildPageLifecycleWrapper(
