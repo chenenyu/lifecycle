@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'dispatch_lifecycle_to_parent_page_mixin.dart';
+import 'child_page_dispatch_lifecycle_mixin.dart';
+import 'child_page_subscribe_lifecycle_mixin.dart';
 import 'lifecycle_aware.dart';
 import 'parent_page_lifecycle_wrapper.dart';
-import 'subscribe_lifecycle_from_parent_page_mixin.dart';
 
 /// Lifecycle wrapper for children of [PageView] and [TabBarView].
 /// See [ParentPageLifecycleWrapper].
@@ -37,8 +37,8 @@ class ChildPageLifecycleWrapper extends StatefulWidget {
 class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
     with
         LifecycleAware,
-        DispatchLifecycleToParentPageMixin,
-        SubscribeLifecycleFromParentPageMixin,
+        ChildPageDispatchLifecycleMixin,
+        ChildPageSubscribeLifecycleMixin,
         AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => widget.wantKeepAlive ?? false;

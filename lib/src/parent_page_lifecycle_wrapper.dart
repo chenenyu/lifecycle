@@ -2,10 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'dispatch_lifecycle_to_child_page_mixin.dart';
 import 'lifecycle_aware.dart';
-import 'lifecycle_mixin.dart';
-import 'subscribe_lifecycle_from_child_page_mixin.dart';
+import 'parent_page_dispatch_lifecycle_mixin.dart';
+import 'parent_page_subscribe_lifecycle_mixin.dart';
 
 /// Lifecycle wrapper for [PageView]/[TabBarView].
 class ParentPageLifecycleWrapper extends StatefulWidget {
@@ -44,9 +43,8 @@ abstract class ParentPageLifecycleWrapperState
     extends State<ParentPageLifecycleWrapper>
     with
         LifecycleAware,
-        LifecycleMixin,
-        DispatchLifecycleToChildPageMixin,
-        SubscribeLifecycleFromChildPageMixin {
+        ParentPageDispatchLifecycleMixin,
+        ParentPageSubscribeLifecycleMixin {
   void onPageChanged();
 
   @override
@@ -95,8 +93,12 @@ class _PageViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
     // print('_PageViewLifecycleWrapperState#initState');
     _pageController = widget.controller;
     curPage = _pageController.initialPage;
-    // 补发第一个page的 active 事件
-    Future.microtask(() => dispatchEvent(LifecycleEvent.active));
+    // 补发第一个page的 active 事件, 异步是让 active 事件在 push 事件之后
+    Future.microtask(() {
+      if (widget.onLifecycleEvent != null) {
+        widget.onLifecycleEvent(LifecycleEvent.active);
+      }
+    });
   }
 
   /// 页面切换监听
@@ -119,8 +121,12 @@ class _TabBarViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
     // print('_TabBarViewLifecycleWrapperState#initState');
     _tabController = widget.controller;
     curPage = _tabController.index;
-    // 补发第一个page的 active 事件
-    Future.microtask(() => dispatchEvent(LifecycleEvent.active));
+    // 补发第一个page的 active 事件, 异步是让 active 事件在 push 事件之后
+    Future.microtask(() {
+      if (widget.onLifecycleEvent != null) {
+        widget.onLifecycleEvent(LifecycleEvent.active);
+      }
+    });
   }
 
   @override

@@ -4,7 +4,7 @@ import 'lifecycle_aware.dart';
 import 'parent_page_lifecycle_wrapper.dart';
 
 /// Dispatch lifecycle event to child page.
-mixin DispatchLifecycleToChildPageMixin
+mixin ParentPageDispatchLifecycleMixin
     on State<ParentPageLifecycleWrapper>, LifecycleAware {
   /// Current page.
   int curPage;
@@ -24,6 +24,8 @@ mixin DispatchLifecycleToChildPageMixin
 
   /// Dispatch event to stream subscription
   void dispatchEvent(LifecycleEvent event) {
-    _subscribers[curPage].onLifecycleEvent(event);
+    if (_subscribers[curPage] != null) {
+      _subscribers[curPage].onLifecycleEvent(event);
+    }
   }
 }

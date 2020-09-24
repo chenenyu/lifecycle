@@ -6,7 +6,7 @@ import 'parent_page_lifecycle_wrapper.dart';
 
 /// Subscribe lifecycle event from [ParentPageLifecycleWrapper].
 /// This is used in child page of PageView.
-mixin SubscribeLifecycleFromParentPageMixin
+mixin ChildPageSubscribeLifecycleMixin
     on State<ChildPageLifecycleWrapper>, LifecycleAware {
   ParentPageLifecycleWrapperState _basePageViewLifecycleWrapperState;
 

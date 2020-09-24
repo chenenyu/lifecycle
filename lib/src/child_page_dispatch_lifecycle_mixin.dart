@@ -4,7 +4,7 @@ import 'child_page_lifecycle_wrapper.dart';
 import 'lifecycle_aware.dart';
 
 /// Lifecycle dispatcher for child page.
-mixin DispatchLifecycleToParentPageMixin
+mixin ChildPageDispatchLifecycleMixin
     on State<ChildPageLifecycleWrapper>, LifecycleAware {
   Set<LifecycleAware> _subscribers = <LifecycleAware>{};
 
