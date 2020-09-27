@@ -1,4 +1,6 @@
-[![Pub Version](https://img.shields.io/pub/v/lifecycle)](https://pub.dev/packages/lifecycle) [![pub points](https://badges.bar/lifecycle/pub%20points)](https://pub.dev/packages/lifecycle/score) [![likes](https://badges.bar/lifecycle/likes)](https://pub.dev/packages/lifecycle/score)
+[![Pub Version](https://img.shields.io/pub/v/lifecycle)](https://pub.dev/packages/lifecycle)
+[![pub points](https://badges.bar/lifecycle/pub%20points)](https://pub.dev/packages/lifecycle/score)
+[![likes](https://badges.bar/lifecycle/likes)](https://pub.dev/packages/lifecycle/score)
 ![PR](https://img.shields.io/badge/PRs-welcome-blue)
 
 # lifecycle
@@ -33,7 +35,7 @@ enum LifecycleEvent {
 
 ```yaml
 dependencies:
-  lifecycle: ^0.0.1
+  lifecycle: any  # replace 'any' with version number
 ```
 
 2. Install it
