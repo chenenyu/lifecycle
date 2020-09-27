@@ -17,7 +17,7 @@ mixin ParentPageSubscribeLifecycleMixin
     super.didChangeDependencies();
     _pageLifecycleWrapperState = ChildPageLifecycleWrapper.of(context);
     if (_pageLifecycleWrapperState != null) {
-      // 如果是嵌套的PageView，则从上层Page订阅event
+      // 如果是嵌套的PageView，则从上层ChildPage订阅event
       _pageLifecycleWrapperState.subscribe(this);
     } else {
       // 如果不是嵌套的PageView，则从LifecycleObserver订阅event
