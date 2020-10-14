@@ -5,11 +5,17 @@ import 'lifecycle_aware.dart';
 import 'lifecycle_observer.dart';
 import 'parent_page_lifecycle_wrapper.dart';
 
-/// Subscribe lifecycle event from [ChildPageLifecycleWrapper] or [LifecycleObserver].
+/// Subscribe lifecycle event from [LifecycleObserver] or [ChildPageLifecycleWrapper] (if nested).
 mixin ParentPageSubscribeLifecycleMixin
     on State<ParentPageLifecycleWrapper>, LifecycleAware {
   ChildPageLifecycleWrapperState _childPageLifecycleWrapperState;
   LifecycleObserver _lifecycleObserver;
+
+  @override
+  void initState() {
+    super.initState();
+    onLifecycleEvent(LifecycleEvent.push);
+  }
 
   @override
   void didChangeDependencies() {
@@ -27,6 +33,7 @@ mixin ParentPageSubscribeLifecycleMixin
 
   @override
   void dispose() {
+    onLifecycleEvent(LifecycleEvent.pop);
     _childPageLifecycleWrapperState?.unsubscribe(this);
     _lifecycleObserver?.unsubscribe(this);
     super.dispose();

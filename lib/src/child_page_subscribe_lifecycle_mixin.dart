@@ -8,18 +8,25 @@ import 'parent_page_lifecycle_wrapper.dart';
 /// This is used in child page of PageView.
 mixin ChildPageSubscribeLifecycleMixin
     on State<ChildPageLifecycleWrapper>, LifecycleAware {
-  ParentPageLifecycleWrapperState _basePageViewLifecycleWrapperState;
+  ParentPageLifecycleWrapperState _parentPageLifecycleWrapperState;
+
+  @override
+  void initState() {
+    super.initState();
+    onLifecycleEvent(LifecycleEvent.push);
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _basePageViewLifecycleWrapperState = ParentPageLifecycleWrapper.of(context);
-    _basePageViewLifecycleWrapperState?.subscribe(widget.index, this);
+    _parentPageLifecycleWrapperState = ParentPageLifecycleWrapper.of(context);
+    _parentPageLifecycleWrapperState?.subscribe(widget.index, this);
   }
 
   @override
   void dispose() {
-    _basePageViewLifecycleWrapperState?.unsubscribe(this);
+    onLifecycleEvent(LifecycleEvent.pop);
+    _parentPageLifecycleWrapperState?.unsubscribe(this);
     super.dispose();
   }
 }

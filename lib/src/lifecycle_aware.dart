@@ -7,7 +7,6 @@ import 'lifecycle_observer.dart';
 /// This is used with [LifecycleObserver] to make a widget aware of changes to the
 /// [Navigator]'s session history.
 abstract class LifecycleAware {
-  /// Lifecycle callback.
   void onLifecycleEvent(LifecycleEvent event);
 }
 

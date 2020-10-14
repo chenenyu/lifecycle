@@ -47,13 +47,11 @@ class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
   void initState() {
     super.initState();
     // print('ChildPageLifecycleWrapperState#initState');
-    onLifecycleEvent(LifecycleEvent.push);
   }
 
   @override
   void dispose() {
     // print('ChildPageLifecycleWrapperState#dispose');
-    onLifecycleEvent(LifecycleEvent.pop);
     super.dispose();
   }
 
@@ -70,6 +68,16 @@ class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
       widget.onLifecycleEvent(event);
     }
     // dispatch event to subscribers
-    dispatchEvent(event);
+    switch (event) {
+      case LifecycleEvent.push:
+      case LifecycleEvent.pop:
+        break;
+      case LifecycleEvent.visible:
+      case LifecycleEvent.active:
+      case LifecycleEvent.inactive:
+      case LifecycleEvent.invisible:
+        dispatchEvent(event);
+        break;
+    }
   }
 }

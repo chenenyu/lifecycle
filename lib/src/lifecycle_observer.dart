@@ -51,10 +51,7 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     assert(route != null);
     final Set<LifecycleAware> subscribers =
         _listeners.putIfAbsent(route, () => <LifecycleAware>{});
-    if (subscribers.add(lifecycleAware)) {
-      // print('LifecycleObserver#subscribe');
-      lifecycleAware.onLifecycleEvent(LifecycleEvent.push);
-    }
+    subscribers.add(lifecycleAware);
   }
 
   /// Unsubscribe [lifecycleAware].
@@ -105,8 +102,8 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
     super.didPush(route, previousRoute);
-    // print(
-    //     'LifecycleObserver($hashCode)#didPush(route(${route.hashCode}): ${route.settings.name}, '
+    // print('LifecycleObserver($hashCode)#didPush('
+    //     'route(${route.hashCode}): ${route.settings.name}, '
     //     'previousRoute(${previousRoute.hashCode}): ${previousRoute?.settings?.name})');
 
     if (previousRoute != null) {
@@ -129,12 +126,10 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   @override
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
     super.didPop(route, previousRoute);
-    // print(
-    //     'LifecycleObserver($hashCode)#didPop(route(${route.hashCode}): ${route.settings.name}, '
+    // print('LifecycleObserver($hashCode)#didPop('
+    //     'route(${route.hashCode}): ${route.settings.name}, '
     //     'previousRoute(${previousRoute.hashCode}): ${previousRoute.settings.name})');
 
-    // 当前 route 触发 pop
-    _sendEventToRoute(route, LifecycleEvent.pop);
     _routes.remove(route);
 
     if (previousRoute != null) {
@@ -158,11 +153,10 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     int index = _routes.indexOf(oldRoute);
     assert(index != -1);
     bool isLast = _routes.last == oldRoute;
-    // print(
-    //     'LifecycleObserver($hashCode)#didReplace(newRoute: ${newRoute.settings.name}, '
+    // print('LifecycleObserver($hashCode)#didReplace('
+    //     'newRoute: ${newRoute.settings.name}, '
     //     'oldRoute: ${oldRoute.settings.name}, isLast: $isLast)');
 
-    _sendEventToRoute(oldRoute, LifecycleEvent.pop);
     _routes.remove(oldRoute);
 
     if (isLast) {
@@ -184,11 +178,10 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   @override
   void didRemove(Route route, Route previousRoute) {
     super.didRemove(route, previousRoute);
-    print(
-        'LifecycleObserver($hashCode)#didRemove(route: ${route.settings.name}, '
-        'previousRoute: ${previousRoute.settings.name})');
+    // print('LifecycleObserver($hashCode)#didRemove('
+    //     'route: ${route.settings.name}, '
+    //     'previousRoute: ${previousRoute.settings.name})');
 
-    _sendEventToRoute(route, LifecycleEvent.pop);
     if (previousRoute.isCurrent) {
       _sendEventToRoute(previousRoute, LifecycleEvent.active);
     }
