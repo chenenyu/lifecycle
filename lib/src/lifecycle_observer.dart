@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import 'lifecycle_aware.dart';
 
+/// An observer can only be used by one [Navigator] (include [MaterialApp]).
+/// If you have your own [Navigator], please use a new instance of LifecycleObserver.
 final LifecycleObserver defaultLifecycleObserver = LifecycleObserver();
 
 class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
@@ -9,8 +11,34 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   final List<Route> _routes = [];
   final Map<R, Set<LifecycleAware>> _listeners = <R, Set<LifecycleAware>>{};
 
+  static final List<LifecycleObserver> _cache = [];
+
+  /// Avoid calling this constructor in [build] method.
   LifecycleObserver() {
+    // clean cache
+    _cache.removeWhere((e) {
+      if (e.navigator == null) {
+        WidgetsBinding.instance.removeObserver(e);
+        return true;
+      }
+      return false;
+    });
+
+    _cache.add(this);
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  /// Only for internal usage.
+  factory LifecycleObserver.internalGet(BuildContext context) {
+    assert(context != null);
+    NavigatorState navigator = Navigator.of(context);
+    for (LifecycleObserver observer in _cache) {
+      if (observer.navigator == navigator) {
+        return observer;
+      }
+    }
+    throw Exception(
+        'Can not get associated LifecycleObserver, did you forget to register it in MaterialApp or Navigator?');
   }
 
   /// Subscribe [lifecycleAware] to be informed about changes to [route].
@@ -73,12 +101,13 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     }
   }
 
-  /// 启动第一个页面时,previousRoute = null.
+  /// 启动第一个页面时, previousRoute = null.
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
     super.didPush(route, previousRoute);
-    // print('LifecycleObserver#didPush(route: ${route.settings.name}, '
-    //     'previousRoute: ${previousRoute?.settings?.name})');
+    // print(
+    //     'LifecycleObserver($hashCode)#didPush(route(${route.hashCode}): ${route.settings.name}, '
+    //     'previousRoute(${previousRoute.hashCode}): ${previousRoute?.settings?.name})');
 
     if (previousRoute != null) {
       if (route is PageRoute) {
@@ -100,8 +129,9 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   @override
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
     super.didPop(route, previousRoute);
-    // print('LifecycleObserver#didPop(route: ${route.settings.name}, '
-    //     'previousRoute: ${previousRoute.settings.name})');
+    // print(
+    //     'LifecycleObserver($hashCode)#didPop(route(${route.hashCode}): ${route.settings.name}, '
+    //     'previousRoute(${previousRoute.hashCode}): ${previousRoute.settings.name})');
 
     // 当前 route 触发 pop
     _sendEventToRoute(route, LifecycleEvent.pop);
@@ -128,7 +158,8 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     int index = _routes.indexOf(oldRoute);
     assert(index != -1);
     bool isLast = _routes.last == oldRoute;
-    // print('LifecycleObserver#didReplace(newRoute: ${newRoute.settings.name}, '
+    // print(
+    //     'LifecycleObserver($hashCode)#didReplace(newRoute: ${newRoute.settings.name}, '
     //     'oldRoute: ${oldRoute.settings.name}, isLast: $isLast)');
 
     _sendEventToRoute(oldRoute, LifecycleEvent.pop);
@@ -153,8 +184,9 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   @override
   void didRemove(Route route, Route previousRoute) {
     super.didRemove(route, previousRoute);
-    // print('LifecycleObserver#didRemove(route: ${route.settings.name}, '
-    //     'previousRoute: ${previousRoute.settings.name})');
+    print(
+        'LifecycleObserver($hashCode)#didRemove(route: ${route.settings.name}, '
+        'previousRoute: ${previousRoute.settings.name})');
 
     _sendEventToRoute(route, LifecycleEvent.pop);
     if (previousRoute.isCurrent) {
