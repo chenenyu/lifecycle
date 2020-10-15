@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
 import 'home_page.dart';
+import 'nav2_home.dart';
 import 'nested_pageview.dart';
 import 'overlay_log.dart';
 import 'pageview.dart';
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         'pageview': (_) => MyPageView(),
         'tabview': (_) => MyTabView(),
         'nested': (_) => NestedPageView(),
+        'nav2': (_) => Nav2Home(),
       },
       home: Builder(
         builder: (context) {

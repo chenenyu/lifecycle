@@ -15,6 +15,7 @@ profile
 xcuserdata
 **/.generated/
 Flutter/App.framework
+Flutter/.last_build_id
 Flutter/Flutter.framework
 Flutter/Flutter.podspec
 Flutter/Generated.xcconfig

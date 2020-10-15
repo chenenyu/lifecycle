@@ -1,6 +1,7 @@
-import 'package:example/overlay_log.dart';
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
+
+import 'overlay_log.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -102,6 +103,12 @@ class _HomePageState extends State<HomePage>
               child: Text('Open NestedPageView'),
               onPressed: () {
                 Navigator.of(context).pushNamed('nested');
+              },
+            ),
+            RaisedButton(
+              child: Text('Open Nav2.0'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('nav2');
               },
             ),
           ],
