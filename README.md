@@ -14,6 +14,7 @@ Lifecycle support for Flutter widgets.
 - [x] `PageView` and it's children.
 - [x] `TabBarView` and it's children.
 - [x] Nested page view.
+- [x] `Navigator`(Navigator 2.0 pages api).
 
 ### Supported lifecycle event
 ```dart
@@ -48,7 +49,7 @@ dependencies:
 
 ### Usage
 
-First of all, you should register a observer in `WidgetsApp`/`MaterialApp`:  
+First of all, you should register an observer in `WidgetsApp`/`MaterialApp`:  
 ```dart
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
