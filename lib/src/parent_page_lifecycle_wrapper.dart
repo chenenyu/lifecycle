@@ -126,9 +126,7 @@ class _TabBarViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
     if (curPage == page) return;
     dispatchEvent(LifecycleEvent.invisible);
     curPage = page;
-    if (ModalRoute
-        .of(context)
-        .isCurrent) {
+    if (ModalRoute.of(context).isCurrent) {
       dispatchEvent(LifecycleEvent.active);
     } else {
       dispatchEvent(LifecycleEvent.visible);

@@ -49,7 +49,8 @@ dependencies:
 
 ### Usage
 
-First of all, you should register an observer in `WidgetsApp`/`MaterialApp`:  
+**First of all, you should register an observer in `WidgetsApp`/`MaterialApp`, and an observer can only be used by one `Navigator`, if you have your own `Navigator`, please use a new instance of LifecycleObserver.**
+
 ```dart
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
