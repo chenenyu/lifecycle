@@ -1,3 +1,7 @@
+## [0.0.6] - 2020/10/28.
+
+* Bug fix.
+
 ## [0.0.5] - 2020/10/15.
 
 * Support usage of `Navigator` widget.
