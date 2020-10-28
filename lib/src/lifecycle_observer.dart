@@ -200,7 +200,7 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   /// 发送 event 给最后一个 route
   void _sendEventToLastRoute(LifecycleEvent event) {
     if (_routes.isEmpty) return;
-    PageRoute route = _routes.last;
+    Route route = _routes.last;
     if (route != null) {
       // 之前的 route 触发 invisible
       final Set<LifecycleAware> subscribers = _listeners[route];
