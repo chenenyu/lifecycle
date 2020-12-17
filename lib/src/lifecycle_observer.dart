@@ -51,7 +51,9 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     assert(route != null);
     final Set<LifecycleAware> subscribers =
         _listeners.putIfAbsent(route, () => <LifecycleAware>{});
-    subscribers.add(lifecycleAware);
+    if (subscribers.add(lifecycleAware)) {
+      lifecycleAware.onLifecycleEvent(LifecycleEvent.push);
+    }
   }
 
   /// Unsubscribe [lifecycleAware].
@@ -130,6 +132,8 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     //     'route(${route.hashCode}): ${route.settings.name}, '
     //     'previousRoute(${previousRoute.hashCode}): ${previousRoute.settings.name})');
 
+    // 当前 route 触发 pop
+    _sendEventToRoute(route, LifecycleEvent.pop);
     _routes.remove(route);
 
     if (previousRoute != null) {
@@ -157,6 +161,7 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     //     'newRoute: ${newRoute.settings.name}, '
     //     'oldRoute: ${oldRoute.settings.name}, isLast: $isLast)');
 
+    _sendEventToRoute(oldRoute, LifecycleEvent.pop);
     _routes.remove(oldRoute);
 
     if (isLast) {
@@ -182,6 +187,7 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     //     'route: ${route.settings.name}, '
     //     'previousRoute: ${previousRoute.settings.name})');
 
+    _sendEventToRoute(route, LifecycleEvent.pop);
     if (previousRoute.isCurrent) {
       _sendEventToRoute(previousRoute, LifecycleEvent.active);
     }

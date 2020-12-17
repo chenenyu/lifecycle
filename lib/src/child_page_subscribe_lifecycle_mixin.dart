@@ -13,7 +13,6 @@ mixin ChildPageSubscribeLifecycleMixin
   @override
   void initState() {
     super.initState();
-    onLifecycleEvent(LifecycleEvent.push);
   }
 
   @override
@@ -25,7 +24,6 @@ mixin ChildPageSubscribeLifecycleMixin
 
   @override
   void dispose() {
-    onLifecycleEvent(LifecycleEvent.pop);
     _parentPageLifecycleWrapperState?.unsubscribe(this);
     super.dispose();
   }

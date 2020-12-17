@@ -9,7 +9,6 @@ mixin LifecycleMixin<T extends StatefulWidget> on State<T>, LifecycleAware {
   @override
   void initState() {
     super.initState();
-    onLifecycleEvent(LifecycleEvent.push);
   }
 
   @override
@@ -21,7 +20,6 @@ mixin LifecycleMixin<T extends StatefulWidget> on State<T>, LifecycleAware {
 
   @override
   void dispose() {
-    onLifecycleEvent(LifecycleEvent.pop);
     _lifecycleObserver.unsubscribe(this);
     super.dispose();
   }
