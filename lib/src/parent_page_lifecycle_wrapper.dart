@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'lifecycle_aware.dart';
+import 'log.dart';
 import 'parent_page_dispatch_lifecycle_mixin.dart';
 import 'parent_page_subscribe_lifecycle_mixin.dart';
 
@@ -64,21 +65,11 @@ abstract class ParentPageLifecycleWrapperState
 
   @override
   void onLifecycleEvent(LifecycleEvent event) {
-    // print('ParentPageLifecycleWrapperState#${event.toString()}');
+    log('ParentPageLifecycleWrapperState($hashCode)#${event.toString()}');
     if (widget.onLifecycleEvent != null) {
       widget.onLifecycleEvent(event);
     }
-    switch (event) {
-      case LifecycleEvent.push:
-      case LifecycleEvent.pop:
-        break;
-      case LifecycleEvent.visible:
-      case LifecycleEvent.active:
-      case LifecycleEvent.inactive:
-      case LifecycleEvent.invisible:
-        dispatchEvent(event);
-        break;
-    }
+    dispatchEvent(event);
   }
 }
 
@@ -88,7 +79,6 @@ class _PageViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
   @override
   void initState() {
     super.initState();
-    // print('_PageViewLifecycleWrapperState#initState');
     _pageController = widget.controller;
     curPage = _pageController.initialPage;
   }
@@ -114,7 +104,6 @@ class _TabBarViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
   @override
   void initState() {
     super.initState();
-    // print('_TabBarViewLifecycleWrapperState#initState');
     _tabController = widget.controller;
     curPage = _tabController.index;
   }

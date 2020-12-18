@@ -20,3 +20,32 @@ enum LifecycleEvent {
   invisible,
   pop,
 }
+
+const Set<LifecycleEvent> lifecycle_events_all = <LifecycleEvent>{
+  LifecycleEvent.push,
+  LifecycleEvent.visible,
+  LifecycleEvent.active,
+  LifecycleEvent.inactive,
+  LifecycleEvent.invisible,
+  LifecycleEvent.pop,
+};
+
+const Set<LifecycleEvent> lifecycle_events_with_push_pop = <LifecycleEvent>{
+  LifecycleEvent.push,
+  LifecycleEvent.pop,
+};
+
+const Set<LifecycleEvent> lifecycle_events_without_push = <LifecycleEvent>{
+  LifecycleEvent.visible,
+  LifecycleEvent.active,
+  LifecycleEvent.inactive,
+  LifecycleEvent.invisible,
+  LifecycleEvent.pop,
+};
+
+const Set<LifecycleEvent> lifecycle_events_without_push_pop = <LifecycleEvent>{
+  LifecycleEvent.visible,
+  LifecycleEvent.active,
+  LifecycleEvent.inactive,
+  LifecycleEvent.invisible,
+};

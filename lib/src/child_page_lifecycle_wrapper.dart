@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'child_page_dispatch_lifecycle_mixin.dart';
 import 'child_page_subscribe_lifecycle_mixin.dart';
 import 'lifecycle_aware.dart';
+import 'log.dart';
 import 'parent_page_lifecycle_wrapper.dart';
 
 /// Lifecycle wrapper for children of [PageView] and [TabBarView].
@@ -33,7 +34,6 @@ class ChildPageLifecycleWrapper extends StatefulWidget {
   }
 }
 
-/// 不实现[LifecycleMixin],通过parent转发
 class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
     with
         LifecycleAware,
@@ -46,14 +46,12 @@ class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
   @override
   void initState() {
     super.initState();
-    // print('ChildPageLifecycleWrapperState#initState');
-    onLifecycleEvent(LifecycleEvent.push);
+    log('ChildPageLifecycleWrapperState($hashCode)#initState');
   }
 
   @override
   void dispose() {
-    // print('ChildPageLifecycleWrapperState#dispose');
-    onLifecycleEvent(LifecycleEvent.pop);
+    log('ChildPageLifecycleWrapperState($hashCode)#dispose');
     super.dispose();
   }
 
@@ -65,6 +63,7 @@ class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
 
   @override
   void onLifecycleEvent(LifecycleEvent event) {
+    log('ChildPageLifecycleWrapperState($hashCode)#${event.toString()}');
     // callback
     if (widget.onLifecycleEvent != null) {
       widget.onLifecycleEvent(event);

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'lifecycle_aware.dart';
+import 'log.dart';
 
 /// An observer can only be used by one [Navigator] (include [MaterialApp]).
 /// If you have your own [Navigator], please use a new instance of LifecycleObserver.
@@ -9,7 +10,8 @@ final LifecycleObserver defaultLifecycleObserver = LifecycleObserver();
 class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     with WidgetsBindingObserver {
   final List<Route> _routes = [];
-  final Map<R, Set<LifecycleAware>> _listeners = <R, Set<LifecycleAware>>{};
+  final Map<R, Set<LifecycleAware>> _lifecycleSubscribers = {};
+  final Map<LifecycleAware, Set<LifecycleEvent>> _eventsFilters = {};
 
   static final List<LifecycleObserver> _cache = [];
 
@@ -46,13 +48,19 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   /// Going forward, [lifecycleAware] will be informed about qualifying changes
   /// to [route], e.g. when [route] is covered by another route or when [route]
   /// is popped off the [Navigator] stack.
-  void subscribe(LifecycleAware lifecycleAware, R route) {
+  void subscribe(LifecycleAware lifecycleAware, R route,
+      [Set<LifecycleEvent> events = lifecycle_events_all]) {
     assert(lifecycleAware != null);
     assert(route != null);
     final Set<LifecycleAware> subscribers =
-        _listeners.putIfAbsent(route, () => <LifecycleAware>{});
+        _lifecycleSubscribers.putIfAbsent(route, () => <LifecycleAware>{});
     if (subscribers.add(lifecycleAware)) {
-      lifecycleAware.onLifecycleEvent(LifecycleEvent.push);
+      log('LifecycleObserver($hashCode)#subscribe (${lifecycleAware.hashCode})');
+      Set<LifecycleEvent> subscribedEvents =
+          _eventsFilters.putIfAbsent(lifecycleAware, () => events);
+      if (subscribedEvents.contains(LifecycleEvent.push)) {
+        lifecycleAware.onLifecycleEvent(LifecycleEvent.push);
+      }
     }
   }
 
@@ -61,19 +69,20 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   /// [lifecycleAware] is no longer informed about changes to its route. If the given argument was
   /// subscribed to multiple types, this will unregister it (once) from each type.
   void unsubscribe(LifecycleAware lifecycleAware) {
-    // print('LifecycleObserver#unsubscribe');
+    log('LifecycleObserver($hashCode)#unsubscribe (${lifecycleAware.hashCode})');
     assert(lifecycleAware != null);
-    for (final R route in _listeners.keys) {
-      final Set<LifecycleAware> subscribers = _listeners[route];
+    for (final R route in _lifecycleSubscribers.keys) {
+      final Set<LifecycleAware> subscribers = _lifecycleSubscribers[route];
       subscribers?.remove(lifecycleAware);
     }
+    _eventsFilters.remove(lifecycleAware);
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    // print(state.toString());
-    if (_routes.isEmpty || _listeners.isEmpty) return;
+    // log(state.toString());
+    if (_routes.isEmpty || _lifecycleSubscribers.isEmpty) return;
     switch (state) {
       case AppLifecycleState.resumed: // active
         // 最上面的 route 触发 active
@@ -104,21 +113,21 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
     super.didPush(route, previousRoute);
-    // print('LifecycleObserver($hashCode)#didPush('
-    //     'route(${route.hashCode}): ${route.settings.name}, '
-    //     'previousRoute(${previousRoute.hashCode}): ${previousRoute?.settings?.name})');
+    log('LifecycleObserver($hashCode)#didPush('
+        'route(${route.hashCode}): ${route.settings.name}, '
+        'previousRoute(${previousRoute.hashCode}): ${previousRoute?.settings?.name})');
 
     if (previousRoute != null) {
       if (route is PageRoute) {
         // 上一个 route 触发 invisible
-        _sendEventToRoute(previousRoute, LifecycleEvent.invisible);
+        _sendEventToGivenRoute(previousRoute, LifecycleEvent.invisible);
         if (previousRoute is PopupRoute) {
           // 上个 PageRoute 触发 invisible
           _sendEventToLastPageRoute(LifecycleEvent.invisible);
         }
       } else if (route is PopupRoute) {
         // 上一个 route 触发 inactive
-        _sendEventToRoute(previousRoute, LifecycleEvent.inactive);
+        _sendEventToGivenRoute(previousRoute, LifecycleEvent.inactive);
       }
     }
 
@@ -128,25 +137,25 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   @override
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
     super.didPop(route, previousRoute);
-    // print('LifecycleObserver($hashCode)#didPop('
-    //     'route(${route.hashCode}): ${route.settings.name}, '
-    //     'previousRoute(${previousRoute.hashCode}): ${previousRoute.settings.name})');
+    log('LifecycleObserver($hashCode)#didPop('
+        'route(${route.hashCode}): ${route.settings.name}, '
+        'previousRoute(${previousRoute.hashCode}): ${previousRoute.settings.name})');
 
     // 当前 route 触发 pop
-    _sendEventToRoute(route, LifecycleEvent.pop);
+    _sendEventToGivenRoute(route, LifecycleEvent.pop);
     _routes.remove(route);
 
     if (previousRoute != null) {
       if (route is PageRoute) {
         // 上一个 Route 触发 active
-        _sendEventToRoute(previousRoute, LifecycleEvent.active);
+        _sendEventToGivenRoute(previousRoute, LifecycleEvent.active);
         if (previousRoute is PopupRoute) {
           // 上一个 PageRoute 触发 visible
           _sendEventToLastPageRoute(LifecycleEvent.visible);
         }
       } else if (route is PopupRoute) {
         // 上一个 Route 触发 active
-        _sendEventToRoute(previousRoute, LifecycleEvent.active);
+        _sendEventToGivenRoute(previousRoute, LifecycleEvent.active);
       }
     }
   }
@@ -157,11 +166,11 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     int index = _routes.indexOf(oldRoute);
     assert(index != -1);
     bool isLast = _routes.last == oldRoute;
-    // print('LifecycleObserver($hashCode)#didReplace('
-    //     'newRoute: ${newRoute.settings.name}, '
-    //     'oldRoute: ${oldRoute.settings.name}, isLast: $isLast)');
+    log('LifecycleObserver($hashCode)#didReplace('
+        'newRoute: ${newRoute.settings.name}, '
+        'oldRoute: ${oldRoute.settings.name}, isLast: $isLast)');
 
-    _sendEventToRoute(oldRoute, LifecycleEvent.pop);
+    _sendEventToGivenRoute(oldRoute, LifecycleEvent.pop);
     _routes.remove(oldRoute);
 
     if (isLast) {
@@ -183,23 +192,26 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   @override
   void didRemove(Route route, Route previousRoute) {
     super.didRemove(route, previousRoute);
-    // print('LifecycleObserver($hashCode)#didRemove('
-    //     'route: ${route.settings.name}, '
-    //     'previousRoute: ${previousRoute.settings.name})');
+    log('LifecycleObserver($hashCode)#didRemove('
+        'route: ${route.settings.name}, '
+        'previousRoute: ${previousRoute.settings.name})');
 
-    _sendEventToRoute(route, LifecycleEvent.pop);
+    _sendEventToGivenRoute(route, LifecycleEvent.pop);
     if (previousRoute.isCurrent) {
-      _sendEventToRoute(previousRoute, LifecycleEvent.active);
+      _sendEventToGivenRoute(previousRoute, LifecycleEvent.active);
     }
 
     _routes.remove(route);
   }
 
   /// 发送 event 给指定的 route
-  void _sendEventToRoute(Route route, LifecycleEvent event) {
-    final Set<LifecycleAware> subscribers = _listeners[route];
+  void _sendEventToGivenRoute(Route route, LifecycleEvent event) {
+    final Set<LifecycleAware> subscribers = _lifecycleSubscribers[route];
     subscribers?.forEach((lifecycleAware) {
-      lifecycleAware.onLifecycleEvent(event);
+      Set<LifecycleEvent> subscribedEvents = _eventsFilters[lifecycleAware];
+      if (subscribedEvents.contains(event)) {
+        lifecycleAware.onLifecycleEvent(event);
+      }
     });
   }
 
@@ -209,10 +221,7 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     Route route = _routes.last;
     if (route != null) {
       // 之前的 route 触发 invisible
-      final Set<LifecycleAware> subscribers = _listeners[route];
-      subscribers?.forEach((lifecycleAware) {
-        lifecycleAware.onLifecycleEvent(event);
-      });
+      _sendEventToGivenRoute(route, event);
     }
   }
 
@@ -221,11 +230,8 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     PageRoute lastPageRoute =
         _routes.lastWhere((r) => r is PageRoute, orElse: () => null);
     if (lastPageRoute != null) {
-      // 之前的Route触发invisible
-      final Set<LifecycleAware> lastPageSubscribers = _listeners[lastPageRoute];
-      lastPageSubscribers?.forEach((lifecycleAware) {
-        lifecycleAware.onLifecycleEvent(event);
-      });
+      // 之前的 route 触发 invisible
+      _sendEventToGivenRoute(lastPageRoute, event);
     }
   }
 }

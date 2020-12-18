@@ -10,22 +10,31 @@ mixin ParentPageDispatchLifecycleMixin
   int curPage;
 
   /// Map of page index and child.
-  Map<int, LifecycleAware> _subscribers = {};
+  final Map<int, LifecycleAware> _lifecycleSubscribers = {};
+  final Map<LifecycleAware, Set<LifecycleEvent>> _eventsFilters = {};
 
-  void subscribe(int index, LifecycleAware lifecycleAware) {
-    _subscribers[index] = lifecycleAware;
+  void subscribe(int index, LifecycleAware lifecycleAware,
+      [Set<LifecycleEvent> events]) {
+    _lifecycleSubscribers[index] = lifecycleAware;
+    _eventsFilters.putIfAbsent(lifecycleAware, () => events);
   }
 
   void unsubscribe(LifecycleAware lifecycleAware) {
-    if (_subscribers.containsValue(lifecycleAware)) {
-      _subscribers.removeWhere((key, value) => value == lifecycleAware);
+    if (_lifecycleSubscribers.containsValue(lifecycleAware)) {
+      _lifecycleSubscribers
+          .removeWhere((key, value) => value == lifecycleAware);
     }
+    _eventsFilters.remove(lifecycleAware);
   }
 
   /// Dispatch event to stream subscription
   void dispatchEvent(LifecycleEvent event) {
-    if (_subscribers[curPage] != null) {
-      _subscribers[curPage].onLifecycleEvent(event);
+    LifecycleAware lifecycleAware = _lifecycleSubscribers[curPage];
+    if (lifecycleAware != null) {
+      Set<LifecycleEvent> events = _eventsFilters[lifecycleAware];
+      if (events.contains(event)) {
+        lifecycleAware.onLifecycleEvent(event);
+      }
     }
   }
 }

@@ -15,7 +15,8 @@ mixin LifecycleMixin<T extends StatefulWidget> on State<T>, LifecycleAware {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _lifecycleObserver = LifecycleObserver.internalGet(context);
-    _lifecycleObserver.subscribe(this, ModalRoute.of(context));
+    _lifecycleObserver.subscribe(
+        this, ModalRoute.of(context), lifecycle_events_all);
   }
 
   @override

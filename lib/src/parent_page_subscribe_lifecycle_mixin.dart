@@ -19,21 +19,30 @@ mixin ParentPageSubscribeLifecycleMixin
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _lifecycleObserver = LifecycleObserver.internalGet(context);
     _childPageLifecycleWrapperState = ChildPageLifecycleWrapper.of(context);
     if (_childPageLifecycleWrapperState != null) {
-      // 如果是嵌套的PageView，则从上层ChildPage订阅event
-      _childPageLifecycleWrapperState.subscribe(this);
+      // If in nested PageView:
+      // 1. Subscribe push events from observer
+      _lifecycleObserver.subscribe(
+          this, ModalRoute.of(context), Set.of([LifecycleEvent.push]));
+      // 2. Subscribe other events from ancestor
+      _childPageLifecycleWrapperState.subscribe(
+          this, lifecycle_events_without_push_pop);
     } else {
-      // 如果不是嵌套的PageView，则从LifecycleObserver订阅event
-      _lifecycleObserver = LifecycleObserver.internalGet(context);
-      _lifecycleObserver.subscribe(this, ModalRoute.of(context));
+      // Subscribe all events from observer
+      _lifecycleObserver.subscribe(
+          this, ModalRoute.of(context), lifecycle_events_all);
     }
   }
 
   @override
   void dispose() {
+    if (_childPageLifecycleWrapperState != null) {
+      onLifecycleEvent(LifecycleEvent.pop);
+    }
+    _lifecycleObserver.unsubscribe(this);
     _childPageLifecycleWrapperState?.unsubscribe(this);
-    _lifecycleObserver?.unsubscribe(this);
     super.dispose();
   }
 }
