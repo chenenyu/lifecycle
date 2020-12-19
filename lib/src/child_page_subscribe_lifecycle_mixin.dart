@@ -20,18 +20,19 @@ mixin ChildPageSubscribeLifecycleMixin
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Subscribe push events from observer
+    // Subscribe push/pop events from observer
     _lifecycleObserver = LifecycleObserver.internalGet(context);
     _lifecycleObserver.subscribe(
-        this, ModalRoute.of(context), Set.of([LifecycleEvent.push]));
+        this, ModalRoute.of(context), lifecycle_events_with_push_pop);
     // Subscribe other events from parent
     _parentPageLifecycleWrapperState = ParentPageLifecycleWrapper.of(context);
     _parentPageLifecycleWrapperState?.subscribe(
-        widget.index, this, lifecycle_events_without_push_pop);
+        widget.index, this, lifecycle_events_without_push);
   }
 
   @override
   void dispose() {
+    // Supply a pop event is necessary when page changed.
     onLifecycleEvent(LifecycleEvent.pop);
     _lifecycleObserver.unsubscribe(this);
     _parentPageLifecycleWrapperState?.unsubscribe(this);

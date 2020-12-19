@@ -29,7 +29,19 @@ mixin ParentPageDispatchLifecycleMixin
 
   /// Dispatch event to stream subscription
   void dispatchEvent(LifecycleEvent event) {
-    LifecycleAware lifecycleAware = _lifecycleSubscribers[curPage];
+    if (event == LifecycleEvent.pop) {
+      // Dispatch pop event to all subscribers.
+      _lifecycleSubscribers.forEach((page, lifecycleAware) {
+        _doDispatch(lifecycleAware, event);
+      });
+    } else {
+      // Dispatch event to current subscriber.
+      LifecycleAware lifecycleAware = _lifecycleSubscribers[curPage];
+      _doDispatch(lifecycleAware, event);
+    }
+  }
+
+  void _doDispatch(LifecycleAware lifecycleAware, LifecycleEvent event) {
     if (lifecycleAware != null) {
       Set<LifecycleEvent> events = _eventsFilters[lifecycleAware];
       if (events.contains(event)) {

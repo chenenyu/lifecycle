@@ -40,6 +40,8 @@ class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
         ChildPageDispatchLifecycleMixin,
         ChildPageSubscribeLifecycleMixin,
         AutomaticKeepAliveClientMixin {
+  bool _popped = false;
+
   @override
   bool get wantKeepAlive => widget.wantKeepAlive ?? false;
 
@@ -64,11 +66,17 @@ class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
   @override
   void onLifecycleEvent(LifecycleEvent event) {
     log('ChildPageLifecycleWrapperState($hashCode)#${event.toString()}');
-    // callback
+    dispatchEvent(event);
     if (widget.onLifecycleEvent != null) {
+      // Intercept pop event except first time.
+      if (event == LifecycleEvent.pop) {
+        if (_popped == true) {
+          return;
+        } else {
+          _popped = true;
+        }
+      }
       widget.onLifecycleEvent(event);
     }
-    // dispatch event to subscribers
-    dispatchEvent(event);
   }
 }

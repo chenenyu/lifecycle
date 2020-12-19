@@ -23,12 +23,12 @@ mixin ParentPageSubscribeLifecycleMixin
     _childPageLifecycleWrapperState = ChildPageLifecycleWrapper.of(context);
     if (_childPageLifecycleWrapperState != null) {
       // If in nested PageView:
-      // 1. Subscribe push events from observer
+      // 1. Subscribe push/pop events from observer
       _lifecycleObserver.subscribe(
-          this, ModalRoute.of(context), Set.of([LifecycleEvent.push]));
+          this, ModalRoute.of(context), lifecycle_events_with_push_pop);
       // 2. Subscribe other events from ancestor
       _childPageLifecycleWrapperState.subscribe(
-          this, lifecycle_events_without_push_pop);
+          this, lifecycle_events_without_push);
     } else {
       // Subscribe all events from observer
       _lifecycleObserver.subscribe(
@@ -39,10 +39,11 @@ mixin ParentPageSubscribeLifecycleMixin
   @override
   void dispose() {
     if (_childPageLifecycleWrapperState != null) {
+      _childPageLifecycleWrapperState.unsubscribe(this);
+      // Supply a pop event is necessary when page changed.
       onLifecycleEvent(LifecycleEvent.pop);
     }
     _lifecycleObserver.unsubscribe(this);
-    _childPageLifecycleWrapperState?.unsubscribe(this);
     super.dispose();
   }
 }

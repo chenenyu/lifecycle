@@ -44,16 +44,20 @@ abstract class ParentPageLifecycleWrapperState
         LifecycleAware,
         ParentPageDispatchLifecycleMixin,
         ParentPageSubscribeLifecycleMixin {
+  bool _popped = false;
+
   void onPageChanged();
 
   @override
   void initState() {
     super.initState();
+    log('ParentPageLifecycleWrapperState($hashCode)#initState');
     widget.controller.addListener(onPageChanged);
   }
 
   @override
   void dispose() {
+    log('ParentPageLifecycleWrapperState($hashCode)#dispose');
     widget.controller.removeListener(onPageChanged);
     super.dispose();
   }
@@ -66,10 +70,18 @@ abstract class ParentPageLifecycleWrapperState
   @override
   void onLifecycleEvent(LifecycleEvent event) {
     log('ParentPageLifecycleWrapperState($hashCode)#${event.toString()}');
+    dispatchEvent(event);
     if (widget.onLifecycleEvent != null) {
+      // Intercept pop event except first time.
+      if (event == LifecycleEvent.pop) {
+        if (_popped == true) {
+          return;
+        } else {
+          _popped = true;
+        }
+      }
       widget.onLifecycleEvent(event);
     }
-    dispatchEvent(event);
   }
 }
 
