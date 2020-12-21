@@ -106,7 +106,7 @@ final List<String> _logs = [];
 class LogManager {
   void add(String log) {
     _logs.add(log);
-    print(log);
+    // print(log);
     entryKey.currentState?.add(log);
   }
 }
