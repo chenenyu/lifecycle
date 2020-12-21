@@ -1,3 +1,8 @@
+## [0.1.0] - 2020/12/29.
+
+* Emit `push` after `initState` and 'pop' before `dispose`.
+* Optimize events delivery in nested page view.
+
 ## [0.0.6] - 2020/10/28.
 
 * Bug fix.
