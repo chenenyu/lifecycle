@@ -1,4 +1,8 @@
-## [0.1.0] - 2020/12/29.
+## [0.1.1] - 2020/12/29.
+
+* Fix a NPE caused by debug log.
+
+## [0.1.0] - 2020/12/21.
 
 * Emit `push` after `initState` and `pop` before `dispose`.
 * Optimize events delivery in nested page view.
