@@ -115,7 +115,7 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     super.didPush(route, previousRoute);
     log('LifecycleObserver($hashCode)#didPush('
         'route(${route.hashCode}): ${route.settings.name}, '
-        'previousRoute(${previousRoute.hashCode}): ${previousRoute?.settings?.name})');
+        'previousRoute(${previousRoute?.hashCode}): ${previousRoute?.settings?.name})');
 
     if (previousRoute != null) {
       if (route is PageRoute) {
@@ -139,7 +139,7 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     super.didPop(route, previousRoute);
     log('LifecycleObserver($hashCode)#didPop('
         'route(${route.hashCode}): ${route.settings.name}, '
-        'previousRoute(${previousRoute.hashCode}): ${previousRoute.settings.name})');
+        'previousRoute(${previousRoute?.hashCode}): ${previousRoute?.settings?.name})');
 
     // 当前 route 触发 pop
     _sendEventToGivenRoute(route, LifecycleEvent.pop);
@@ -167,8 +167,8 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     assert(index != -1);
     bool isLast = _routes.last == oldRoute;
     log('LifecycleObserver($hashCode)#didReplace('
-        'newRoute: ${newRoute.settings.name}, '
-        'oldRoute: ${oldRoute.settings.name}, isLast: $isLast)');
+        'newRoute: ${newRoute?.settings?.name}, '
+        'oldRoute: ${oldRoute?.settings?.name}, isLast: $isLast)');
 
     _sendEventToGivenRoute(oldRoute, LifecycleEvent.pop);
     _routes.remove(oldRoute);
@@ -193,8 +193,8 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   void didRemove(Route route, Route previousRoute) {
     super.didRemove(route, previousRoute);
     log('LifecycleObserver($hashCode)#didRemove('
-        'route: ${route.settings.name}, '
-        'previousRoute: ${previousRoute.settings.name})');
+        'route: ${route?.settings?.name}, '
+        'previousRoute: ${previousRoute?.settings?.name})');
 
     _sendEventToGivenRoute(route, LifecycleEvent.pop);
     if (previousRoute.isCurrent) {
