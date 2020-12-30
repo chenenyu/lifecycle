@@ -188,7 +188,7 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   }
 
   /// [route] 被移除的route
-  /// [previousRoute] 被移除route下面的route,移除多个route时,该参数值不变
+  /// [previousRoute] 被移除route下面的route,移除多个route时,该参数值不变, 可能为null
   @override
   void didRemove(Route route, Route previousRoute) {
     super.didRemove(route, previousRoute);
@@ -197,7 +197,7 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
         'previousRoute: ${previousRoute?.settings?.name})');
 
     _sendEventToGivenRoute(route, LifecycleEvent.pop);
-    if (previousRoute.isCurrent) {
+    if (previousRoute?.isCurrent ?? false) {
       _sendEventToGivenRoute(previousRoute, LifecycleEvent.active);
     }
 
