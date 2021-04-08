@@ -20,20 +20,20 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     // clean cache
     _cache.removeWhere((e) {
       if (e.navigator == null) {
-        WidgetsBinding.instance.removeObserver(e);
+        WidgetsBinding.instance?.removeObserver(e);
         return true;
       }
       return false;
     });
 
     _cache.add(this);
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance?.addObserver(this);
   }
 
   /// Only for internal usage.
-  factory LifecycleObserver.internalGet(BuildContext context) {
+  factory LifecycleObserver.internalGet(BuildContext? context) {
     assert(context != null);
-    NavigatorState navigator = Navigator.of(context);
+    NavigatorState navigator = Navigator.of(context!);
     for (LifecycleObserver observer in _cache) {
       if (observer.navigator == navigator) {
         return observer;
@@ -72,7 +72,7 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
     log('LifecycleObserver($hashCode)#unsubscribe (${lifecycleAware.hashCode})');
     assert(lifecycleAware != null);
     for (final R route in _lifecycleSubscribers.keys) {
-      final Set<LifecycleAware> subscribers = _lifecycleSubscribers[route];
+      final Set<LifecycleAware>? subscribers = _lifecycleSubscribers[route];
       subscribers?.remove(lifecycleAware);
     }
     _eventsFilters.remove(lifecycleAware);
@@ -111,11 +111,11 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
 
   /// 启动第一个页面时, previousRoute = null.
   @override
-  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didPush(route, previousRoute);
     log('LifecycleObserver($hashCode)#didPush('
         'route(${route.hashCode}): ${route.settings.name}, '
-        'previousRoute(${previousRoute?.hashCode}): ${previousRoute?.settings?.name})');
+        'previousRoute(${previousRoute?.hashCode}): ${previousRoute?.settings.name})');
 
     if (previousRoute != null) {
       if (route is PageRoute) {
@@ -135,11 +135,12 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   }
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
+  void didPop(Route<dynamic>? route, Route<dynamic>? previousRoute) {
+    if (route == null) return;
     super.didPop(route, previousRoute);
     log('LifecycleObserver($hashCode)#didPop('
         'route(${route.hashCode}): ${route.settings.name}, '
-        'previousRoute(${previousRoute?.hashCode}): ${previousRoute?.settings?.name})');
+        'previousRoute(${previousRoute.hashCode}): ${previousRoute?.settings.name})');
 
     // 当前 route 触发 pop
     _sendEventToGivenRoute(route, LifecycleEvent.pop);
@@ -161,14 +162,15 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   }
 
   @override
-  void didReplace({Route newRoute, Route oldRoute}) {
+  void didReplace({Route? newRoute, Route? oldRoute}) {
+    if (newRoute == null || oldRoute == null) return;
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     int index = _routes.indexOf(oldRoute);
     assert(index != -1);
     bool isLast = _routes.last == oldRoute;
     log('LifecycleObserver($hashCode)#didReplace('
-        'newRoute: ${newRoute?.settings?.name}, '
-        'oldRoute: ${oldRoute?.settings?.name}, isLast: $isLast)');
+        'newRoute: ${newRoute.settings.name}, '
+        'oldRoute: ${oldRoute.settings.name}, isLast: $isLast)');
 
     _sendEventToGivenRoute(oldRoute, LifecycleEvent.pop);
     _routes.remove(oldRoute);
@@ -190,14 +192,15 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   /// [route] 被移除的route
   /// [previousRoute] 被移除route下面的route,移除多个route时,该参数值不变, 可能为null
   @override
-  void didRemove(Route route, Route previousRoute) {
+  void didRemove(Route? route, Route? previousRoute) {
+    if (route == null || previousRoute == null) return;
     super.didRemove(route, previousRoute);
     log('LifecycleObserver($hashCode)#didRemove('
-        'route: ${route?.settings?.name}, '
-        'previousRoute: ${previousRoute?.settings?.name})');
+        'route: ${route.settings.name}, '
+        'previousRoute: ${previousRoute.settings.name})');
 
     _sendEventToGivenRoute(route, LifecycleEvent.pop);
-    if (previousRoute?.isCurrent ?? false) {
+    if (previousRoute.isCurrent) {
       _sendEventToGivenRoute(previousRoute, LifecycleEvent.active);
     }
 
@@ -206,10 +209,10 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
 
   /// 发送 event 给指定的 route
   void _sendEventToGivenRoute(Route route, LifecycleEvent event) {
-    final Set<LifecycleAware> subscribers = _lifecycleSubscribers[route];
+    final Set<LifecycleAware>? subscribers = _lifecycleSubscribers[route];
     subscribers?.forEach((lifecycleAware) {
-      Set<LifecycleEvent> subscribedEvents = _eventsFilters[lifecycleAware];
-      if (subscribedEvents.contains(event)) {
+      Set<LifecycleEvent>? subscribedEvents = _eventsFilters[lifecycleAware];
+      if (subscribedEvents?.contains(event) == true) {
         lifecycleAware.onLifecycleEvent(event);
       }
     });
@@ -219,16 +222,13 @@ class LifecycleObserver<R extends Route<dynamic>> extends NavigatorObserver
   void _sendEventToLastRoute(LifecycleEvent event) {
     if (_routes.isEmpty) return;
     Route route = _routes.last;
-    if (route != null) {
-      // 之前的 route 触发 invisible
-      _sendEventToGivenRoute(route, event);
-    }
+    _sendEventToGivenRoute(route, event);
   }
 
   /// 发送 event 给最后一个 page route
   void _sendEventToLastPageRoute(LifecycleEvent event) {
-    PageRoute lastPageRoute =
-        _routes.lastWhere((r) => r is PageRoute, orElse: () => null);
+    Route? lastPageRoute =
+        _routes.lastWhere((r) => r is PageRoute);
     if (lastPageRoute != null) {
       // 之前的 route 触发 invisible
       _sendEventToGivenRoute(lastPageRoute, event);

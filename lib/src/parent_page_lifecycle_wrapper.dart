@@ -9,16 +9,15 @@ import 'parent_page_subscribe_lifecycle_mixin.dart';
 class ParentPageLifecycleWrapper extends StatefulWidget {
   /// Instance of [PageController] or [TabController].
   final ChangeNotifier controller;
-  final OnLifecycleEvent onLifecycleEvent;
+  final OnLifecycleEvent? onLifecycleEvent;
   final Widget child;
 
   ParentPageLifecycleWrapper({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
     this.onLifecycleEvent,
-    @required this.child,
+    required this.child,
   })  : assert(controller is PageController || controller is TabController),
-        assert(child != null),
         super(key: key);
 
   @override
@@ -33,7 +32,7 @@ class ParentPageLifecycleWrapper extends StatefulWidget {
     }
   }
 
-  static ParentPageLifecycleWrapperState of(BuildContext context) {
+  static ParentPageLifecycleWrapperState? of(BuildContext context) {
     return context.findAncestorStateOfType<ParentPageLifecycleWrapperState>();
   }
 }
@@ -80,29 +79,31 @@ abstract class ParentPageLifecycleWrapperState
           _popped = true;
         }
       }
-      widget.onLifecycleEvent(event);
+      widget.onLifecycleEvent!(event);
     }
   }
 }
 
 class _PageViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
-  PageController _pageController;
+  PageController? _pageController;
 
   @override
   void initState() {
     super.initState();
-    _pageController = widget.controller;
-    curPage = _pageController.initialPage;
+    _pageController = widget.controller as PageController;
+    curPage = _pageController?.initialPage;
   }
 
   /// 页面切换监听
   @override
   void onPageChanged() {
-    int page = _pageController.page.round();
+    if (_pageController?.page == null) return;
+
+    int page = _pageController!.page!.round();
     if (curPage == page) return;
     dispatchEvent(LifecycleEvent.invisible);
     curPage = page;
-    if (ModalRoute.of(context).isCurrent) {
+    if (ModalRoute.of(context)?.isCurrent == true) {
       dispatchEvent(LifecycleEvent.active);
     } else {
       dispatchEvent(LifecycleEvent.visible);
@@ -111,23 +112,23 @@ class _PageViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
 }
 
 class _TabBarViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
-  TabController _tabController;
+  TabController? _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = widget.controller;
-    curPage = _tabController.index;
+    _tabController = widget.controller as TabController;
+    curPage = _tabController?.index;
   }
 
   @override
   void onPageChanged() {
-    if (_tabController.indexIsChanging) return;
-    int page = _tabController.index;
+    if (_tabController?.indexIsChanging == true) return;
+    int page = _tabController!.index;
     if (curPage == page) return;
     dispatchEvent(LifecycleEvent.invisible);
     curPage = page;
-    if (ModalRoute.of(context).isCurrent) {
+    if (ModalRoute.of(context)?.isCurrent == true) {
       dispatchEvent(LifecycleEvent.active);
     } else {
       dispatchEvent(LifecycleEvent.visible);

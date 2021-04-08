@@ -9,17 +9,17 @@ import 'parent_page_lifecycle_wrapper.dart';
 /// Lifecycle wrapper for children of [PageView] and [TabBarView].
 /// See [ParentPageLifecycleWrapper].
 class ChildPageLifecycleWrapper extends StatefulWidget {
-  final int index;
-  final OnLifecycleEvent onLifecycleEvent;
+  final int? index;
+  final OnLifecycleEvent? onLifecycleEvent;
   final bool wantKeepAlive;
-  final Widget child;
+  final Widget? child;
 
   ChildPageLifecycleWrapper({
-    Key key,
-    @required this.index,
+    Key? key,
+    required this.index,
     this.onLifecycleEvent,
     this.wantKeepAlive = false,
-    @required this.child,
+    required this.child,
   })  : assert(index != null && index >= 0),
         assert(child != null),
         super(key: key);
@@ -29,7 +29,7 @@ class ChildPageLifecycleWrapper extends StatefulWidget {
     return ChildPageLifecycleWrapperState();
   }
 
-  static ChildPageLifecycleWrapperState of(BuildContext context) {
+  static ChildPageLifecycleWrapperState? of(BuildContext context) {
     return context.findAncestorStateOfType<ChildPageLifecycleWrapperState>();
   }
 }
@@ -43,7 +43,7 @@ class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
   bool _popped = false;
 
   @override
-  bool get wantKeepAlive => widget.wantKeepAlive ?? false;
+  bool get wantKeepAlive => widget.wantKeepAlive;
 
   @override
   void initState() {
@@ -60,7 +60,7 @@ class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return widget.child;
+    return widget.child!;
   }
 
   @override
@@ -76,7 +76,7 @@ class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
           _popped = true;
         }
       }
-      widget.onLifecycleEvent(event);
+      widget.onLifecycleEvent!(event);
     }
   }
 }
