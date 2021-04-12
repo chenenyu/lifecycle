@@ -17,7 +17,7 @@ class ParentPageLifecycleWrapper extends StatefulWidget {
     required this.controller,
     this.onLifecycleEvent,
     required this.child,
-  })  : assert(controller is PageController || controller is TabController),
+  })   : assert(controller is PageController || controller is TabController),
         super(key: key);
 
   @override
@@ -85,21 +85,20 @@ abstract class ParentPageLifecycleWrapperState
 }
 
 class _PageViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
-  PageController? _pageController;
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
     _pageController = widget.controller as PageController;
-    curPage = _pageController?.initialPage;
+    curPage = _pageController.initialPage;
   }
 
   /// 页面切换监听
   @override
   void onPageChanged() {
-    if (_pageController?.page == null) return;
-
-    int page = _pageController!.page!.round();
+    if (_pageController.page == null) return;
+    int page = _pageController.page!.round();
     if (curPage == page) return;
     dispatchEvent(LifecycleEvent.invisible);
     curPage = page;
@@ -112,19 +111,19 @@ class _PageViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
 }
 
 class _TabBarViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
-  TabController? _tabController;
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = widget.controller as TabController;
-    curPage = _tabController?.index;
+    curPage = _tabController.index;
   }
 
   @override
   void onPageChanged() {
-    if (_tabController?.indexIsChanging == true) return;
-    int page = _tabController!.index;
+    if (_tabController.indexIsChanging == true) return;
+    int page = _tabController.index;
     if (curPage == page) return;
     dispatchEvent(LifecycleEvent.invisible);
     curPage = page;

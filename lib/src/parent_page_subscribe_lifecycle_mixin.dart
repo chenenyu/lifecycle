@@ -19,35 +19,29 @@ mixin ParentPageSubscribeLifecycleMixin
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _lifecycleObserver = LifecycleObserver.internalGet(context);
-    _childPageLifecycleWrapperState = ChildPageLifecycleWrapper.of(context);
-
     final page = ModalRoute.of(context);
     if (page == null) return;
+
+    _lifecycleObserver = LifecycleObserver.internalGet(context);
+    _childPageLifecycleWrapperState = ChildPageLifecycleWrapper.of(context);
 
     if (_childPageLifecycleWrapperState != null) {
       // If in nested PageView:
       // 1. Subscribe push/pop events from observer
-
-      _lifecycleObserver?.subscribe(
-          this, page, lifecycle_events_with_push_pop);
+      _lifecycleObserver?.subscribe(this, page, lifecycle_events_only_push_pop);
       // 2. Subscribe other events from ancestor
       _childPageLifecycleWrapperState?.subscribe(
           this, lifecycle_events_without_push);
     } else {
       // Subscribe all events from observer
-      _lifecycleObserver?.subscribe(
-          this, page, lifecycle_events_all);
+      _lifecycleObserver?.subscribe(this, page, lifecycle_events_all);
     }
   }
 
   @override
   void dispose() {
-    if (_childPageLifecycleWrapperState != null) {
-      _childPageLifecycleWrapperState?.unsubscribe(this);
-      // Supply a pop event is necessary when page changed.
-      onLifecycleEvent(LifecycleEvent.pop);
-    }
+    onLifecycleEvent(LifecycleEvent.pop);
+    _childPageLifecycleWrapperState?.unsubscribe(this);
     _lifecycleObserver?.unsubscribe(this);
     super.dispose();
   }

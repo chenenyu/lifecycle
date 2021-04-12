@@ -13,7 +13,7 @@ class LifecycleWrapper extends StatefulWidget {
     Key? key,
     required this.onLifecycleEvent,
     required this.child,
-  })  : super(key: key);
+  }) : super(key: key);
 
   @override
   _LifecycleWrapperState createState() {

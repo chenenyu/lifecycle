@@ -32,7 +32,7 @@ enum LifecycleEvent {
 
 ### Install
 
-1. Depend on itnull
+1. Depend on it
 
 ```yaml
 dependencies:

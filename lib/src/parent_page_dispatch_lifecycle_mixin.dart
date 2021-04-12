@@ -45,12 +45,10 @@ mixin ParentPageDispatchLifecycleMixin
     }
   }
 
-  void _doDispatch(LifecycleAware? lifecycleAware, LifecycleEvent event) {
-    if (lifecycleAware != null) {
-      Set<LifecycleEvent>? events = _eventsFilters[lifecycleAware];
-      if (events?.contains(event) == true) {
-        lifecycleAware.onLifecycleEvent(event);
-      }
+  void _doDispatch(LifecycleAware lifecycleAware, LifecycleEvent event) {
+    Set<LifecycleEvent>? events = _eventsFilters[lifecycleAware];
+    if (events?.contains(event) == true) {
+      lifecycleAware.onLifecycleEvent(event);
     }
   }
 }

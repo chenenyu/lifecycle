@@ -30,7 +30,7 @@ const Set<LifecycleEvent> lifecycle_events_all = <LifecycleEvent>{
   LifecycleEvent.pop,
 };
 
-const Set<LifecycleEvent> lifecycle_events_with_push_pop = <LifecycleEvent>{
+const Set<LifecycleEvent> lifecycle_events_only_push_pop = <LifecycleEvent>{
   LifecycleEvent.push,
   LifecycleEvent.pop,
 };

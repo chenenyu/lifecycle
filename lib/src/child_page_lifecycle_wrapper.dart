@@ -9,10 +9,10 @@ import 'parent_page_lifecycle_wrapper.dart';
 /// Lifecycle wrapper for children of [PageView] and [TabBarView].
 /// See [ParentPageLifecycleWrapper].
 class ChildPageLifecycleWrapper extends StatefulWidget {
-  final int? index;
+  final int index;
   final OnLifecycleEvent? onLifecycleEvent;
   final bool wantKeepAlive;
-  final Widget? child;
+  final Widget child;
 
   ChildPageLifecycleWrapper({
     Key? key,
@@ -20,8 +20,7 @@ class ChildPageLifecycleWrapper extends StatefulWidget {
     this.onLifecycleEvent,
     this.wantKeepAlive = false,
     required this.child,
-  })  : assert(index != null && index >= 0),
-        assert(child != null),
+  })   : assert(index >= 0),
         super(key: key);
 
   @override
@@ -60,7 +59,7 @@ class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return widget.child!;
+    return widget.child;
   }
 
   @override

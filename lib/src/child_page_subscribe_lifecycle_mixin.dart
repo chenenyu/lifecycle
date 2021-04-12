@@ -9,8 +9,8 @@ import 'parent_page_lifecycle_wrapper.dart';
 /// This is used in child page of PageView.
 mixin ChildPageSubscribeLifecycleMixin
     on State<ChildPageLifecycleWrapper>, LifecycleAware {
-  late LifecycleObserver? _lifecycleObserver;
-  late ParentPageLifecycleWrapperState? _parentPageLifecycleWrapperState;
+  LifecycleObserver? _lifecycleObserver;
+  ParentPageLifecycleWrapperState? _parentPageLifecycleWrapperState;
 
   @override
   void initState() {
@@ -20,24 +20,19 @@ mixin ChildPageSubscribeLifecycleMixin
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route == null) return;
     // Subscribe push/pop events from observer
     _lifecycleObserver = LifecycleObserver.internalGet(context);
-
-    final route = ModalRoute.of(context);
-
-    if (route == null || widget.index == null) return;
-
-    _lifecycleObserver?.subscribe(
-        this, route, lifecycle_events_with_push_pop);
+    _lifecycleObserver?.subscribe(this, route, lifecycle_events_only_push_pop);
     // Subscribe other events from parent
     _parentPageLifecycleWrapperState = ParentPageLifecycleWrapper.of(context);
     _parentPageLifecycleWrapperState?.subscribe(
-        widget.index!, this, lifecycle_events_without_push);
+        widget.index, this, lifecycle_events_without_push);
   }
 
   @override
   void dispose() {
-    // Supply a pop event is necessary when page changed.
     onLifecycleEvent(LifecycleEvent.pop);
     _lifecycleObserver?.unsubscribe(this);
     _parentPageLifecycleWrapperState?.unsubscribe(this);

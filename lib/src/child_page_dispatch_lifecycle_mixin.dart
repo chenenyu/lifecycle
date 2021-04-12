@@ -11,7 +11,6 @@ mixin ChildPageDispatchLifecycleMixin
 
   void subscribe(LifecycleAware lifecycleAware, [Set<LifecycleEvent>? events]) {
     if (events == null) return;
-
     _lifecycleSubscribers.add(lifecycleAware);
     _eventsFilters.putIfAbsent(lifecycleAware, () => events);
   }
