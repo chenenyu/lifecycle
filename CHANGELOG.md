@@ -1,3 +1,7 @@
+## [0.2.0] - 2021/04/12.
+
+* null safety.
+
 ## [0.1.1+1] - 2020/12/30.
 
 * Fix a NPE caused by debug log.
