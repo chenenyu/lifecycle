@@ -10,11 +10,10 @@ class LifecycleWrapper extends StatefulWidget {
   final Widget child;
 
   LifecycleWrapper({
-    Key key,
-    @required this.onLifecycleEvent,
-    @required this.child,
-  })  : assert(child != null),
-        super(key: key);
+    Key? key,
+    required this.onLifecycleEvent,
+    required this.child,
+  })  : super(key: key);
 
   @override
   _LifecycleWrapperState createState() {
@@ -31,8 +30,6 @@ class _LifecycleWrapperState extends State<LifecycleWrapper>
 
   @override
   void onLifecycleEvent(LifecycleEvent event) {
-    if (widget.onLifecycleEvent != null) {
-      widget.onLifecycleEvent(event);
-    }
+    widget.onLifecycleEvent(event);
   }
 }

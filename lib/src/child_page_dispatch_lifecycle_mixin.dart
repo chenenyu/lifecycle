@@ -9,7 +9,9 @@ mixin ChildPageDispatchLifecycleMixin
   final Set<LifecycleAware> _lifecycleSubscribers = <LifecycleAware>{};
   final Map<LifecycleAware, Set<LifecycleEvent>> _eventsFilters = {};
 
-  void subscribe(LifecycleAware lifecycleAware, [Set<LifecycleEvent> events]) {
+  void subscribe(LifecycleAware lifecycleAware, [Set<LifecycleEvent>? events]) {
+    if (events == null) return;
+
     _lifecycleSubscribers.add(lifecycleAware);
     _eventsFilters.putIfAbsent(lifecycleAware, () => events);
   }
@@ -22,8 +24,8 @@ mixin ChildPageDispatchLifecycleMixin
   /// Dispatch event to subscribers.
   void dispatchEvent(LifecycleEvent event) {
     _lifecycleSubscribers.forEach((lifecycleAware) {
-      Set<LifecycleEvent> events = _eventsFilters[lifecycleAware];
-      if (events.contains(event)) {
+      Set<LifecycleEvent>? events = _eventsFilters[lifecycleAware];
+      if (events?.contains(event) == true) {
         lifecycleAware.onLifecycleEvent(event);
       }
     });
