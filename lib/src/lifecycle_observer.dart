@@ -76,6 +76,7 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    log('LifecycleObserver($hashCode)#state:${state.toString()}');
     // log(state.toString());
     if (_routes.isEmpty || _lifecycleSubscribers.isEmpty) return;
     switch (state) {
@@ -142,8 +143,8 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
 
     if (previousRoute != null) {
       if (route is PageRoute) {
-        // 上一个 Route 触发 active
-        _sendEventToGivenRoute(previousRoute, LifecycleEvent.active);
+        // 上一个 Route 触发 visible
+        _sendEventToGivenRoute(previousRoute, LifecycleEvent.visible);
         if (previousRoute is PopupRoute) {
           // 上一个 PageRoute 触发 visible
           _sendEventToLastPageRoute(LifecycleEvent.visible);
