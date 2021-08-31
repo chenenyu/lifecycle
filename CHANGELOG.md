@@ -1,6 +1,12 @@
+## [0.3.0] - 2021/08/31.
+
+**Breaking changes:**
+
+* More reasonable lifecycle events just like Android platform.
+
 ## [0.2.0] - 2021/04/12.
 
-* null safety.
+* Null safety.
 
 ## [0.1.1+1] - 2020/12/30.
 

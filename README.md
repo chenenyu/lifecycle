@@ -309,3 +309,12 @@ class _NestedPageViewState extends State<NestedPageView> with SingleTickerProvid
 }
 
 ```
+
+### Other API
+
+* Remove a route according to a specific name.
+
+```
+defaultLifecycleObserver.removeNamed('route_name');
+```
+
