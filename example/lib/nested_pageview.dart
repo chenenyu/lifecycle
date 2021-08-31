@@ -46,7 +46,7 @@ class _NestedPageViewState extends State<NestedPageView>
       body: ParentPageLifecycleWrapper(
         controller: _tabController,
         onLifecycleEvent: (event) {
-          log.add('NestedPageView@Outer#${event.toString()}');
+          // log.add('NestedPageView@Outer#${event.toString()}');
         },
         child: TabBarView(
           controller: _tabController,
@@ -73,14 +73,14 @@ class _NestedPageViewState extends State<NestedPageView>
               child: ParentPageLifecycleWrapper(
                 controller: _pageController,
                 onLifecycleEvent: (event) {
-                  log.add('NestedPageView@Inner#${event.toString()}');
+                  // log.add('NestedPageView@Inner#${event.toString()}');
                 },
                 child: PageView(
                   controller: _pageController,
                   children: [
                     ChildPageLifecycleWrapper(
                       index: 0,
-                      wantKeepAlive: false,
+                      wantKeepAlive: true,
                       onLifecycleEvent: (event) {
                         log.add('InnerPage@0#${event.toString()}');
                       },
@@ -104,7 +104,7 @@ class _NestedPageViewState extends State<NestedPageView>
                     ),
                     ChildPageLifecycleWrapper(
                       index: 1,
-                      wantKeepAlive: false,
+                      wantKeepAlive: true,
                       onLifecycleEvent: (event) {
                         log.add('InnerPage@1#${event.toString()}');
                       },

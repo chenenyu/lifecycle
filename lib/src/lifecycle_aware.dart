@@ -7,6 +7,20 @@ import 'lifecycle_observer.dart';
 /// This is used with [LifecycleObserver] to make a widget aware of changes to the
 /// [Navigator]'s session history.
 abstract class LifecycleAware {
+  LifecycleEvent? _currentLifecycleState;
+
+  void handleLifecycleEvents(List<LifecycleEvent> events) {
+    if (_currentLifecycleState == events.last) {
+      return;
+    }
+    for (LifecycleEvent event in events) {
+      if (event != _currentLifecycleState) {
+        onLifecycleEvent(event);
+      }
+    }
+    _currentLifecycleState = events.last;
+  }
+
   void onLifecycleEvent(LifecycleEvent event);
 }
 
@@ -21,31 +35,12 @@ enum LifecycleEvent {
   pop,
 }
 
-const Set<LifecycleEvent> lifecycle_events_all = <LifecycleEvent>{
-  LifecycleEvent.push,
+const List<LifecycleEvent> lifecycle_events_visible_and_active = [
   LifecycleEvent.visible,
   LifecycleEvent.active,
+];
+
+const List<LifecycleEvent> lifecycle_events_inactive_and_invisible = [
   LifecycleEvent.inactive,
   LifecycleEvent.invisible,
-  LifecycleEvent.pop,
-};
-
-const Set<LifecycleEvent> lifecycle_events_only_push_pop = <LifecycleEvent>{
-  LifecycleEvent.push,
-  LifecycleEvent.pop,
-};
-
-const Set<LifecycleEvent> lifecycle_events_without_push = <LifecycleEvent>{
-  LifecycleEvent.visible,
-  LifecycleEvent.active,
-  LifecycleEvent.inactive,
-  LifecycleEvent.invisible,
-  LifecycleEvent.pop,
-};
-
-const Set<LifecycleEvent> lifecycle_events_without_push_pop = <LifecycleEvent>{
-  LifecycleEvent.visible,
-  LifecycleEvent.active,
-  LifecycleEvent.inactive,
-  LifecycleEvent.invisible,
-};
+];

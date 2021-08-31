@@ -1,23 +1,29 @@
 import 'package:flutter/widgets.dart';
 
+import 'child_page_lifecycle_wrapper.dart';
 import 'lifecycle_aware.dart';
 import 'parent_page_lifecycle_wrapper.dart';
 
 /// Dispatch lifecycle event to child page.
-mixin ParentPageDispatchLifecycleMixin
-    on State<ParentPageLifecycleWrapper>, LifecycleAware {
+mixin ParentPageDispatchLifecycleMixin on State<ParentPageLifecycleWrapper> {
   /// Current page.
-  int? curPage;
+  int curPage = 0;
 
   /// Map of page index and child.
   final Map<int, LifecycleAware> _lifecycleSubscribers = {};
-  final Map<LifecycleAware, Set<LifecycleEvent>> _eventsFilters = {};
 
-  void subscribe(int index, LifecycleAware lifecycleAware,
-      [Set<LifecycleEvent>? events]) {
-    _lifecycleSubscribers[index] = lifecycleAware;
-    if (events != null) {
-      _eventsFilters.putIfAbsent(lifecycleAware, () => events);
+  void subscribe(int index, LifecycleAware lifecycleAware) {
+    assert(lifecycleAware is ChildPageLifecycleWrapperState);
+    if (_lifecycleSubscribers[index] != lifecycleAware) {
+      _lifecycleSubscribers[index] = lifecycleAware;
+      // Dispatch [LifecycleEvent.active] to initial page.
+      if (curPage == index) {
+        if (ModalRoute.of(context)!.isCurrent) {
+          dispatchEvents(lifecycle_events_visible_and_active);
+        } else {
+          dispatchEvents([LifecycleEvent.visible]);
+        }
+      }
     }
   }
 
@@ -26,29 +32,10 @@ mixin ParentPageDispatchLifecycleMixin
       _lifecycleSubscribers
           .removeWhere((key, value) => value == lifecycleAware);
     }
-    _eventsFilters.remove(lifecycleAware);
   }
 
-  /// Dispatch event to stream subscription
-  void dispatchEvent(LifecycleEvent event) {
-    if (event == LifecycleEvent.pop) {
-      // Dispatch pop event to all subscribers.
-      _lifecycleSubscribers.forEach((page, lifecycleAware) {
-        _doDispatch(lifecycleAware, event);
-      });
-    } else {
-      // Dispatch event to current subscriber.
-      LifecycleAware? lifecycleAware = _lifecycleSubscribers[curPage];
-      if (lifecycleAware != null) {
-        _doDispatch(lifecycleAware, event);
-      }
-    }
-  }
-
-  void _doDispatch(LifecycleAware lifecycleAware, LifecycleEvent event) {
-    Set<LifecycleEvent>? events = _eventsFilters[lifecycleAware];
-    if (events?.contains(event) == true) {
-      lifecycleAware.onLifecycleEvent(event);
-    }
+  /// Dispatch [events] to subscribers.
+  void dispatchEvents(List<LifecycleEvent> events) {
+    _lifecycleSubscribers[curPage]?.handleLifecycleEvents(events);
   }
 }

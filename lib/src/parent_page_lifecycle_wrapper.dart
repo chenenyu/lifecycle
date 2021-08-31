@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'lifecycle_aware.dart';
-import 'log.dart';
 import 'parent_page_dispatch_lifecycle_mixin.dart';
 import 'parent_page_subscribe_lifecycle_mixin.dart';
 
@@ -17,7 +16,7 @@ class ParentPageLifecycleWrapper extends StatefulWidget {
     required this.controller,
     this.onLifecycleEvent,
     required this.child,
-  })   : assert(controller is PageController || controller is TabController),
+  })  : assert(controller is PageController || controller is TabController),
         super(key: key);
 
   @override
@@ -41,22 +40,20 @@ abstract class ParentPageLifecycleWrapperState
     extends State<ParentPageLifecycleWrapper>
     with
         LifecycleAware,
-        ParentPageDispatchLifecycleMixin,
-        ParentPageSubscribeLifecycleMixin {
-  bool _popped = false;
-
+        ParentPageSubscribeLifecycleMixin,
+        ParentPageDispatchLifecycleMixin {
   void onPageChanged();
 
   @override
   void initState() {
     super.initState();
-    log('ParentPageLifecycleWrapperState($hashCode)#initState');
+    // log('ParentPageLifecycleWrapperState($hashCode)#initState');
     widget.controller.addListener(onPageChanged);
   }
 
   @override
   void dispose() {
-    log('ParentPageLifecycleWrapperState($hashCode)#dispose');
+    // log('ParentPageLifecycleWrapperState($hashCode)#dispose');
     widget.controller.removeListener(onPageChanged);
     super.dispose();
   }
@@ -68,19 +65,8 @@ abstract class ParentPageLifecycleWrapperState
 
   @override
   void onLifecycleEvent(LifecycleEvent event) {
-    log('ParentPageLifecycleWrapperState($hashCode)#${event.toString()}');
-    dispatchEvent(event);
-    if (widget.onLifecycleEvent != null) {
-      // Intercept pop event except first time.
-      if (event == LifecycleEvent.pop) {
-        if (_popped == true) {
-          return;
-        } else {
-          _popped = true;
-        }
-      }
-      widget.onLifecycleEvent!(event);
-    }
+    // log('ParentPageLifecycleWrapperState($hashCode)#${event.toString()}');
+    widget.onLifecycleEvent?.call(event);
   }
 }
 
@@ -94,18 +80,19 @@ class _PageViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
     curPage = _pageController.initialPage;
   }
 
-  /// 页面切换监听
   @override
   void onPageChanged() {
     if (_pageController.page == null) return;
     int page = _pageController.page!.round();
     if (curPage == page) return;
-    dispatchEvent(LifecycleEvent.invisible);
+    // log('PageController#onPageChanged: from page[$curPage]');
+    dispatchEvents(lifecycle_events_inactive_and_invisible);
     curPage = page;
+    // log('PageController#onPageChanged: to page[$curPage]');
     if (ModalRoute.of(context)?.isCurrent == true) {
-      dispatchEvent(LifecycleEvent.active);
+      dispatchEvents(lifecycle_events_visible_and_active);
     } else {
-      dispatchEvent(LifecycleEvent.visible);
+      dispatchEvents([LifecycleEvent.visible]);
     }
   }
 }
@@ -122,15 +109,17 @@ class _TabBarViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
 
   @override
   void onPageChanged() {
-    if (_tabController.indexIsChanging == true) return;
+    if (_tabController.indexIsChanging) return;
     int page = _tabController.index;
     if (curPage == page) return;
-    dispatchEvent(LifecycleEvent.invisible);
+    // log('TabController#onPageChanged: from page[$curPage]');
+    dispatchEvents(lifecycle_events_inactive_and_invisible);
     curPage = page;
+    // log('TabController#onPageChanged: to page[$curPage]');
     if (ModalRoute.of(context)?.isCurrent == true) {
-      dispatchEvent(LifecycleEvent.active);
+      dispatchEvents(lifecycle_events_visible_and_active);
     } else {
-      dispatchEvent(LifecycleEvent.visible);
+      dispatchEvents([LifecycleEvent.visible]);
     }
   }
 }

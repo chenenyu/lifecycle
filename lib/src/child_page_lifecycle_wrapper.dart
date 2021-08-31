@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'child_page_dispatch_lifecycle_mixin.dart';
 import 'child_page_subscribe_lifecycle_mixin.dart';
 import 'lifecycle_aware.dart';
-import 'log.dart';
 import 'parent_page_lifecycle_wrapper.dart';
 
 /// Lifecycle wrapper for children of [PageView] and [TabBarView].
@@ -20,7 +19,7 @@ class ChildPageLifecycleWrapper extends StatefulWidget {
     this.onLifecycleEvent,
     this.wantKeepAlive = false,
     required this.child,
-  })   : assert(index >= 0),
+  })  : assert(index >= 0),
         super(key: key);
 
   @override
@@ -36,23 +35,21 @@ class ChildPageLifecycleWrapper extends StatefulWidget {
 class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
     with
         LifecycleAware,
-        ChildPageDispatchLifecycleMixin,
         ChildPageSubscribeLifecycleMixin,
+        ChildPageDispatchLifecycleMixin,
         AutomaticKeepAliveClientMixin {
-  bool _popped = false;
-
   @override
   bool get wantKeepAlive => widget.wantKeepAlive;
 
   @override
   void initState() {
     super.initState();
-    log('ChildPageLifecycleWrapperState($hashCode)#initState');
+    // log('ChildPageLifecycleWrapperState($hashCode)#initState');
   }
 
   @override
   void dispose() {
-    log('ChildPageLifecycleWrapperState($hashCode)#dispose');
+    // log('ChildPageLifecycleWrapperState($hashCode)#dispose');
     super.dispose();
   }
 
@@ -64,18 +61,7 @@ class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
 
   @override
   void onLifecycleEvent(LifecycleEvent event) {
-    log('ChildPageLifecycleWrapperState($hashCode)#${event.toString()}');
-    dispatchEvent(event);
-    if (widget.onLifecycleEvent != null) {
-      // Intercept pop event except first time.
-      if (event == LifecycleEvent.pop) {
-        if (_popped == true) {
-          return;
-        } else {
-          _popped = true;
-        }
-      }
-      widget.onLifecycleEvent!(event);
-    }
+    // log('ChildPageLifecycleWrapperState($hashCode)#${event.toString()}');
+    widget.onLifecycleEvent?.call(event);
   }
 }

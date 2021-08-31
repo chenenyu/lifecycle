@@ -48,6 +48,12 @@ class Sub2Page extends StatelessWidget {
                 child: Text(
                     "pushNamedAndRemoveUntil('sub1', ModalRoute.withName('/'))"),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  defaultLifecycleObserver.removeNamed('sub1');
+                },
+                child: Text("removeNamed('sub1')"),
+              ),
             ],
           ),
         ),
