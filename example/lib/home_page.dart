@@ -4,7 +4,7 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key}) : super(key: key);
+  HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() {
@@ -40,19 +40,19 @@ class _HomePageState extends State<HomePage>
       body: Center(
         child: Column(
           children: <Widget>[
-            RaisedButton(
+            ElevatedButton(
               child: Text('Open Sub1Page'),
               onPressed: () {
                 Navigator.of(context).pushNamed('sub1');
               },
             ),
-            RaisedButton(
+            ElevatedButton(
               child: Text('Open Sub2Page'),
               onPressed: () {
                 Navigator.of(context).pushNamed('sub2');
               },
             ),
-            RaisedButton(
+            ElevatedButton(
               child: Text('Open Dialog'),
               onPressed: () {
                 showDialog(
@@ -68,13 +68,13 @@ class _HomePageState extends State<HomePage>
                           'This is a dialog.',
                         ),
                         actions: <Widget>[
-                          FlatButton(
+                          TextButton(
                             child: Text('Dismiss'),
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
                           ),
-                          FlatButton(
+                          TextButton(
                             child: Text('Open Sub1Page'),
                             onPressed: () {
                               Navigator.of(context).pushNamed('sub1');
@@ -87,25 +87,25 @@ class _HomePageState extends State<HomePage>
                 );
               },
             ),
-            RaisedButton(
+            ElevatedButton(
               child: Text('Open MyPageView'),
               onPressed: () {
                 Navigator.of(context).pushNamed('pageview');
               },
             ),
-            RaisedButton(
+            ElevatedButton(
               child: Text('Open MyTabView'),
               onPressed: () {
                 Navigator.of(context).pushNamed('tabview');
               },
             ),
-            RaisedButton(
+            ElevatedButton(
               child: Text('Open NestedPageView'),
               onPressed: () {
                 Navigator.of(context).pushNamed('nested');
               },
             ),
-            RaisedButton(
+            ElevatedButton(
               child: Text('Open Nav2.0'),
               onPressed: () {
                 Navigator.of(context).pushNamed('nav2');

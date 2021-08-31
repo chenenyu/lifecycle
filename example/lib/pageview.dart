@@ -4,13 +4,13 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class MyPageView extends StatefulWidget {
-  MyPageView({Key key}) : super(key: key);
+  MyPageView({Key? key}) : super(key: key);
 
   _MyPageViewState createState() => _MyPageViewState();
 }
 
 class _MyPageViewState extends State<MyPageView> {
-  PageController _pageController;
+  late PageController _pageController;
 
   @override
   void initState() {
@@ -49,8 +49,7 @@ class _MyPageViewState extends State<MyPageView> {
                 child: Center(
                   child: Column(
                     children: <Widget>[
-                      RaisedButton(
-                        color: Colors.white,
+                      ElevatedButton(
                         onPressed: () {
                           if (_pageController.hasClients) {
                             _pageController.animateToPage(
@@ -62,8 +61,7 @@ class _MyPageViewState extends State<MyPageView> {
                         },
                         child: Text('Next'),
                       ),
-                      RaisedButton(
-                        color: Colors.white,
+                      ElevatedButton(
                         onPressed: () {
                           showDialog(
                             context: context,
@@ -78,13 +76,13 @@ class _MyPageViewState extends State<MyPageView> {
                                     'This is a dialog.',
                                   ),
                                   actions: <Widget>[
-                                    FlatButton(
+                                    TextButton(
                                       child: Text('Dismiss'),
                                       onPressed: () {
                                         Navigator.of(context).pop();
                                       },
                                     ),
-                                    FlatButton(
+                                    TextButton(
                                       child: Text('Open Sub1Page'),
                                       onPressed: () {
                                         Navigator.of(context).pushNamed('sub1');
@@ -114,8 +112,7 @@ class _MyPageViewState extends State<MyPageView> {
                 child: Center(
                   child: Column(
                     children: <Widget>[
-                      RaisedButton(
-                        color: Colors.white,
+                      ElevatedButton(
                         onPressed: () {
                           if (_pageController.hasClients) {
                             _pageController.animateToPage(

@@ -8,17 +8,17 @@ class LogEntry extends StatefulWidget {
     return LogEntryState();
   }
 
-  static OverlayEntry _logEntry;
+  static OverlayEntry? _logEntry;
 
   static void init(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      OverlayState overlayState = Overlay.of(context);
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      OverlayState? overlayState = Overlay.of(context);
       if (overlayState == null) return;
       _logEntry?.remove();
       _logEntry = OverlayEntry(builder: (context) {
         return LogEntry();
       });
-      overlayState.insert(_logEntry);
+      overlayState.insert(_logEntry!);
     });
   }
 }
@@ -33,17 +33,17 @@ class LogEntryState extends State<LogEntry> {
 
   @override
   void dispose() {
-    _controller?.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   void add(String log) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       if (mounted) {
         setState(() {});
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        WidgetsBinding.instance!.addPostFrameCallback((_) {
           if (mounted) {
-            _controller?.jumpTo(_controller.position.maxScrollExtent);
+            _controller.jumpTo(_controller.position.maxScrollExtent);
           }
         });
       }

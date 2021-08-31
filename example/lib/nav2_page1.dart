@@ -6,7 +6,7 @@ import 'overlay_log.dart';
 class Nav2Page1 extends StatefulWidget {
   final VoidCallback onShowPage2;
 
-  Nav2Page1({Key key, this.onShowPage2}) : super(key: key);
+  Nav2Page1({Key? key, required this.onShowPage2}) : super(key: key);
 
   @override
   _Nav2Page1State createState() {

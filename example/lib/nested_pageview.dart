@@ -4,14 +4,15 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class NestedPageView extends StatefulWidget {
-  NestedPageView({Key key}) : super(key: key);
+  NestedPageView({Key? key}) : super(key: key);
 
   _NestedPageViewState createState() => _NestedPageViewState();
 }
 
-class _NestedPageViewState extends State<NestedPageView> with SingleTickerProviderStateMixin {
-  PageController _pageController;
-  TabController _tabController;
+class _NestedPageViewState extends State<NestedPageView>
+    with SingleTickerProviderStateMixin {
+  late PageController _pageController;
+  late TabController _tabController;
 
   final List<Tab> myTabs = <Tab>[
     Tab(text: 'left'),
@@ -45,7 +46,7 @@ class _NestedPageViewState extends State<NestedPageView> with SingleTickerProvid
       body: ParentPageLifecycleWrapper(
         controller: _tabController,
         onLifecycleEvent: (event) {
-          log.add('NestedPageView#${event.toString()}');
+          log.add('NestedPageView@Outer#${event.toString()}');
         },
         child: TabBarView(
           controller: _tabController,
@@ -71,6 +72,9 @@ class _NestedPageViewState extends State<NestedPageView> with SingleTickerProvid
               },
               child: ParentPageLifecycleWrapper(
                 controller: _pageController,
+                onLifecycleEvent: (event) {
+                  log.add('NestedPageView@Inner#${event.toString()}');
+                },
                 child: PageView(
                   controller: _pageController,
                   children: [
@@ -83,8 +87,7 @@ class _NestedPageViewState extends State<NestedPageView> with SingleTickerProvid
                       child: Container(
                         color: Colors.teal,
                         child: Center(
-                          child: RaisedButton(
-                            color: Colors.white,
+                          child: ElevatedButton(
                             onPressed: () {
                               if (_pageController.hasClients) {
                                 _pageController.animateToPage(
@@ -108,8 +111,7 @@ class _NestedPageViewState extends State<NestedPageView> with SingleTickerProvid
                       child: Container(
                         color: Colors.blue,
                         child: Center(
-                          child: RaisedButton(
-                            color: Colors.white,
+                          child: ElevatedButton(
                             onPressed: () {
                               if (_pageController.hasClients) {
                                 _pageController.animateToPage(

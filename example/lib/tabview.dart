@@ -4,7 +4,7 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class MyTabView extends StatefulWidget {
-  const MyTabView({Key key}) : super(key: key);
+  const MyTabView({Key? key}) : super(key: key);
 
   @override
   _MyTabViewState createState() => _MyTabViewState();
@@ -17,7 +17,7 @@ class _MyTabViewState extends State<MyTabView>
     Tab(text: 'RIGHT'),
   ];
 
-  TabController _tabController;
+  late TabController _tabController;
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class _MyTabViewState extends State<MyTabView>
         child: TabBarView(
           controller: _tabController,
           children: myTabs.map((Tab tab) {
-            final String label = tab.text.toLowerCase();
+            final String label = tab.text!.toLowerCase();
             final int index = myTabs.indexOf(tab);
             return ChildPageLifecycleWrapper(
               index: index,

@@ -4,7 +4,7 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class Sub2Page extends StatelessWidget {
-  Sub2Page({Key key}) : super(key: key);
+  Sub2Page({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,26 +21,26 @@ class Sub2Page extends StatelessWidget {
         body: Center(
           child: Column(
             children: <Widget>[
-              RaisedButton(
+              ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
                 child: Text("pop()"),
               ),
-              RaisedButton(
+              ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).removeRoute(ModalRoute.of(context));
+                  Navigator.of(context).removeRoute(ModalRoute.of(context)!);
                 },
                 child: Text("removeRoute(current)"),
               ),
-              RaisedButton(
+              ElevatedButton(
                 onPressed: () {
                   Navigator.of(context)
-                      .removeRouteBelow(ModalRoute.of(context));
+                      .removeRouteBelow(ModalRoute.of(context)!);
                 },
                 child: Text("removeRouteBelow(current)"),
               ),
-              RaisedButton(
+              ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pushNamedAndRemoveUntil(
                       'sub1', ModalRoute.withName('/'));
