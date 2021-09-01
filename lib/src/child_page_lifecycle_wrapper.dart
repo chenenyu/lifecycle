@@ -27,7 +27,7 @@ class ChildPageLifecycleWrapper extends StatefulWidget {
     return ChildPageLifecycleWrapperState();
   }
 
-  static ChildPageLifecycleWrapperState? of(BuildContext context) {
+  static ChildPageLifecycleWrapperState? maybeOf(BuildContext context) {
     return context.findAncestorStateOfType<ChildPageLifecycleWrapperState>();
   }
 }
@@ -42,18 +42,6 @@ class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
   bool get wantKeepAlive => widget.wantKeepAlive;
 
   @override
-  void initState() {
-    super.initState();
-    // log('ChildPageLifecycleWrapperState($hashCode)#initState');
-  }
-
-  @override
-  void dispose() {
-    // log('ChildPageLifecycleWrapperState($hashCode)#dispose');
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     super.build(context);
     return widget.child;
@@ -61,7 +49,6 @@ class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
 
   @override
   void onLifecycleEvent(LifecycleEvent event) {
-    // log('ChildPageLifecycleWrapperState($hashCode)#${event.toString()}');
     widget.onLifecycleEvent?.call(event);
   }
 }
