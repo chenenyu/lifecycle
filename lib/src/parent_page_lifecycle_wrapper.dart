@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'lifecycle_aware.dart';
+import 'lifecycle_mixin.dart';
 import 'parent_page_dispatch_lifecycle_mixin.dart';
-import 'parent_page_subscribe_lifecycle_mixin.dart';
 
 /// Lifecycle wrapper for [PageView] / [TabBarView].
 class ParentPageLifecycleWrapper extends StatefulWidget {
@@ -31,17 +31,14 @@ class ParentPageLifecycleWrapper extends StatefulWidget {
     }
   }
 
-  static ParentPageLifecycleWrapperState? of(BuildContext context) {
+  static ParentPageLifecycleWrapperState? maybeOf(BuildContext context) {
     return context.findAncestorStateOfType<ParentPageLifecycleWrapperState>();
   }
 }
 
 abstract class ParentPageLifecycleWrapperState
     extends State<ParentPageLifecycleWrapper>
-    with
-        LifecycleAware,
-        ParentPageSubscribeLifecycleMixin,
-        ParentPageDispatchLifecycleMixin {
+    with LifecycleAware, LifecycleMixin, ParentPageDispatchLifecycleMixin {
   void onPageChanged();
 
   @override
@@ -109,7 +106,6 @@ class _TabBarViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
 
   @override
   void onPageChanged() {
-    if (_tabController.indexIsChanging) return;
     int page = _tabController.index;
     if (curPage == page) return;
     // log('TabController#onPageChanged: from page[$curPage]');

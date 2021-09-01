@@ -1,3 +1,8 @@
+## [0.3.1] - 2021/09/01.
+
+* Bug fixes.
+* Opt: events callback immediately when tab bar changed.
+
 ## [0.3.0] - 2021/08/31.
 
 **Breaking changes:**

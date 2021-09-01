@@ -18,7 +18,6 @@ mixin ChildPageDispatchLifecycleMixin
 
   @override
   void handleLifecycleEvents(List<LifecycleEvent> events) {
-    print('${_lifecycleSubscribers.length}, $events');
     super.handleLifecycleEvents(events);
     dispatchEvents(events);
   }

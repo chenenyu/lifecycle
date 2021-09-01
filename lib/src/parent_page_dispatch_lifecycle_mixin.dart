@@ -5,7 +5,8 @@ import 'lifecycle_aware.dart';
 import 'parent_page_lifecycle_wrapper.dart';
 
 /// Dispatch lifecycle event to child page.
-mixin ParentPageDispatchLifecycleMixin on State<ParentPageLifecycleWrapper> {
+mixin ParentPageDispatchLifecycleMixin
+    on State<ParentPageLifecycleWrapper>, LifecycleAware {
   /// Current page.
   int curPage = 0;
 
@@ -32,6 +33,12 @@ mixin ParentPageDispatchLifecycleMixin on State<ParentPageLifecycleWrapper> {
       _lifecycleSubscribers
           .removeWhere((key, value) => value == lifecycleAware);
     }
+  }
+
+  @override
+  void handleLifecycleEvents(List<LifecycleEvent> events) {
+    super.handleLifecycleEvents(events);
+    dispatchEvents(events);
   }
 
   /// Dispatch [events] to subscribers.
