@@ -106,7 +106,6 @@ class _TabBarViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
 
   @override
   void onPageChanged() {
-    if (_tabController.indexIsChanging) return;
     int page = _tabController.index;
     if (curPage == page) return;
     // log('TabController#onPageChanged: from page[$curPage]');
