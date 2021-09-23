@@ -35,12 +35,12 @@ enum LifecycleEvent {
   pop,
 }
 
-const List<LifecycleEvent> lifecycle_events_visible_and_active = [
+const List<LifecycleEvent> lifecycleEventsVisibleAndActive = [
   LifecycleEvent.visible,
   LifecycleEvent.active,
 ];
 
-const List<LifecycleEvent> lifecycle_events_inactive_and_invisible = [
+const List<LifecycleEvent> lifecycleEventsInactiveAndInvisible = [
   LifecycleEvent.inactive,
   LifecycleEvent.invisible,
 ];

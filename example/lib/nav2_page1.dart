@@ -6,7 +6,7 @@ import 'overlay_log.dart';
 class Nav2Page1 extends StatefulWidget {
   final VoidCallback onShowPage2;
 
-  Nav2Page1({Key? key, required this.onShowPage2}) : super(key: key);
+  const Nav2Page1({Key? key, required this.onShowPage2}) : super(key: key);
 
   @override
   _Nav2Page1State createState() {
@@ -38,7 +38,7 @@ class _Nav2Page1State extends State<Nav2Page1>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Page1'),
+        title: const Text('Page1'),
         leading: BackButton(
           onPressed: () {
             Navigator.of(context, rootNavigator: true).maybePop();
@@ -48,7 +48,7 @@ class _Nav2Page1State extends State<Nav2Page1>
       body: Center(
         child: TextButton(
           onPressed: widget.onShowPage2,
-          child: Text('Open Page2'),
+          child: const Text('Open Page2'),
         ),
       ),
     );

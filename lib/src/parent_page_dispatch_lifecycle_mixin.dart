@@ -20,7 +20,7 @@ mixin ParentPageDispatchLifecycleMixin
       // Dispatch [LifecycleEvent.active] to initial page.
       if (curPage == index) {
         if (ModalRoute.of(context)!.isCurrent) {
-          dispatchEvents(lifecycle_events_visible_and_active);
+          dispatchEvents(lifecycleEventsVisibleAndActive);
         } else {
           dispatchEvents([LifecycleEvent.visible]);
         }

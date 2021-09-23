@@ -4,8 +4,9 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class NestedPageView extends StatefulWidget {
-  NestedPageView({Key? key}) : super(key: key);
+  const NestedPageView({Key? key}) : super(key: key);
 
+  @override
   _NestedPageViewState createState() => _NestedPageViewState();
 }
 
@@ -15,8 +16,8 @@ class _NestedPageViewState extends State<NestedPageView>
   late TabController _tabController;
 
   final List<Tab> myTabs = <Tab>[
-    Tab(text: 'left'),
-    Tab(text: 'right'),
+    const Tab(text: 'left'),
+    const Tab(text: 'right'),
   ];
 
   @override
@@ -37,7 +38,7 @@ class _NestedPageViewState extends State<NestedPageView>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('NestedPageView'),
+        title: const Text('NestedPageView'),
         bottom: TabBar(
           controller: _tabController,
           tabs: myTabs,
@@ -57,10 +58,10 @@ class _NestedPageViewState extends State<NestedPageView>
                 log.add('OuterPage@0#${event.toString()}');
               },
               wantKeepAlive: true,
-              child: Center(
+              child: const Center(
                 child: Text(
                   'This is the first tab',
-                  style: const TextStyle(fontSize: 20),
+                  style: TextStyle(fontSize: 20),
                 ),
               ),
             ),
@@ -97,7 +98,7 @@ class _NestedPageViewState extends State<NestedPageView>
                                 );
                               }
                             },
-                            child: Text('Next'),
+                            child: const Text('Next'),
                           ),
                         ),
                       ),
@@ -121,7 +122,7 @@ class _NestedPageViewState extends State<NestedPageView>
                                 );
                               }
                             },
-                            child: Text('Previous'),
+                            child: const Text('Previous'),
                           ),
                         ),
                       ),

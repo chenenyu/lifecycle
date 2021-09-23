@@ -24,7 +24,7 @@ class LogEntry extends StatefulWidget {
 }
 
 class LogEntryState extends State<LogEntry> {
-  ScrollController _controller = ScrollController();
+  final ScrollController _controller = ScrollController();
 
   @override
   void initState() {
@@ -63,13 +63,13 @@ class LogEntryState extends State<LogEntry> {
             ListView.builder(
               controller: _controller,
               shrinkWrap: true,
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               itemCount: _logs.length,
               itemBuilder: (context, index) {
                 final String log = _logs[index];
                 return Text(
                   log,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 14,
                   ),
@@ -82,7 +82,7 @@ class LogEntryState extends State<LogEntry> {
               child: IconButton(
                 iconSize: 16,
                 padding: EdgeInsets.zero,
-                icon: Icon(
+                icon: const Icon(
                   Icons.clear,
                   color: Colors.white,
                 ),

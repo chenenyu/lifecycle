@@ -1,3 +1,8 @@
+## [0.3.2] - 2021/09/23.
+
+* NEW API: `findRoute(String routeName)`.
+* Add `flutter_lints`.
+
 ## [0.3.1] - 2021/09/01.
 
 * Bug fixes.
