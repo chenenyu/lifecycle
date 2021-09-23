@@ -24,8 +24,8 @@ mixin ChildPageDispatchLifecycleMixin
 
   /// Dispatch [events] to subscribers.
   void dispatchEvents(List<LifecycleEvent> events) {
-    _lifecycleSubscribers.forEach((lifecycleAware) {
+    for (LifecycleAware lifecycleAware in _lifecycleSubscribers) {
       lifecycleAware.handleLifecycleEvents(events);
-    });
+    }
   }
 }

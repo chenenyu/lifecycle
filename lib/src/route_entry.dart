@@ -10,9 +10,9 @@ class RouteEntry {
   final Set<LifecycleAware> lifecycleSubscribers = {};
 
   void emitEventsToSubscribers(List<LifecycleEvent> events) {
-    lifecycleSubscribers.forEach((lifecycleAware) {
+    for (LifecycleAware lifecycleAware in lifecycleSubscribers) {
       emitEvents(lifecycleAware, events);
-    });
+    }
   }
 
   void emitEvents(LifecycleAware lifecycleAware, List<LifecycleEvent> events) {

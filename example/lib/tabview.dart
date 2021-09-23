@@ -13,8 +13,8 @@ class MyTabView extends StatefulWidget {
 class _MyTabViewState extends State<MyTabView>
     with SingleTickerProviderStateMixin {
   final List<Tab> myTabs = <Tab>[
-    Tab(text: 'LEFT'),
-    Tab(text: 'RIGHT'),
+    const Tab(text: 'LEFT'),
+    const Tab(text: 'RIGHT'),
   ];
 
   late TabController _tabController;
@@ -35,7 +35,7 @@ class _MyTabViewState extends State<MyTabView>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('MyTabView'),
+        title: const Text('MyTabView'),
         bottom: TabBar(
           controller: _tabController,
           tabs: myTabs,

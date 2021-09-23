@@ -4,7 +4,7 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key? key}) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() {
@@ -33,7 +33,7 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Home Page',
         ),
       ),
@@ -41,41 +41,41 @@ class _HomePageState extends State<HomePage>
         child: Column(
           children: <Widget>[
             ElevatedButton(
-              child: Text('Open Sub1Page'),
+              child: const Text('Open Sub1Page'),
               onPressed: () {
                 Navigator.of(context).pushNamed('sub1');
               },
             ),
             ElevatedButton(
-              child: Text('Open Sub2Page'),
+              child: const Text('Open Sub2Page'),
               onPressed: () {
                 Navigator.of(context).pushNamed('sub2');
               },
             ),
             ElevatedButton(
-              child: Text('Open Dialog'),
+              child: const Text('Open Dialog'),
               onPressed: () {
                 showDialog(
                   context: context,
-                  routeSettings: RouteSettings(name: 'dialog'),
+                  routeSettings: const RouteSettings(name: 'dialog'),
                   builder: (context) {
                     return LifecycleWrapper(
                       onLifecycleEvent: (event) {
                         log.add('Dialog#${event.toString()}');
                       },
                       child: AlertDialog(
-                        content: Text(
+                        content: const Text(
                           'This is a dialog.',
                         ),
                         actions: <Widget>[
                           TextButton(
-                            child: Text('Dismiss'),
+                            child: const Text('Dismiss'),
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
                           ),
                           TextButton(
-                            child: Text('Open Sub1Page'),
+                            child: const Text('Open Sub1Page'),
                             onPressed: () {
                               Navigator.of(context).pushNamed('sub1');
                             },
@@ -88,25 +88,25 @@ class _HomePageState extends State<HomePage>
               },
             ),
             ElevatedButton(
-              child: Text('Open MyPageView'),
+              child: const Text('Open MyPageView'),
               onPressed: () {
                 Navigator.of(context).pushNamed('pageview');
               },
             ),
             ElevatedButton(
-              child: Text('Open MyTabView'),
+              child: const Text('Open MyTabView'),
               onPressed: () {
                 Navigator.of(context).pushNamed('tabview');
               },
             ),
             ElevatedButton(
-              child: Text('Open NestedPageView'),
+              child: const Text('Open NestedPageView'),
               onPressed: () {
                 Navigator.of(context).pushNamed('nested');
               },
             ),
             ElevatedButton(
-              child: Text('Open Nav2.0'),
+              child: const Text('Open Nav2.0'),
               onPressed: () {
                 Navigator.of(context).pushNamed('nav2');
               },

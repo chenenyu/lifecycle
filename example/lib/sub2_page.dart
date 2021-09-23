@@ -4,7 +4,7 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class Sub2Page extends StatelessWidget {
-  Sub2Page({Key? key}) : super(key: key);
+  const Sub2Page({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class Sub2Page extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             'Sub2Page',
           ),
         ),
@@ -25,34 +25,34 @@ class Sub2Page extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text("pop()"),
+                child: const Text("pop()"),
               ),
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).removeRoute(ModalRoute.of(context)!);
                 },
-                child: Text("removeRoute(current)"),
+                child: const Text("removeRoute(current)"),
               ),
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context)
                       .removeRouteBelow(ModalRoute.of(context)!);
                 },
-                child: Text("removeRouteBelow(current)"),
+                child: const Text("removeRouteBelow(current)"),
               ),
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pushNamedAndRemoveUntil(
                       'sub1', ModalRoute.withName('/'));
                 },
-                child: Text(
+                child: const Text(
                     "pushNamedAndRemoveUntil('sub1', ModalRoute.withName('/'))"),
               ),
               ElevatedButton(
                 onPressed: () {
                   defaultLifecycleObserver.removeNamed('sub1');
                 },
-                child: Text("removeNamed('sub1')"),
+                child: const Text("removeNamed('sub1')"),
               ),
             ],
           ),

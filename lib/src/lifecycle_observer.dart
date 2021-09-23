@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:lifecycle/lifecycle.dart';
 
 import 'lifecycle_aware.dart';
 import 'log.dart';
@@ -54,7 +53,7 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
     }
     if (entry.lifecycleSubscribers.add(lifecycleAware)) {
       log('LifecycleObserver($hashCode)#subscribe (${lifecycleAware.toString()})');
-      entry.emitEvents(lifecycleAware, lifecycle_events_visible_and_active);
+      entry.emitEvents(lifecycleAware, lifecycleEventsVisibleAndActive);
     }
   }
 
@@ -78,7 +77,7 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.resumed: // active
         // Top route trigger active
-        _sendEventsToLastRoute(lifecycle_events_visible_and_active);
+        _sendEventsToLastRoute(lifecycleEventsVisibleAndActive);
         if (_history.last.route is! PageRoute) {
           // Previous PageRoute trigger visible
           _sendEventsToLastPageRoute([LifecycleEvent.visible]);
@@ -115,7 +114,7 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
         if (route is PageRoute) {
           // Previous route trigger invisible
           _sendEventsToGivenRoute(
-              previousEntry, lifecycle_events_inactive_and_invisible);
+              previousEntry, lifecycleEventsInactiveAndInvisible);
           if (previousRoute is PopupRoute) {
             // Previous PageRoute trigger invisible
             _sendEventsToLastPageRoute([LifecycleEvent.invisible]);
@@ -141,15 +140,14 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
 
     RouteEntry entry = _getRouteEntry(route);
     // Current route trigger pop
-    _sendEventsToGivenRoute(entry, lifecycle_events_inactive_and_invisible);
+    _sendEventsToGivenRoute(entry, lifecycleEventsInactiveAndInvisible);
     _history.remove(entry);
 
     if (previousRoute != null) {
       RouteEntry previousEntry = _getRouteEntry(previousRoute);
       if (route is PageRoute) {
         // Previous Route trigger active
-        _sendEventsToGivenRoute(
-            previousEntry, lifecycle_events_visible_and_active);
+        _sendEventsToGivenRoute(previousEntry, lifecycleEventsVisibleAndActive);
         if (previousRoute is PopupRoute) {
           // Previous PageRoute trigger visible
           _sendEventsToLastPageRoute([LifecycleEvent.visible]);
@@ -175,7 +173,7 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
         'newRoute: ${newRoute.settings.name}, '
         'oldRoute: ${oldRoute.settings.name}, isLast: $isLast)');
 
-    _sendEventsToGivenRoute(oldEntry, lifecycle_events_inactive_and_invisible);
+    _sendEventsToGivenRoute(oldEntry, lifecycleEventsInactiveAndInvisible);
     _history.remove(oldEntry);
 
     if (isLast) {
@@ -185,7 +183,7 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
       } else if (oldRoute is PopupRoute && newRoute is PageRoute) {
         // todo: Previous PopupRoute trigger invisible ？
         // Previous PageRoute trigger invisible
-        _sendEventsToLastPageRoute(lifecycle_events_inactive_and_invisible);
+        _sendEventsToLastPageRoute(lifecycleEventsInactiveAndInvisible);
       }
     }
 
@@ -193,7 +191,8 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   }
 
   /// [route] route being removed.
-  /// [previousRoute] 被移除route下面的route,移除多个route时,该参数值不变, 可能为null
+  /// [previousRoute] A route below the removed route. When removing
+  /// multiple routes, the [previousRoute] is unchanged, and may be null.
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didRemove(route, previousRoute);
@@ -202,11 +201,10 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
         'previousRoute: ${previousRoute?.settings.name})');
 
     RouteEntry entry = _getRouteEntry(route);
-    _sendEventsToGivenRoute(entry, lifecycle_events_inactive_and_invisible);
+    _sendEventsToGivenRoute(entry, lifecycleEventsInactiveAndInvisible);
     if (previousRoute?.isCurrent ?? false) {
       RouteEntry previousEntry = _getRouteEntry(previousRoute!);
-      _sendEventsToGivenRoute(
-          previousEntry, lifecycle_events_visible_and_active);
+      _sendEventsToGivenRoute(previousEntry, lifecycleEventsVisibleAndActive);
     }
 
     _history.remove(entry);
@@ -236,15 +234,22 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
     }
   }
 
+  Route<dynamic>? findRoute(String routeName) {
+    try {
+      Route route =
+          _history.firstWhere((r) => r.route.settings.name == routeName).route;
+      return route;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Remove a route according to the [routeName].
   void removeNamed<T extends Object?>(String routeName, [T? result]) {
-    // try {
-    Route route =
-        _history.firstWhere((r) => r.route.settings.name == routeName).route;
-    route.didPop(result);
-    navigator?.removeRoute(route);
-    // } catch (e) {
-    //   log(e);
-    // }
+    Route? route = findRoute(routeName);
+    if (route != null) {
+      route.didPop(result);
+      navigator?.removeRoute(route);
+    }
   }
 }

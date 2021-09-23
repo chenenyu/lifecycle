@@ -21,10 +21,8 @@ mixin ChildPageSubscribeLifecycleMixin
     super.didChangeDependencies();
     final route = ModalRoute.of(context);
     if (route == null) return;
-    if (_parentPageLifecycleWrapperState == null) {
-      _parentPageLifecycleWrapperState =
-          ParentPageLifecycleWrapper.maybeOf(context);
-    }
+    _parentPageLifecycleWrapperState ??=
+        ParentPageLifecycleWrapper.maybeOf(context);
     _parentPageLifecycleWrapperState?.subscribe(widget.index, this);
   }
 

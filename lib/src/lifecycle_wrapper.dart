@@ -9,7 +9,7 @@ class LifecycleWrapper extends StatefulWidget {
   final OnLifecycleEvent onLifecycleEvent;
   final Widget child;
 
-  LifecycleWrapper({
+  const LifecycleWrapper({
     Key? key,
     required this.onLifecycleEvent,
     required this.child,

@@ -11,7 +11,7 @@ class ParentPageLifecycleWrapper extends StatefulWidget {
   final OnLifecycleEvent? onLifecycleEvent;
   final Widget child;
 
-  ParentPageLifecycleWrapper({
+  const ParentPageLifecycleWrapper({
     Key? key,
     required this.controller,
     this.onLifecycleEvent,
@@ -19,6 +19,7 @@ class ParentPageLifecycleWrapper extends StatefulWidget {
   })  : assert(controller is PageController || controller is TabController),
         super(key: key);
 
+  // ignore_for_file: no_logic_in_create_state
   @override
   ParentPageLifecycleWrapperState createState() {
     if (controller is PageController) {
@@ -83,11 +84,11 @@ class _PageViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
     int page = _pageController.page!.round();
     if (curPage == page) return;
     // log('PageController#onPageChanged: from page[$curPage]');
-    dispatchEvents(lifecycle_events_inactive_and_invisible);
+    dispatchEvents(lifecycleEventsInactiveAndInvisible);
     curPage = page;
     // log('PageController#onPageChanged: to page[$curPage]');
     if (ModalRoute.of(context)?.isCurrent == true) {
-      dispatchEvents(lifecycle_events_visible_and_active);
+      dispatchEvents(lifecycleEventsVisibleAndActive);
     } else {
       dispatchEvents([LifecycleEvent.visible]);
     }
@@ -109,11 +110,11 @@ class _TabBarViewLifecycleWrapperState extends ParentPageLifecycleWrapperState {
     int page = _tabController.index;
     if (curPage == page) return;
     // log('TabController#onPageChanged: from page[$curPage]');
-    dispatchEvents(lifecycle_events_inactive_and_invisible);
+    dispatchEvents(lifecycleEventsInactiveAndInvisible);
     curPage = page;
     // log('TabController#onPageChanged: to page[$curPage]');
     if (ModalRoute.of(context)?.isCurrent == true) {
-      dispatchEvents(lifecycle_events_visible_and_active);
+      dispatchEvents(lifecycleEventsVisibleAndActive);
     } else {
       dispatchEvents([LifecycleEvent.visible]);
     }

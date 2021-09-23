@@ -13,7 +13,7 @@ class ChildPageLifecycleWrapper extends StatefulWidget {
   final bool wantKeepAlive;
   final Widget child;
 
-  ChildPageLifecycleWrapper({
+  const ChildPageLifecycleWrapper({
     Key? key,
     required this.index,
     this.onLifecycleEvent,

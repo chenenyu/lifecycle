@@ -21,13 +21,9 @@ mixin LifecycleMixin<T extends StatefulWidget> on State<T>, LifecycleAware {
     super.didChangeDependencies();
     final route = ModalRoute.of(context);
     if (route == null) return;
-    if (_lifecycleObserver == null) {
-      _lifecycleObserver = LifecycleObserver.internalGet(context);
-    }
-    if (_childPageLifecycleWrapperState == null) {
-      _childPageLifecycleWrapperState =
-          ChildPageLifecycleWrapper.maybeOf(context);
-    }
+    _lifecycleObserver ??= LifecycleObserver.internalGet(context);
+    _childPageLifecycleWrapperState ??=
+        ChildPageLifecycleWrapper.maybeOf(context);
 
     if (_childPageLifecycleWrapperState != null) {
       _childPageLifecycleWrapperState!.subscribe(this);

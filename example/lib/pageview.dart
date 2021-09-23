@@ -4,8 +4,9 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class MyPageView extends StatefulWidget {
-  MyPageView({Key? key}) : super(key: key);
+  const MyPageView({Key? key}) : super(key: key);
 
+  @override
   _MyPageViewState createState() => _MyPageViewState();
 }
 
@@ -28,7 +29,7 @@ class _MyPageViewState extends State<MyPageView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('MyPageView'),
+        title: const Text('MyPageView'),
       ),
       body: ParentPageLifecycleWrapper(
         controller: _pageController,
@@ -59,31 +60,31 @@ class _MyPageViewState extends State<MyPageView> {
                             );
                           }
                         },
-                        child: Text('Next'),
+                        child: const Text('Next'),
                       ),
                       ElevatedButton(
                         onPressed: () {
                           showDialog(
                             context: context,
-                            routeSettings: RouteSettings(name: 'dialog'),
+                            routeSettings: const RouteSettings(name: 'dialog'),
                             builder: (context) {
                               return LifecycleWrapper(
                                 onLifecycleEvent: (event) {
                                   log.add('Dialog#${event.toString()}');
                                 },
                                 child: AlertDialog(
-                                  content: Text(
+                                  content: const Text(
                                     'This is a dialog.',
                                   ),
                                   actions: <Widget>[
                                     TextButton(
-                                      child: Text('Dismiss'),
+                                      child: const Text('Dismiss'),
                                       onPressed: () {
                                         Navigator.of(context).pop();
                                       },
                                     ),
                                     TextButton(
-                                      child: Text('Open Sub1Page'),
+                                      child: const Text('Open Sub1Page'),
                                       onPressed: () {
                                         Navigator.of(context).pushNamed('sub1');
                                       },
@@ -94,7 +95,7 @@ class _MyPageViewState extends State<MyPageView> {
                             },
                           );
                         },
-                        child: Text('Open dialog'),
+                        child: const Text('Open dialog'),
                       ),
                     ],
                   ),
@@ -122,7 +123,7 @@ class _MyPageViewState extends State<MyPageView> {
                             );
                           }
                         },
-                        child: Text('Previous'),
+                        child: const Text('Previous'),
                       ),
                     ],
                   ),

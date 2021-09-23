@@ -11,10 +11,12 @@ import 'sub2_page.dart';
 import 'tabview.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -25,17 +27,17 @@ class MyApp extends StatelessWidget {
       ),
       navigatorObservers: [defaultLifecycleObserver],
       routes: {
-        'sub1': (_) => Sub1Page(),
-        'sub2': (_) => Sub2Page(),
-        'pageview': (_) => MyPageView(),
-        'tabview': (_) => MyTabView(),
-        'nested': (_) => NestedPageView(),
-        'nav2': (_) => Nav2Home(),
+        'sub1': (_) => const Sub1Page(),
+        'sub2': (_) => const Sub2Page(),
+        'pageview': (_) => const MyPageView(),
+        'tabview': (_) => const MyTabView(),
+        'nested': (_) => const NestedPageView(),
+        'nav2': (_) => const Nav2Home(),
       },
       home: Builder(
         builder: (context) {
           LogEntry.init(context);
-          return HomePage();
+          return const HomePage();
         },
       ),
     );

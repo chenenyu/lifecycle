@@ -4,7 +4,7 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class Sub1Page extends StatefulWidget {
-  Sub1Page({Key? key}) : super(key: key);
+  const Sub1Page({Key? key}) : super(key: key);
 
   @override
   _Sub1PageState createState() {
@@ -33,7 +33,7 @@ class _Sub1PageState extends State<Sub1Page>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Sub1Page',
         ),
       ),
@@ -44,31 +44,31 @@ class _Sub1PageState extends State<Sub1Page>
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text("pop()"),
+              child: const Text("pop()"),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).popUntil(ModalRoute.withName('/'));
               },
-              child: Text("popUntil('/')"),
+              child: const Text("popUntil('/')"),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pushNamed('sub2');
               },
-              child: Text("push('sub2')"),
+              child: const Text("push('sub2')"),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).popAndPushNamed('sub2');
               },
-              child: Text("popAndPushNamed('sub2')"),
+              child: const Text("popAndPushNamed('sub2')"),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pushReplacementNamed('sub2');
               },
-              child: Text("pushReplacementNamed('sub2')"),
+              child: const Text("pushReplacementNamed('sub2')"),
             ),
           ],
         ),
