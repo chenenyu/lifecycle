@@ -1,6 +1,6 @@
 name: lifecycle
 description: Lifecycle support for Flutter widgets.
-version: 0.3.2
+version: 0.3.3
 homepage: https://github.com/chenenyu/lifecycle
 publish_to: https://pub.dev
 

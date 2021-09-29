@@ -1,3 +1,7 @@
+## [0.3.3] - 2021/09/29.
+
+* Fix issue #9.
+
 ## [0.3.2] - 2021/09/23.
 
 * NEW API: `findRoute(String routeName)`.
