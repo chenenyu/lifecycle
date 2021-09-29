@@ -4,9 +4,9 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class Nav2Page2 extends StatefulWidget {
-  final VoidCallback onHidePage1;
+  final VoidCallback onHidePage2;
 
-  const Nav2Page2({Key? key, required this.onHidePage1}) : super(key: key);
+  const Nav2Page2({Key? key, required this.onHidePage2}) : super(key: key);
 
   @override
   _Nav2Page2State createState() {
@@ -47,8 +47,8 @@ class _Nav2Page2State extends State<Nav2Page2>
       ),
       body: Center(
         child: TextButton(
-          onPressed: widget.onHidePage1,
-          child: const Text('Hide Page1'),
+          onPressed: widget.onHidePage2,
+          child: const Text('Hide Page2'),
         ),
       ),
     );

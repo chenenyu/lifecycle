@@ -29,6 +29,12 @@ class Sub2Page extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () {
+                  Navigator.of(context).popUntil(ModalRoute.withName('/'));
+                },
+                child: const Text("popUntil('/')"),
+              ),
+              ElevatedButton(
+                onPressed: () {
                   Navigator.of(context).removeRoute(ModalRoute.of(context)!);
                 },
                 child: const Text("removeRoute(current)"),
