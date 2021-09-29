@@ -43,23 +43,16 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
 
   /// Subscribe [lifecycleAware] to be informed about changes to [route].
   void subscribe(LifecycleAware lifecycleAware, Route route) {
-    RouteEntry entry;
-    try {
-      entry = _getRouteEntry(route);
-    } catch (e) {
-      // Navigator2.0
-      entry = RouteEntry(route);
-      _history.add(entry);
-    }
+    RouteEntry entry = _getRouteEntry(route);
     if (entry.lifecycleSubscribers.add(lifecycleAware)) {
-      log('LifecycleObserver($hashCode)#subscribe (${lifecycleAware.toString()})');
+      log('LifecycleObserver($hashCode)#subscribe(${lifecycleAware.toString()})');
       entry.emitEvents(lifecycleAware, lifecycleEventsVisibleAndActive);
     }
   }
 
   /// Unsubscribe [lifecycleAware].
   void unsubscribe(LifecycleAware lifecycleAware) {
-    log('LifecycleObserver($hashCode)#unsubscribe (${lifecycleAware.toString()})');
+    log('LifecycleObserver($hashCode)#unsubscribe(${lifecycleAware.toString()})');
     for (final RouteEntry entry in _history) {
       entry.lifecycleSubscribers.remove(lifecycleAware);
     }

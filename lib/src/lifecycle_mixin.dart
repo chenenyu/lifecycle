@@ -20,7 +20,10 @@ mixin LifecycleMixin<T extends StatefulWidget> on State<T>, LifecycleAware {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final route = ModalRoute.of(context);
-    if (route == null) return;
+    // Avoid re-subscribe when a route is popping.
+    // When called Navigator#pop(), the [_RouteLifecycle] will change to [popping],
+    // then notify the [NavigatorObserver].
+    if (route == null || !route.isActive) return;
     _lifecycleObserver ??= LifecycleObserver.internalGet(context);
     _childPageLifecycleWrapperState ??=
         ChildPageLifecycleWrapper.maybeOf(context);

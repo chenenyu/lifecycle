@@ -51,9 +51,9 @@ class _Nav2HomeState extends State<Nav2Home>
           MaterialPage(
             name: 'nav2/page2',
             child: Nav2Page2(
-              onHidePage1: () {
+              onHidePage2: () {
                 setState(() {
-                  _showPage1 = false;
+                  _showPage2 = false;
                 });
               },
             ),
