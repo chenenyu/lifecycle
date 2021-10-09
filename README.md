@@ -315,7 +315,7 @@ class _NestedPageViewState extends State<NestedPageView> with SingleTickerProvid
 * Find a route according to a specific name.
 
 ```
-defaultLifecycleObserver.findRoute('route_name');
+Route route = defaultLifecycleObserver.findRoute('route_name');
 ```
 
 * Remove a route according to a specific name.
@@ -323,4 +323,3 @@ defaultLifecycleObserver.findRoute('route_name');
 ```
 defaultLifecycleObserver.removeNamed('route_name');
 ```
-

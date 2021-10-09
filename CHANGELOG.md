@@ -1,3 +1,7 @@
+## [0.3.4] - 2021/10/09.
+
+* Ensure that `inactive`and `invisible` occurs when single `pop` triggered.
+
 ## [0.3.3] - 2021/09/29.
 
 * Fix issue #9.

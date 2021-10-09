@@ -14,23 +14,31 @@ abstract class LifecycleAware {
     if (_currentLifecycleState == events.last) {
       return;
     }
+
+    List<LifecycleEvent> fixedEvents = events;
+
     // Ensure that [LifecycleEvent.inactive] and [LifecycleEvent.invisible]
     // occurs when single [LifecycleEvent.pop] triggered.
+    // When an observed widget is removed from widget tree, this case happens.
     if (events.length == 1 && events.first == LifecycleEvent.pop) {
       if (_currentLifecycleState!.index < LifecycleEvent.inactive.index) {
-        events
-            .insertAll(0, [LifecycleEvent.inactive, LifecycleEvent.invisible]);
+        fixedEvents = [
+          LifecycleEvent.inactive,
+          LifecycleEvent.invisible,
+          LifecycleEvent.pop,
+        ];
       } else if (_currentLifecycleState!.index <
           LifecycleEvent.invisible.index) {
-        events.insert(0, LifecycleEvent.invisible);
+        fixedEvents = [LifecycleEvent.invisible, LifecycleEvent.pop];
       }
     }
-    for (LifecycleEvent event in events) {
+
+    for (LifecycleEvent event in fixedEvents) {
       if (event != _currentLifecycleState) {
         onLifecycleEvent(event);
       }
     }
-    _currentLifecycleState = events.last;
+    _currentLifecycleState = fixedEvents.last;
   }
 
   void onLifecycleEvent(LifecycleEvent event);
