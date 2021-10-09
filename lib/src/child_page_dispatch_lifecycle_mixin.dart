@@ -19,11 +19,11 @@ mixin ChildPageDispatchLifecycleMixin
   @override
   void handleLifecycleEvents(List<LifecycleEvent> events) {
     super.handleLifecycleEvents(events);
-    dispatchEvents(events);
+    _dispatchEvents(events);
   }
 
   /// Dispatch [events] to subscribers.
-  void dispatchEvents(List<LifecycleEvent> events) {
+  void _dispatchEvents(List<LifecycleEvent> events) {
     for (LifecycleAware lifecycleAware in _lifecycleSubscribers) {
       lifecycleAware.handleLifecycleEvents(events);
     }

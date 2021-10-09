@@ -9,9 +9,21 @@ import 'lifecycle_observer.dart';
 abstract class LifecycleAware {
   LifecycleEvent? _currentLifecycleState;
 
+  @mustCallSuper
   void handleLifecycleEvents(List<LifecycleEvent> events) {
     if (_currentLifecycleState == events.last) {
       return;
+    }
+    // Ensure that [LifecycleEvent.inactive] and [LifecycleEvent.invisible]
+    // occurs when single [LifecycleEvent.pop] triggered.
+    if (events.length == 1 && events.first == LifecycleEvent.pop) {
+      if (_currentLifecycleState!.index < LifecycleEvent.inactive.index) {
+        events
+            .insertAll(0, [LifecycleEvent.inactive, LifecycleEvent.invisible]);
+      } else if (_currentLifecycleState!.index <
+          LifecycleEvent.invisible.index) {
+        events.insert(0, LifecycleEvent.invisible);
+      }
     }
     for (LifecycleEvent event in events) {
       if (event != _currentLifecycleState) {
