@@ -111,6 +111,12 @@ class _HomePageState extends State<HomePage>
                 Navigator.of(context).pushNamed('nav2');
               },
             ),
+            ElevatedButton(
+              child: const Text('Open ListView page'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('list');
+              },
+            ),
           ],
         ),
       ),
