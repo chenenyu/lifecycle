@@ -1,11 +1,10 @@
 import 'package:flutter/widgets.dart';
 
-import 'child_page_lifecycle_wrapper.dart';
 import 'lifecycle_aware.dart';
 
 /// Lifecycle dispatcher for child page.
-mixin ChildPageDispatchLifecycleMixin
-    on State<ChildPageLifecycleWrapper>, LifecycleAware {
+mixin ChildPageDispatchLifecycleMixin<T extends StatefulWidget>
+    on State<T>, LifecycleAware {
   final Set<LifecycleAware> _lifecycleSubscribers = {};
 
   void subscribe(LifecycleAware lifecycleAware) {
