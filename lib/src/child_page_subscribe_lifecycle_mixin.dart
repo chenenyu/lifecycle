@@ -2,13 +2,13 @@ import 'package:flutter/widgets.dart';
 
 import 'child_page_lifecycle_wrapper.dart';
 import 'lifecycle_aware.dart';
-import 'parent_page_lifecycle_wrapper.dart';
+import 'page_view_lifecycle_wrapper.dart';
 
-/// Subscribe lifecycle event from [ParentPageLifecycleWrapper].
+/// Subscribe lifecycle event from [PageViewLifecycleWrapper].
 /// This is used in child page of PageView.
 mixin ChildPageSubscribeLifecycleMixin
     on State<ChildPageLifecycleWrapper>, LifecycleAware {
-  ParentPageLifecycleWrapperState? _parentPageLifecycleWrapperState;
+  PageViewLifecycleWrapperState? _pageViewLifecycleWrapperState;
 
   @override
   void initState() {
@@ -21,15 +21,14 @@ mixin ChildPageSubscribeLifecycleMixin
     super.didChangeDependencies();
     final ModalRoute? route = ModalRoute.of(context);
     if (route == null || !route.isActive) return;
-    _parentPageLifecycleWrapperState =
-        ParentPageLifecycleWrapper.maybeOf(context);
-    _parentPageLifecycleWrapperState?.subscribe(widget.index, this);
+    _pageViewLifecycleWrapperState = PageViewLifecycleWrapper.maybeOf(context);
+    _pageViewLifecycleWrapperState?.subscribe(widget.index, this);
   }
 
   @override
   void dispose() {
     handleLifecycleEvents([LifecycleEvent.pop]);
-    _parentPageLifecycleWrapperState?.unsubscribe(this);
+    _pageViewLifecycleWrapperState?.unsubscribe(this);
     super.dispose();
   }
 }
