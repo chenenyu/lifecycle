@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'child_page_dispatch_lifecycle_mixin.dart';
 import 'child_page_subscribe_lifecycle_mixin.dart';
 import 'lifecycle_aware.dart';
-import 'parent_page_lifecycle_wrapper.dart';
+import 'page_view_lifecycle_wrapper.dart';
 
 /// Lifecycle wrapper for children of [PageView] and [TabBarView].
-/// See [ParentPageLifecycleWrapper].
+/// See [PageViewLifecycleWrapper].
 class ChildPageLifecycleWrapper extends StatefulWidget {
   final int index;
   final OnLifecycleEvent? onLifecycleEvent;
