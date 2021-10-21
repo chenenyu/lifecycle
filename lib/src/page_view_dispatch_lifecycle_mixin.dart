@@ -1,7 +1,6 @@
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-import 'child_page_lifecycle_wrapper.dart';
 import 'lifecycle_aware.dart';
 
 /// Dispatch lifecycle event to child page.
@@ -18,6 +17,7 @@ mixin PageViewDispatchLifecycleMixin<T extends StatefulWidget>
   @override
   void initState() {
     super.initState();
+    // visitChildElements() can't called during build, so we schedule a frame callback.
     SchedulerBinding.instance!.scheduleFrameCallback((_) {
       _updateController();
     });
@@ -30,7 +30,6 @@ mixin PageViewDispatchLifecycleMixin<T extends StatefulWidget>
   }
 
   void subscribe(int index, LifecycleAware lifecycleAware) {
-    assert(lifecycleAware is ChildPageLifecycleWrapperState);
     if (_lifecycleSubscribers[index] != lifecycleAware) {
       _lifecycleSubscribers[index] = lifecycleAware;
       // Dispatch [LifecycleEvent.active] to initial page.
@@ -91,10 +90,10 @@ mixin PageViewDispatchLifecycleMixin<T extends StatefulWidget>
     if (_pageController!.page == null) return;
     int page = _pageController!.page!.round();
     if (_curPage == page) return;
-    // log('PageController#onPageChanged: from page[$curPage]');
+    // print('PageController#onPageChanged: from page[$curPage]');
     dispatchEvents(lifecycleEventsInactiveAndInvisible);
     _curPage = page;
-    // log('PageController#onPageChanged: to page[$curPage]');
+    // print('PageController#onPageChanged: to page[$curPage]');
     if (ModalRoute.of(context)?.isCurrent == true) {
       dispatchEvents(lifecycleEventsVisibleAndActive);
     } else {

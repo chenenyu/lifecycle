@@ -1,14 +1,13 @@
 import 'package:flutter/widgets.dart';
 
-import 'child_page_lifecycle_wrapper.dart';
 import 'lifecycle_aware.dart';
 import 'lifecycle_observer.dart';
+import 'widget_dispatch_lifecycle_mixin.dart';
 
-/// Subscribe lifecycle event from [LifecycleObserver] or
-/// [ChildPageLifecycleWrapper] (if nested).
+/// Subscribe lifecycle event for normal widgets.
 mixin LifecycleMixin<T extends StatefulWidget> on State<T>, LifecycleAware {
   LifecycleObserver? _lifecycleObserver;
-  ChildPageLifecycleWrapperState? _childPageLifecycleWrapperState;
+  WidgetDispatchLifecycleMixin? _widgetDispatchLifecycleMixin;
 
   @override
   void initState() {
@@ -24,10 +23,19 @@ mixin LifecycleMixin<T extends StatefulWidget> on State<T>, LifecycleAware {
     // When called Navigator#pop(), the [_RouteLifecycle] will change to [popping],
     // then notify the [NavigatorObserver].
     if (route == null || !route.isActive) return;
-    _childPageLifecycleWrapperState =
-        ChildPageLifecycleWrapper.maybeOf(context);
-    if (_childPageLifecycleWrapperState != null) {
-      _childPageLifecycleWrapperState!.subscribe(this);
+
+    _widgetDispatchLifecycleMixin = null;
+    context.visitAncestorElements((element) {
+      if (element is StatefulElement &&
+          element.state is WidgetDispatchLifecycleMixin) {
+        _widgetDispatchLifecycleMixin =
+            element.state as WidgetDispatchLifecycleMixin;
+        return false;
+      }
+      return true;
+    });
+    if (_widgetDispatchLifecycleMixin != null) {
+      _widgetDispatchLifecycleMixin!.subscribe(this);
     } else {
       _lifecycleObserver = LifecycleObserver.internalGet(context);
       _lifecycleObserver!.subscribe(this, route);
@@ -38,7 +46,7 @@ mixin LifecycleMixin<T extends StatefulWidget> on State<T>, LifecycleAware {
   void dispose() {
     handleLifecycleEvents([LifecycleEvent.pop]);
     _lifecycleObserver?.unsubscribe(this);
-    _childPageLifecycleWrapperState?.unsubscribe(this);
+    _widgetDispatchLifecycleMixin?.unsubscribe(this);
     super.dispose();
   }
 }

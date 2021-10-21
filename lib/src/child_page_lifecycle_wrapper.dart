@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
-import 'child_page_dispatch_lifecycle_mixin.dart';
 import 'child_page_subscribe_lifecycle_mixin.dart';
 import 'lifecycle_aware.dart';
-import 'page_view_lifecycle_wrapper.dart';
+import 'widget_dispatch_lifecycle_mixin.dart';
 
 /// Lifecycle wrapper for children of [PageView] and [TabBarView].
-/// See [PageViewLifecycleWrapper].
+///
+/// If you do not want to wrap child widget with this widget, try to mixin
+/// [LifecycleAware], [ChildPageSubscribeLifecycleMixin] and [WidgetDispatchLifecycleMixin]
+/// on your item's [State].
 class ChildPageLifecycleWrapper extends StatefulWidget {
   final int index;
   final OnLifecycleEvent? onLifecycleEvent;
@@ -23,21 +25,20 @@ class ChildPageLifecycleWrapper extends StatefulWidget {
         super(key: key);
 
   @override
-  ChildPageLifecycleWrapperState createState() {
-    return ChildPageLifecycleWrapperState();
-  }
-
-  static ChildPageLifecycleWrapperState? maybeOf(BuildContext context) {
-    return context.findAncestorStateOfType<ChildPageLifecycleWrapperState>();
+  _ChildPageLifecycleWrapperState createState() {
+    return _ChildPageLifecycleWrapperState();
   }
 }
 
-class ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
+class _ChildPageLifecycleWrapperState extends State<ChildPageLifecycleWrapper>
     with
         LifecycleAware,
         ChildPageSubscribeLifecycleMixin,
-        ChildPageDispatchLifecycleMixin,
+        WidgetDispatchLifecycleMixin,
         AutomaticKeepAliveClientMixin {
+  @override
+  int get itemIndex => widget.index;
+
   @override
   bool get wantKeepAlive => widget.wantKeepAlive;
 

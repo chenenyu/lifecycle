@@ -1,12 +1,7 @@
 import 'package:flutter/widgets.dart';
 
-import 'lifecycle_observer.dart';
-
 /// An interface for objects that are aware of their current [Route].
-///
-/// This is used with [LifecycleObserver] to make a widget aware of changes to the
-/// [Navigator]'s session history.
-abstract class LifecycleAware {
+mixin LifecycleAware {
   LifecycleEvent? _currentLifecycleState;
 
   @mustCallSuper
@@ -43,6 +38,9 @@ abstract class LifecycleAware {
   }
 
   void onLifecycleEvent(LifecycleEvent event);
+
+  /// Used for a indexed child, such as a item of [ListView]/[GridView].
+  int? get itemIndex => null;
 }
 
 typedef OnLifecycleEvent = void Function(LifecycleEvent event);
