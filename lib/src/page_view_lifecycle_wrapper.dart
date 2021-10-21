@@ -19,10 +19,6 @@ class PageViewLifecycleWrapper extends StatefulWidget {
   PageViewLifecycleWrapperState createState() {
     return PageViewLifecycleWrapperState();
   }
-
-  static PageViewLifecycleWrapperState? maybeOf(BuildContext context) {
-    return context.findAncestorStateOfType<PageViewLifecycleWrapperState>();
-  }
 }
 
 class PageViewLifecycleWrapperState extends State<PageViewLifecycleWrapper>
@@ -34,7 +30,7 @@ class PageViewLifecycleWrapperState extends State<PageViewLifecycleWrapper>
 
   @override
   void onLifecycleEvent(LifecycleEvent event) {
-    // log('ParentPageLifecycleWrapperState($hashCode)#${event.toString()}');
+    // print('ParentPageLifecycleWrapperState($hashCode)#${event.toString()}');
     widget.onLifecycleEvent?.call(event);
   }
 }

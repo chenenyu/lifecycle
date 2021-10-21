@@ -1,14 +1,13 @@
 import 'package:flutter/widgets.dart';
 
-import 'child_page_lifecycle_wrapper.dart';
 import 'lifecycle_aware.dart';
-import 'page_view_lifecycle_wrapper.dart';
+import 'page_view_dispatch_lifecycle_mixin.dart';
 
-/// Subscribe lifecycle event from [PageViewLifecycleWrapper].
+/// Subscribe lifecycle event from [PageViewDispatchLifecycleMixin].
 /// This is used in child page of PageView.
-mixin ChildPageSubscribeLifecycleMixin
-    on State<ChildPageLifecycleWrapper>, LifecycleAware {
-  PageViewLifecycleWrapperState? _pageViewLifecycleWrapperState;
+mixin ChildPageSubscribeLifecycleMixin<T extends StatefulWidget>
+    on State<T>, LifecycleAware {
+  PageViewDispatchLifecycleMixin? _pageViewDispatchLifecycleMixin;
 
   @override
   void initState() {
@@ -21,14 +20,30 @@ mixin ChildPageSubscribeLifecycleMixin
     super.didChangeDependencies();
     final ModalRoute? route = ModalRoute.of(context);
     if (route == null || !route.isActive) return;
-    _pageViewLifecycleWrapperState = PageViewLifecycleWrapper.maybeOf(context);
-    _pageViewLifecycleWrapperState?.subscribe(widget.index, this);
+
+    if (itemIndex == null) {
+      throw FlutterError(
+          'State must override getter \'itemIndex\' from LifecycleAware and return a non-null value.');
+    }
+
+    _pageViewDispatchLifecycleMixin = null;
+    context.visitAncestorElements((element) {
+      if (element is StatefulElement &&
+          element.state is PageViewDispatchLifecycleMixin) {
+        _pageViewDispatchLifecycleMixin =
+            element.state as PageViewDispatchLifecycleMixin;
+        return false;
+      }
+      return true;
+    });
+
+    _pageViewDispatchLifecycleMixin?.subscribe(itemIndex!, this);
   }
 
   @override
   void dispose() {
     handleLifecycleEvents([LifecycleEvent.pop]);
-    _pageViewLifecycleWrapperState?.unsubscribe(this);
+    _pageViewDispatchLifecycleMixin?.unsubscribe(this);
     super.dispose();
   }
 }

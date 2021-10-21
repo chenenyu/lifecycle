@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
 import 'lifecycle_aware.dart';
-import 'log.dart';
 import 'route_entry.dart';
 
 /// An observer can only be used by one [Navigator] (include [MaterialApp]).
@@ -45,14 +44,14 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   void subscribe(LifecycleAware lifecycleAware, Route route) {
     RouteEntry entry = _getRouteEntry(route);
     if (entry.lifecycleSubscribers.add(lifecycleAware)) {
-      log('LifecycleObserver($hashCode)#subscribe(${lifecycleAware.toString()})');
+      // print('LifecycleObserver($hashCode)#subscribe(${lifecycleAware.toString()})');
       entry.emitEvents(lifecycleAware, lifecycleEventsVisibleAndActive);
     }
   }
 
   /// Unsubscribe [lifecycleAware].
   void unsubscribe(LifecycleAware lifecycleAware) {
-    log('LifecycleObserver($hashCode)#unsubscribe(${lifecycleAware.toString()})');
+    // print('LifecycleObserver($hashCode)#unsubscribe(${lifecycleAware.toString()})');
     for (final RouteEntry entry in _history) {
       entry.lifecycleSubscribers.remove(lifecycleAware);
     }
@@ -65,7 +64,7 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    // log(state.toString());
+    // print(state);
     if (_history.isEmpty) return;
     switch (state) {
       case AppLifecycleState.resumed: // active
@@ -97,9 +96,9 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didPush(route, previousRoute);
-    log('LifecycleObserver($hashCode)#didPush('
-        'route(${route.hashCode}): ${route.settings.name}, '
-        'previousRoute(${previousRoute?.hashCode}): ${previousRoute?.settings.name})');
+    // print('LifecycleObserver($hashCode)#didPush('
+    //     'route(${route.hashCode}): ${route.settings.name}, '
+    //     'previousRoute(${previousRoute?.hashCode}): ${previousRoute?.settings.name})');
 
     if (previousRoute != null) {
       try {
@@ -117,7 +116,7 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
           _sendEventsToGivenRoute(previousEntry, [LifecycleEvent.inactive]);
         }
       } catch (e) {
-        log(e);
+        // print(e);
       }
     }
 
@@ -127,9 +126,9 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didPop(route, previousRoute);
-    log('LifecycleObserver($hashCode)#didPop('
-        'route(${route.hashCode}): ${route.settings.name}, '
-        'previousRoute(${previousRoute.hashCode}): ${previousRoute?.settings.name})');
+    // print('LifecycleObserver($hashCode)#didPop('
+    //     'route(${route.hashCode}): ${route.settings.name}, '
+    //     'previousRoute(${previousRoute.hashCode}): ${previousRoute?.settings.name})');
 
     RouteEntry entry = _getRouteEntry(route);
     // Current route trigger pop
@@ -162,9 +161,9 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
     int index = _history.indexOf(oldEntry);
     assert(index != -1);
     bool isLast = _history.last == oldEntry;
-    log('LifecycleObserver($hashCode)#didReplace('
-        'newRoute: ${newRoute.settings.name}, '
-        'oldRoute: ${oldRoute.settings.name}, isLast: $isLast)');
+    // print('LifecycleObserver($hashCode)#didReplace('
+    //     'newRoute: ${newRoute.settings.name}, '
+    //     'oldRoute: ${oldRoute.settings.name}, isLast: $isLast)');
 
     _sendEventsToGivenRoute(oldEntry, lifecycleEventsInactiveAndInvisible);
     _history.remove(oldEntry);
@@ -189,9 +188,9 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didRemove(route, previousRoute);
-    log('LifecycleObserver($hashCode)#didRemove('
-        'route: ${route.settings.name}, '
-        'previousRoute: ${previousRoute?.settings.name})');
+    // print('LifecycleObserver($hashCode)#didRemove('
+    //     'route: ${route.settings.name}, '
+    //     'previousRoute: ${previousRoute?.settings.name})');
 
     RouteEntry entry = _getRouteEntry(route);
     _sendEventsToGivenRoute(entry, lifecycleEventsInactiveAndInvisible);
@@ -222,7 +221,7 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
       _sendEventsToGivenRoute(entry, events);
     } catch (e) {
       // IterableElementError.noElement()
-      log(e);
+      // print(e);
       rethrow;
     }
   }
