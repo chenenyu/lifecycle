@@ -31,11 +31,10 @@ class _MyPageViewState extends State<MyPageView> {
       appBar: AppBar(
         title: const Text('MyPageView'),
       ),
-      body: ParentPageLifecycleWrapper(
-        controller: _pageController,
-        onLifecycleEvent: (event) {
-          log.add('MyPageView#${event.toString()}');
-        },
+      body: PageViewLifecycleWrapper(
+        // onLifecycleEvent: (event) {
+        //   log.add('MyPageView#${event.toString()}');
+        // },
         child: PageView(
           controller: _pageController,
           children: [
