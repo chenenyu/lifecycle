@@ -11,10 +11,10 @@ Lifecycle support for Flutter widgets.
 
 - [x] `StatefulWidget`.
 - [x] `StatelessWidget`(include `Dialog`).
-- [x] `PageView` and it's children.
-- [x] `TabBarView` and it's children.
-- [x] Nested page view.
+- [x] `PageView/TabBarView` and it's children.
+- [x] Nested `PageView`.
 - [x] `Navigator`(Navigator 2.0 pages api).
+- [x] Child of `ListView/GridView/CustomScrollView`.
 
 ### Supported lifecycle event
 ```dart
@@ -175,11 +175,7 @@ class _MyPageViewState extends State<MyPageView> {
         title: Text('MyPageView'),
       ),
       // Wrap PageView
-      body: ParentPageLifecycleWrapper(
-        controller: _pageController,
-        onLifecycleEvent: (event) { // optional.
-          print('MyPageView#${event.toString()}');
-        },
+      body: PageViewLifecycleWrapper(
         child: PageView(
           controller: _pageController,
           children: [
@@ -254,11 +250,7 @@ class _NestedPageViewState extends State<NestedPageView> with SingleTickerProvid
           tabs: myTabs,
         ),
       ),
-      body: ParentPageLifecycleWrapper( // Outer PageView
-        controller: _tabController,
-        onLifecycleEvent: (event) {
-          print('NestedPageView#${event.toString()}');
-        },
+      body: PageViewLifecycleWrapper( // Outer PageView
         child: TabBarView(
           controller: _tabController,
           children: <Widget>[
@@ -276,8 +268,7 @@ class _NestedPageViewState extends State<NestedPageView> with SingleTickerProvid
               onLifecycleEvent: (event) {
                 print('OuterPage@1#${event.toString()}');
               },
-              child: ParentPageLifecycleWrapper( // Inner PageView
-                controller: _pageController,
+              child: PageViewLifecycleWrapper( // Inner PageView
                 child: PageView(
                   controller: _pageController,
                   children: [
@@ -308,6 +299,35 @@ class _NestedPageViewState extends State<NestedPageView> with SingleTickerProvid
   }
 }
 
+```
+
+* ListView
+
+```dart
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('ListPage'),
+    ),
+    body: ListView.builder(
+      itemCount: _data.length,
+      itemBuilder: (context, index) {
+        return ScrollViewItemLifecycleWrapper(
+          onLifecycleEvent: (LifecycleEvent event) {
+            print('ListPage(item$index)#${event.toString()}');
+          },
+          wantKeepAlive: false,
+          child: ListTile(
+            title: Text(
+              _data[index],
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}
 ```
 
 ### Other APIs

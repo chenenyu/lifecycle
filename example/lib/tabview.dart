@@ -41,11 +41,10 @@ class _MyTabViewState extends State<MyTabView>
           tabs: myTabs,
         ),
       ),
-      body: ParentPageLifecycleWrapper(
-        controller: _tabController,
-        onLifecycleEvent: (event) {
-          log.add('MyTabView#${event.toString()}');
-        },
+      body: PageViewLifecycleWrapper(
+        // onLifecycleEvent: (event) {
+        //   log.add('MyTabView#${event.toString()}');
+        // },
         child: TabBarView(
           controller: _tabController,
           children: myTabs.map((Tab tab) {

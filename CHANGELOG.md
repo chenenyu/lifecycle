@@ -1,3 +1,8 @@
+## [0.4.0] - 2021/10/22.
+
+* ScrollView item lifecycle support.
+* Rename `ParentPageLifecycleWrapper` to `PageViewLifecycleWrapper` and remove required param `controller`.
+
 ## [0.3.4] - 2021/10/09.
 
 * Ensure that `inactive`and `invisible` occurs when single `pop` triggered.
