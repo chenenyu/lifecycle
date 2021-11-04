@@ -81,7 +81,11 @@ mixin PageViewDispatchLifecycleMixin<T extends StatefulWidget>
     if (_pageController == newValue) return;
     final ScrollController? oldValue = _pageController;
     _pageController = newValue;
-    _curPage = _pageController!.page!.round();
+    if (_pageController!.hasClients) {
+      _curPage = _pageController!.page?.round() ?? _pageController!.initialPage;
+    } else {
+      _curPage = _pageController!.initialPage;
+    }
     oldValue?.removeListener(_onPageChanged);
     newValue.addListener(_onPageChanged);
   }

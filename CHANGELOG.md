@@ -1,3 +1,7 @@
+## [0.4.1] - 2021/11/04.
+
+* Fix a null cast error.
+
 ## [0.4.0] - 2021/10/22.
 
 * ScrollView item lifecycle support.
