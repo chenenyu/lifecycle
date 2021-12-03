@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 mixin LifecycleAware {
   LifecycleEvent? _currentLifecycleState;
 
+  LifecycleEvent? get currentLifecycleState => _currentLifecycleState;
+
   @mustCallSuper
   void handleLifecycleEvents(List<LifecycleEvent> events) {
     if (_currentLifecycleState == events.last) {
@@ -39,7 +41,7 @@ mixin LifecycleAware {
 
   void onLifecycleEvent(LifecycleEvent event);
 
-  /// Used for a indexed child, such as a item of [ListView]/[GridView].
+  /// Used for an indexed child, such as an item of [ListView]/[GridView].
   int? get itemIndex => null;
 }
 
