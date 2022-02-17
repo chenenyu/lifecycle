@@ -14,15 +14,6 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
 
   /// Avoid calling this constructor in [build] method.
   LifecycleObserver() {
-    // clean cache
-    _cache.removeWhere((e) {
-      if (e.navigator == null) {
-        WidgetsBinding.instance?.removeObserver(e);
-        return true;
-      }
-      return false;
-    });
-
     _cache.add(this);
     WidgetsBinding.instance?.addObserver(this);
   }
@@ -32,7 +23,10 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   factory LifecycleObserver.internalGet(BuildContext context) {
     NavigatorState navigator = Navigator.of(context);
     for (LifecycleObserver observer in _cache) {
-      if (observer.navigator == navigator) {
+      if (observer.navigator == null) {
+        WidgetsBinding.instance?.removeObserver(observer);
+        _cache.remove(observer);
+      } else if (observer.navigator == navigator) {
         return observer;
       }
     }
