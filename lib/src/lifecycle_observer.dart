@@ -22,10 +22,11 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   @protected
   factory LifecycleObserver.internalGet(BuildContext context) {
     NavigatorState navigator = Navigator.of(context);
-    for (LifecycleObserver observer in _cache) {
+    for (int i = _cache.length - 1; i >= 0; i--) {
+      LifecycleObserver observer = _cache[i];
       if (observer.navigator == null) {
         WidgetsBinding.instance?.removeObserver(observer);
-        _cache.remove(observer);
+        _cache.removeAt(i);
       } else if (observer.navigator == navigator) {
         return observer;
       }

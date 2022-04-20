@@ -1,3 +1,7 @@
+## [0.4.4] - 2022/04/20.
+
+* issue #20. Fix error `Concurrent modification during iteration`.
+
 ## [0.4.3] - 2022/02/17.
 
 * issue #19.
