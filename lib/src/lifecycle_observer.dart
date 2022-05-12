@@ -22,14 +22,18 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   @protected
   factory LifecycleObserver.internalGet(BuildContext context) {
     NavigatorState navigator = Navigator.of(context);
+    LifecycleObserver? targetObserver;
     for (int i = _cache.length - 1; i >= 0; i--) {
       LifecycleObserver observer = _cache[i];
       if (observer.navigator == null) {
         WidgetsBinding.instance?.removeObserver(observer);
         _cache.removeAt(i);
       } else if (observer.navigator == navigator) {
-        return observer;
+        targetObserver = observer;
       }
+    }
+    if (targetObserver != null) {
+      return targetObserver;
     }
     throw Exception(
         'Can not get associated LifecycleObserver, did you forget to register it in MaterialApp or Navigator?');
