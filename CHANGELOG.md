@@ -1,3 +1,7 @@
+## [0.5.0] - 2022/05/16.
+
+* Flutter 3.
+
 ## [0.4.4] - 2022/04/20.
 
 * issue #20. Fix error `Concurrent modification during iteration`.

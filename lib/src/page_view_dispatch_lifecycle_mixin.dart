@@ -18,7 +18,7 @@ mixin PageViewDispatchLifecycleMixin<T extends StatefulWidget>
   void initState() {
     super.initState();
     // visitChildElements() can't called during build, so we schedule a frame callback.
-    SchedulerBinding.instance!.scheduleFrameCallback((_) {
+    SchedulerBinding.instance.scheduleFrameCallback((_) {
       _updateController();
     });
   }

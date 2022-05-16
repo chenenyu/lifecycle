@@ -20,7 +20,7 @@ mixin ScrollViewItemSubscribeLifecycleMixin<T extends StatefulWidget>
   void initState() {
     super.initState();
     handleLifecycleEvents([LifecycleEvent.push]);
-    SchedulerBinding.instance!.endOfFrame.then((value) {
+    SchedulerBinding.instance.endOfFrame.then((value) {
       // trigger manually
       _onScrollPositionChanged();
     });
@@ -90,11 +90,11 @@ mixin ScrollViewItemSubscribeLifecycleMixin<T extends StatefulWidget>
     if (!mounted) return;
     if (_scrollPosition!.recommendDeferredLoading(context)) {
       if (_nextFrameCallbackId != null) {
-        SchedulerBinding.instance!
+        SchedulerBinding.instance
             .cancelFrameCallbackWithId(_nextFrameCallbackId!);
       }
       _nextFrameCallbackId =
-          SchedulerBinding.instance!.scheduleFrameCallback((_) {
+          SchedulerBinding.instance.scheduleFrameCallback((_) {
         _onScrollPositionChanged();
       });
       return;
