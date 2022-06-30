@@ -343,3 +343,10 @@ Route route = defaultLifecycleObserver.findRoute('route_name');
 ```
 defaultLifecycleObserver.removeNamed('route_name');
 ```
+
+* Dispose a LifecycleObserver when it will never be used.
+
+```
+defaultLifecycleObserver.dispose();
+```
+

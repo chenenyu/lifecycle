@@ -13,6 +13,7 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   static final List<LifecycleObserver> _cache = [];
 
   /// Avoid calling this constructor in [build] method.
+  /// Call [dispose] when you will never use it.
   LifecycleObserver() {
     _cache.add(this);
     WidgetsBinding.instance.addObserver(this);
@@ -25,10 +26,7 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
     LifecycleObserver? targetObserver;
     for (int i = _cache.length - 1; i >= 0; i--) {
       LifecycleObserver observer = _cache[i];
-      if (observer.navigator == null) {
-        WidgetsBinding.instance.removeObserver(observer);
-        _cache.removeAt(i);
-      } else if (observer.navigator == navigator) {
+      if (observer.navigator == navigator) {
         targetObserver = observer;
       }
     }
@@ -37,6 +35,13 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
     }
     throw Exception(
         'Can not get associated LifecycleObserver, did you forget to register it in MaterialApp or Navigator?');
+  }
+
+  /// Must be called when the observer will no longer be used.
+  @mustCallSuper
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _cache.remove(this);
   }
 
   /// Subscribe [lifecycleAware] to be informed about changes to [route].
