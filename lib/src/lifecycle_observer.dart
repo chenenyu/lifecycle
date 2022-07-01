@@ -13,7 +13,7 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   static final List<LifecycleObserver> _cache = [];
 
   /// Avoid calling this constructor in [build] method.
-  /// Call [dispose] when you will never use it.
+  /// Call [dispose] when it will never be used, e.g. call it in State#dispose.
   LifecycleObserver() {
     _cache.add(this);
     WidgetsBinding.instance.addObserver(this);
@@ -23,15 +23,11 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   @protected
   factory LifecycleObserver.internalGet(BuildContext context) {
     NavigatorState navigator = Navigator.of(context);
-    LifecycleObserver? targetObserver;
     for (int i = _cache.length - 1; i >= 0; i--) {
       LifecycleObserver observer = _cache[i];
       if (observer.navigator == navigator) {
-        targetObserver = observer;
+        return observer;
       }
-    }
-    if (targetObserver != null) {
-      return targetObserver;
     }
     throw Exception(
         'Can not get associated LifecycleObserver, did you forget to register it in MaterialApp or Navigator?');
