@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 
 import 'lifecycle_aware.dart';
 
-/// Dispatch lifecycle event to child page.
+/// Dispatches lifecycle events to child page.
 mixin PageViewDispatchLifecycleMixin<T extends StatefulWidget>
     on State<T>, LifecycleAware {
   PageController? _pageController;
@@ -61,8 +61,10 @@ mixin PageViewDispatchLifecycleMixin<T extends StatefulWidget>
     _lifecycleSubscribers[_curPage]?.handleLifecycleEvents(events);
   }
 
+  /// 查找更新[PageController]。
   void _updateController() {
     PageController? pageController;
+    // [TabBarView]内部实现也是嵌套PageView，所以这里查找PageView就可以了
     void findPageView(Element element) {
       if (element.widget is PageView) {
         PageView pageView = element.widget as PageView;

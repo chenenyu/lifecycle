@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import 'lifecycle_aware.dart';
 
-/// A Widget that needs to dispatch lifecycle to it's children should mixin this.
+/// Widget that needs to dispatch lifecycle to it's children should mixin this.
 mixin WidgetDispatchLifecycleMixin<T extends StatefulWidget>
     on State<T>, LifecycleAware {
   final Set<LifecycleAware> _lifecycleSubscribers = {};

@@ -18,7 +18,7 @@ class ScrollViewItemLifecycleWrapper extends StatefulWidget {
   final Widget child;
 
   @override
-  _ScrollViewItemLifecycleWrapperState createState() {
+  State createState() {
     return _ScrollViewItemLifecycleWrapperState();
   }
 }

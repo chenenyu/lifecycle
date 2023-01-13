@@ -16,7 +16,7 @@ class LifecycleWrapper extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _LifecycleWrapperState createState() {
+  State createState() {
     return _LifecycleWrapperState();
   }
 }

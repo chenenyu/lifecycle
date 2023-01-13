@@ -1,9 +1,10 @@
 import 'package:flutter/widgets.dart';
 
-/// An interface for objects that are aware of their current [Route].
+/// A mixin for widgets that are aware of their current lifecycle.
 mixin LifecycleAware {
   LifecycleEvent? _currentLifecycleState;
 
+  /// Current lifecycle.
   LifecycleEvent? get currentLifecycleState => _currentLifecycleState;
 
   @mustCallSuper
@@ -14,9 +15,13 @@ mixin LifecycleAware {
 
     List<LifecycleEvent> fixedEvents = events;
 
-    // Ensure that [LifecycleEvent.inactive] and [LifecycleEvent.invisible]
+    // Ensures that [LifecycleEvent.inactive] and [LifecycleEvent.invisible]
     // occurs when single [LifecycleEvent.pop] triggered.
     // When an observed widget is removed from widget tree, this case happens.
+    //
+    // 对 events 进行修正，如果触发了[LifecycleEvent.pop]，确保[LifecycleEvent.inactive]
+    // 和[LifecycleEvent.invisible]一定被触发。
+    // 当widget被移除时，可能会发生这种情况。
     if (events.length == 1 &&
         events.first == LifecycleEvent.pop &&
         _currentLifecycleState != LifecycleEvent.push) {
@@ -31,6 +36,7 @@ mixin LifecycleAware {
       }
     }
 
+    // 分发 events
     for (LifecycleEvent event in fixedEvents) {
       if (event != _currentLifecycleState) {
         _currentLifecycleState = event;
@@ -39,6 +45,7 @@ mixin LifecycleAware {
     }
   }
 
+  /// [LifecycleEvent] callback.
   void onLifecycleEvent(LifecycleEvent event);
 
   /// Used for an indexed child, such as an item of [ListView]/[GridView].

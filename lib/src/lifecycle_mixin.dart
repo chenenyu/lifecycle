@@ -4,7 +4,7 @@ import 'lifecycle_aware.dart';
 import 'lifecycle_observer.dart';
 import 'widget_dispatch_lifecycle_mixin.dart';
 
-/// Subscribe lifecycle event for normal widgets.
+/// Subscribes lifecycle events for normal widgets.
 mixin LifecycleMixin<T extends StatefulWidget> on State<T>, LifecycleAware {
   LifecycleObserver? _lifecycleObserver;
   WidgetDispatchLifecycleMixin? _widgetDispatchLifecycleMixin;
@@ -12,6 +12,7 @@ mixin LifecycleMixin<T extends StatefulWidget> on State<T>, LifecycleAware {
   @override
   void initState() {
     super.initState();
+    // Dispatches [LifecycleEvent.push] event.
     handleLifecycleEvents([LifecycleEvent.push]);
   }
 
@@ -19,11 +20,14 @@ mixin LifecycleMixin<T extends StatefulWidget> on State<T>, LifecycleAware {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final ModalRoute? route = ModalRoute.of(context);
-    // Avoid re-subscribe when a route is popping.
+    // Avoids re-subscribe when a route is popping.
     // When called Navigator#pop(), the [_RouteLifecycle] will change to [popping],
     // then notify the [NavigatorObserver].
+    //
+    // 如果当前route正在popping，避免重复订阅。
     if (route == null || !route.isActive) return;
 
+    // 重新查找 [WidgetDispatchLifecycleMixin]。
     _widgetDispatchLifecycleMixin = null;
     context.visitAncestorElements((element) {
       if (element is StatefulElement &&
@@ -34,6 +38,7 @@ mixin LifecycleMixin<T extends StatefulWidget> on State<T>, LifecycleAware {
       }
       return true;
     });
+    // 优先从 [WidgetDispatchLifecycleMixin] 中订阅。
     if (_widgetDispatchLifecycleMixin != null) {
       _widgetDispatchLifecycleMixin!.subscribe(this);
     } else {
@@ -44,6 +49,7 @@ mixin LifecycleMixin<T extends StatefulWidget> on State<T>, LifecycleAware {
 
   @override
   void dispose() {
+    // Dispatches [LifecycleEvent.pop].
     handleLifecycleEvents([LifecycleEvent.pop]);
     _lifecycleObserver?.unsubscribe(this);
     _widgetDispatchLifecycleMixin?.unsubscribe(this);

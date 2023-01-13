@@ -25,7 +25,7 @@ class ChildPageLifecycleWrapper extends StatefulWidget {
         super(key: key);
 
   @override
-  _ChildPageLifecycleWrapperState createState() {
+  State createState() {
     return _ChildPageLifecycleWrapperState();
   }
 }

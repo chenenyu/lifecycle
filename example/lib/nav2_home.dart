@@ -28,6 +28,7 @@ class _Nav2HomeState extends State<Nav2Home>
 
   @override
   void dispose() {
+    lifecycleObserver.dispose();
     super.dispose();
   }
 
