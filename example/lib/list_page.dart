@@ -7,7 +7,7 @@ class ListPage extends StatefulWidget {
   const ListPage({Key? key}) : super(key: key);
 
   @override
-  _ListPageState createState() {
+  State createState() {
     return _ListPageState();
   }
 }
@@ -73,7 +73,7 @@ class ListItem extends StatefulWidget {
   final int index;
 
   @override
-  _ListItemState createState() {
+  State createState() {
     return _ListItemState();
   }
 }

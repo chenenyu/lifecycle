@@ -7,7 +7,7 @@ class Sub1Page extends StatefulWidget {
   const Sub1Page({Key? key}) : super(key: key);
 
   @override
-  _Sub1PageState createState() {
+  State createState() {
     return _Sub1PageState();
   }
 }

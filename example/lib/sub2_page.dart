@@ -56,9 +56,19 @@ class Sub2Page extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () {
-                  defaultLifecycleObserver.removeNamed('sub1');
+                  Route? sub1Route;
+                  defaultLifecycleObserver.iterateRoutes((route) {
+                    if (route.settings.name == 'sub1') {
+                      sub1Route = route;
+                      return true;
+                    }
+                    return false;
+                  });
+                  if (sub1Route != null) {
+                    defaultLifecycleObserver.removeRoute(sub1Route!);
+                  }
                 },
-                child: const Text("removeNamed('sub1')"),
+                child: const Text("removeRoute('sub1')"),
               ),
             ],
           ),

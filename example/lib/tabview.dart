@@ -7,7 +7,7 @@ class MyTabView extends StatefulWidget {
   const MyTabView({Key? key}) : super(key: key);
 
   @override
-  _MyTabViewState createState() => _MyTabViewState();
+  State createState() => _MyTabViewState();
 }
 
 class _MyTabViewState extends State<MyTabView>

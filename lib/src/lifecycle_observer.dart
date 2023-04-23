@@ -278,6 +278,7 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   }
 
   /// Finds route by [routeName].
+  @Deprecated('Use iterateRoutes() instead.')
   Route<dynamic>? findRoute(String routeName) {
     try {
       Route route =
@@ -289,11 +290,31 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   }
 
   /// Remove a route according to the [routeName].
-  void removeNamed<T extends Object?>(String routeName, [T? result]) {
+  @Deprecated('Use removeRoute() instead.')
+  void removeNamed<T>(String routeName, [T? result]) {
     Route? route = findRoute(routeName);
     if (route != null) {
       route.didPop(result);
       navigator?.removeRoute(route);
     }
+  }
+
+  /// Iterates routes. It's usually used for locating a specific route.
+  /// [callback] The callback function to be called for each route.
+  ///            Returns true to break the iteration.
+  void iterateRoutes(bool Function(Route<dynamic> route) callback) {
+    for (var route in _history) {
+      if (callback(route.route)) {
+        break;
+      }
+    }
+  }
+
+  /// Removes a route.
+  void removeRoute<T>(Route route, [T? result]) {
+    if (result != null) {
+      route.didPop(result);
+    }
+    navigator?.removeRoute(route);
   }
 }

@@ -9,7 +9,7 @@ class Nav2Page1 extends StatefulWidget {
   const Nav2Page1({Key? key, required this.onShowPage2}) : super(key: key);
 
   @override
-  _Nav2Page1State createState() {
+  State createState() {
     return _Nav2Page1State();
   }
 }

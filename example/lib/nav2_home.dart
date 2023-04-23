@@ -9,7 +9,7 @@ class Nav2Home extends StatefulWidget {
   const Nav2Home({Key? key}) : super(key: key);
 
   @override
-  _Nav2HomeState createState() {
+  State createState() {
     return _Nav2HomeState();
   }
 }
@@ -18,7 +18,7 @@ class _Nav2HomeState extends State<Nav2Home>
     with LifecycleAware, LifecycleMixin {
   final LifecycleObserver lifecycleObserver = LifecycleObserver();
 
-  bool _showPage1 = true;
+  bool _showPage1 = true; // ignore: prefer_final_fields
   bool _showPage2 = false;
 
   @override

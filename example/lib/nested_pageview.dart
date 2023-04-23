@@ -7,7 +7,7 @@ class NestedPageView extends StatefulWidget {
   const NestedPageView({Key? key}) : super(key: key);
 
   @override
-  _NestedPageViewState createState() => _NestedPageViewState();
+  State createState() => _NestedPageViewState();
 }
 
 class _NestedPageViewState extends State<NestedPageView>

@@ -7,7 +7,7 @@ class MyPageView extends StatefulWidget {
   const MyPageView({Key? key}) : super(key: key);
 
   @override
-  _MyPageViewState createState() => _MyPageViewState();
+  State createState() => _MyPageViewState();
 }
 
 class _MyPageViewState extends State<MyPageView> {
