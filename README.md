@@ -1,6 +1,6 @@
 [![Pub Version](https://img.shields.io/pub/v/lifecycle)](https://pub.dev/packages/lifecycle)
-[![pub points](https://badges.bar/lifecycle/pub%20points)](https://pub.dev/packages/lifecycle/score)
-[![likes](https://badges.bar/lifecycle/likes)](https://pub.dev/packages/lifecycle/score)
+[![pub points](https://img.shields.io/pub/points/lifecycle)](https://pub.dev/packages/lifecycle)
+[![likes](https://img.shields.io/pub/likes/lifecycle)](https://pub.dev/packages/lifecycle)
 ![PR](https://img.shields.io/badge/PRs-welcome-blue)
 
 # lifecycle
@@ -332,16 +332,16 @@ Widget build(BuildContext context) {
 
 ### Other APIs
 
-* Find a route according to a specific name.
+* Iterates routes.
 
 ```
-Route route = defaultLifecycleObserver.findRoute('route_name');
+defaultLifecycleObserver.iterateRoutes(bool Function(route) callback);
 ```
 
-* Remove a route according to a specific name.
+* Remove a route.
 
 ```
-defaultLifecycleObserver.removeNamed('route_name');
+defaultLifecycleObserver.removeRoute<T>(Route route, [T? result]);
 ```
 
 * Dispose a LifecycleObserver when it will never be used.
