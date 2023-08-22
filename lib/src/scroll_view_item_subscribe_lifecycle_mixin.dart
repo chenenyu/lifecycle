@@ -20,7 +20,7 @@ mixin ScrollViewItemSubscribeLifecycleMixin<T extends StatefulWidget>
   void initState() {
     super.initState();
     handleLifecycleEvents([LifecycleEvent.push]);
-    SchedulerBinding.instance.endOfFrame.then((value) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
       // trigger manually
       _onScrollPositionChanged();
     });
@@ -73,6 +73,9 @@ mixin ScrollViewItemSubscribeLifecycleMixin<T extends StatefulWidget>
   }
 
   void _updateScrollPosition() {
+    if (!mounted) return;
+    // nullable before 3.7.0
+    // ignore: unnecessary_non_null_assertion
     _scrollableState = Scrollable.of(context)!;
     ScrollPosition newValue = _scrollableState.position;
     if (_scrollPosition == newValue) {
