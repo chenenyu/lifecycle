@@ -184,7 +184,7 @@ class _MyPageViewState extends State<MyPageView> {
               index: 0,
               wantKeepAlive: true,
               onLifecycleEvent: (event) {
-                print('Page@0#${event.toString()}');
+                print('Page@0#${event.name}');
               },
               child: Container(),
             ),
@@ -192,7 +192,7 @@ class _MyPageViewState extends State<MyPageView> {
               index: 1,
               wantKeepAlive: true,
               onLifecycleEvent: (event) {
-                print('Page@1#${event.toString()}');
+                print('Page@1#${event.name}');
               },
               child: Container(),
             ),
@@ -258,7 +258,7 @@ class _NestedPageViewState extends State<NestedPageView> with SingleTickerProvid
               index: 0,
               wantKeepAlive: true,
               onLifecycleEvent: (event) {
-                print('OuterPage@0#${event.toString()}');
+                print('OuterPage@0#${event.name}');
               },
               child: Container(),
             ),
@@ -266,7 +266,7 @@ class _NestedPageViewState extends State<NestedPageView> with SingleTickerProvid
               index: 1,
               wantKeepAlive: true,
               onLifecycleEvent: (event) {
-                print('OuterPage@1#${event.toString()}');
+                print('OuterPage@1#${event.name}');
               },
               child: PageViewLifecycleWrapper( // Inner PageView
                 child: PageView(
@@ -276,7 +276,7 @@ class _NestedPageViewState extends State<NestedPageView> with SingleTickerProvid
                       index: 0,
                       wantKeepAlive: false,
                       onLifecycleEvent: (event) {
-                        log.add('InnerPage@0#${event.toString()}');
+                        log.add('InnerPage@0#${event.name}');
                       },
                       child: Container(),
                     ),
@@ -284,7 +284,7 @@ class _NestedPageViewState extends State<NestedPageView> with SingleTickerProvid
                       index: 1,
                       wantKeepAlive: false,
                       onLifecycleEvent: (event) {
-                        log.add('InnerPage@1#${event.toString()}');
+                        log.add('InnerPage@1#${event.name}');
                       },
                       child: Container(),
                     ),
@@ -315,7 +315,7 @@ Widget build(BuildContext context) {
       itemBuilder: (context, index) {
         return ScrollViewItemLifecycleWrapper(
           onLifecycleEvent: (LifecycleEvent event) {
-            print('ListPage(item$index)#${event.toString()}');
+            print('ListPage(item$index)#${event.name}');
           },
           wantKeepAlive: false,
           child: ListTile(
