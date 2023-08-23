@@ -1,7 +1,13 @@
 name: lifecycle
-description: Lifecycle support for Flutter widgets.
-version: 0.7.0
+description: A flutter package that let you easily add hooks for widget lifecycle.
+version: 0.8.0
 homepage: https://github.com/chenenyu/lifecycle
+topics:
+  - lifecycle
+  - navigator-observer
+  - app-lifecycle-state
+  - app-lifecycle-listener
+  - widgets-binding-observer
 
 environment:
   sdk: ">=2.12.0 <4.0.0"

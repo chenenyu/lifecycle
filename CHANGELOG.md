@@ -1,3 +1,9 @@
+## [0.8.0] - 2023/08/23.
+
+* Fix: use `addPostFrameCallback` to avoid unnecessary frame callback.
+* The param `wantKeepAlive` in `ChildPageLifecycleWrapper` is not required now.
+* Export some mixins.
+
 ## [0.7.0] - 2023/04/23.
 
 * Added: `iterateRoutes()`, `removeRoute()`.
