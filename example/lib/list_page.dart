@@ -37,12 +37,13 @@ class _ListPageState extends State<ListPage> {
       body: ListView.builder(
         itemCount: _data.length,
         itemBuilder: (context, index) {
+          // use mixin:
           // return ListItem(index: index);
+          // or use ScrollViewItemLifecycleWrapper:
           return ScrollViewItemLifecycleWrapper(
             onLifecycleEvent: (LifecycleEvent event) {
-              log.add('ListPage(item$index)#${event.toString()}');
+              log.add('ListPage(item$index)#${event.name}');
             },
-            wantKeepAlive: false,
             child: ListTile(
               title: Text(
                 _data[index],
@@ -84,16 +85,6 @@ class _ListItemState extends State<ListItem>
         ScrollViewItemSubscribeLifecycleMixin,
         AutomaticKeepAliveClientMixin {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     super.build(context);
     return ListTile(
@@ -105,7 +96,7 @@ class _ListItemState extends State<ListItem>
 
   @override
   void onLifecycleEvent(LifecycleEvent event) {
-    log.add('ListPage(item${widget.index})#${event.toString()}');
+    log.add('ListPage(item${widget.index})#${event.name}');
   }
 
   @override

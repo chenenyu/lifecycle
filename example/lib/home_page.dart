@@ -15,18 +15,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with LifecycleAware, LifecycleMixin {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   void onLifecycleEvent(LifecycleEvent event) {
-    log.add('HomePage#${event.toString()}');
+    log.add('HomePage#${event.name}');
   }
 
   @override
@@ -61,7 +51,7 @@ class _HomePageState extends State<HomePage>
                   builder: (context) {
                     return LifecycleWrapper(
                       onLifecycleEvent: (event) {
-                        log.add('Dialog#${event.toString()}');
+                        log.add('Dialog#${event.name}');
                       },
                       child: AlertDialog(
                         content: const Text(

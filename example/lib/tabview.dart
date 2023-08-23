@@ -43,7 +43,7 @@ class _MyTabViewState extends State<MyTabView>
       ),
       body: PageViewLifecycleWrapper(
         // onLifecycleEvent: (event) {
-        //   log.add('MyTabView#${event.toString()}');
+        //   log.add('MyTabView#${event.name}');
         // },
         child: TabBarView(
           controller: _tabController,
@@ -54,7 +54,7 @@ class _MyTabViewState extends State<MyTabView>
               index: index,
               wantKeepAlive: true,
               onLifecycleEvent: (event) {
-                log.add('Page@$index#${event.toString()}');
+                log.add('Page@$index#${event.name}');
               },
               child: Center(
                 child: Text(

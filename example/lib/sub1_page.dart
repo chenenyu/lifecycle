@@ -15,18 +15,8 @@ class Sub1Page extends StatefulWidget {
 class _Sub1PageState extends State<Sub1Page>
     with LifecycleAware, LifecycleMixin {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   void onLifecycleEvent(LifecycleEvent event) {
-    log.add('Sub1Page#${event.toString()}');
+    log.add('Sub1Page#${event.name}');
   }
 
   @override

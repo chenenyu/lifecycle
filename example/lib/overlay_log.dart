@@ -12,8 +12,7 @@ class LogEntry extends StatefulWidget {
 
   static void init(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      OverlayState? overlayState = Overlay.of(context);
-      if (overlayState == null) return;
+      OverlayState overlayState = Overlay.of(context);
       _logEntry?.remove();
       _logEntry = OverlayEntry(builder: (context) {
         return LogEntry();

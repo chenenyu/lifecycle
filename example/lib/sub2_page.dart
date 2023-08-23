@@ -10,7 +10,7 @@ class Sub2Page extends StatelessWidget {
   Widget build(BuildContext context) {
     return LifecycleWrapper(
       onLifecycleEvent: (event) {
-        log.add('Sub2Page#${event.toString()}');
+        log.add('Sub2Page#${event.name}');
       },
       child: Scaffold(
         appBar: AppBar(

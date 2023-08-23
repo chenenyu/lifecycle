@@ -22,11 +22,6 @@ class _Nav2HomeState extends State<Nav2Home>
   bool _showPage2 = false;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
     lifecycleObserver.dispose();
     super.dispose();
@@ -76,6 +71,6 @@ class _Nav2HomeState extends State<Nav2Home>
 
   @override
   void onLifecycleEvent(LifecycleEvent event) {
-    log.add('Nav2Home#${event.toString()}');
+    log.add('Nav2Home#${event.name}');
   }
 }

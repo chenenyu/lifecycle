@@ -33,16 +33,16 @@ class _MyPageViewState extends State<MyPageView> {
       ),
       body: PageViewLifecycleWrapper(
         // onLifecycleEvent: (event) {
-        //   log.add('MyPageView#${event.toString()}');
+        //   log.add('MyPageView#${event.name}');
         // },
         child: PageView(
           controller: _pageController,
           children: [
             ChildPageLifecycleWrapper(
               index: 0,
-              wantKeepAlive: false,
+              // wantKeepAlive: false,
               onLifecycleEvent: (event) {
-                log.add('Page@0#${event.toString()}');
+                log.add('Page@0#${event.name}');
               },
               child: Container(
                 color: Colors.teal,
@@ -69,7 +69,7 @@ class _MyPageViewState extends State<MyPageView> {
                             builder: (context) {
                               return LifecycleWrapper(
                                 onLifecycleEvent: (event) {
-                                  log.add('Dialog#${event.toString()}');
+                                  log.add('Dialog#${event.name}');
                                 },
                                 child: AlertDialog(
                                   content: const Text(
@@ -105,7 +105,7 @@ class _MyPageViewState extends State<MyPageView> {
               index: 1,
               wantKeepAlive: false,
               onLifecycleEvent: (event) {
-                log.add('Page@1#${event.toString()}');
+                log.add('Page@1#${event.name}');
               },
               child: Container(
                 color: Colors.blue,

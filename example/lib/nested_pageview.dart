@@ -46,7 +46,7 @@ class _NestedPageViewState extends State<NestedPageView>
       ),
       body: PageViewLifecycleWrapper(
         // onLifecycleEvent: (event) {
-        //   log.add('NestedPageView@Outer#${event.toString()}');
+        //   log.add('NestedPageView@Outer#${event.name}');
         // },
         child: TabBarView(
           controller: _tabController,
@@ -54,7 +54,7 @@ class _NestedPageViewState extends State<NestedPageView>
             ChildPageLifecycleWrapper(
               index: 0,
               onLifecycleEvent: (event) {
-                log.add('OuterPage@0#${event.toString()}');
+                log.add('OuterPage@0#${event.name}');
               },
               wantKeepAlive: true,
               child: const Center(
@@ -68,11 +68,11 @@ class _NestedPageViewState extends State<NestedPageView>
               index: 1,
               wantKeepAlive: true,
               onLifecycleEvent: (event) {
-                log.add('OuterPage@1#${event.toString()}');
+                log.add('OuterPage@1#${event.name}');
               },
               child: PageViewLifecycleWrapper(
                 // onLifecycleEvent: (event) {
-                //   log.add('NestedPageView@Inner#${event.toString()}');
+                //   log.add('NestedPageView@Inner#${event.name}');
                 // },
                 child: PageView(
                   controller: _pageController,
@@ -81,7 +81,7 @@ class _NestedPageViewState extends State<NestedPageView>
                       index: 0,
                       wantKeepAlive: true,
                       onLifecycleEvent: (event) {
-                        log.add('InnerPage@0#${event.toString()}');
+                        log.add('InnerPage@0#${event.name}');
                       },
                       child: Container(
                         color: Colors.teal,
@@ -105,7 +105,7 @@ class _NestedPageViewState extends State<NestedPageView>
                       index: 1,
                       wantKeepAlive: true,
                       onLifecycleEvent: (event) {
-                        log.add('InnerPage@1#${event.toString()}');
+                        log.add('InnerPage@1#${event.name}');
                       },
                       child: Container(
                         color: Colors.blue,

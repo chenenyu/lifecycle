@@ -56,6 +56,6 @@ class _Nav2Page1State extends State<Nav2Page1>
 
   @override
   void onLifecycleEvent(LifecycleEvent event) {
-    log.add('Nav2Page1($hashCode)#${event.toString()}');
+    log.add('Nav2Page1($hashCode)#${event.name}');
   }
 }
