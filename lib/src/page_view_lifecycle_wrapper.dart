@@ -30,7 +30,7 @@ class PageViewLifecycleWrapperState extends State<PageViewLifecycleWrapper>
 
   @override
   void onLifecycleEvent(LifecycleEvent event) {
-    // print('ParentPageLifecycleWrapperState($hashCode)#${event.toString()}');
+    // print('ParentPageLifecycleWrapperState($hashCode)#${event.name}');
     widget.onLifecycleEvent?.call(event);
   }
 }

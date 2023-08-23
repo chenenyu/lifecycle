@@ -18,7 +18,7 @@ mixin PageViewDispatchLifecycleMixin<T extends StatefulWidget>
   void initState() {
     super.initState();
     // visitChildElements() can't called during build, so we schedule a frame callback.
-    SchedulerBinding.instance.scheduleFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
       _updateController();
     });
   }
@@ -61,9 +61,12 @@ mixin PageViewDispatchLifecycleMixin<T extends StatefulWidget>
     _lifecycleSubscribers[_curPage]?.handleLifecycleEvents(events);
   }
 
-  /// 查找更新[PageController]。
+  /// Find and update [PageController]。
   void _updateController() {
+    if (!mounted) return;
+
     PageController? pageController;
+
     // [TabBarView]内部实现也是嵌套PageView，所以这里查找PageView就可以了
     void findPageView(Element element) {
       if (element.widget is PageView) {
@@ -76,7 +79,7 @@ mixin PageViewDispatchLifecycleMixin<T extends StatefulWidget>
 
     context.visitChildElements(findPageView);
     if (pageController == null) {
-      throw FlutterError('Child widget is not a PageView or TabBarView.');
+      throw FlutterError('Child widget is not a PageView nor a TabBarView.');
     }
 
     PageController newValue = pageController!;
