@@ -19,4 +19,4 @@ pubspec.lock
 .pub/
 build/
 
-example/
+# example/
