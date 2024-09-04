@@ -18,10 +18,11 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
   /// Avoids calling this constructor in [build] method.
   /// Call [dispose] when it will never be used, e.g. call it in State#dispose.
   ///
-  /// 避免在[build]方法里调用该构造方法。记得在[State#build]里调用[dispose]销毁实例。
+  /// 避免在[build]方法里调用该构造方法。记得在[State#dispose]里调用[dispose]销毁实例。
   LifecycleObserver() {
     _cache.add(this);
     WidgetsBinding.instance.addObserver(this);
+    AppLifecycleListener();
   }
 
   /// Only for internal usage.
@@ -80,33 +81,33 @@ class LifecycleObserver extends NavigatorObserver with WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.resumed: // active
         // Top route trigger active
-        //
         // 最上面的route触发active
         _sendEventsToLastRoute(lifecycleEventsVisibleAndActive);
         if (_history.last.route is! PageRoute) {
           // Previous PageRoute trigger visible
-          //
           // 前一个PageRoute触发visible
           _sendEventsToLastPageRoute([LifecycleEvent.visible]);
         }
         break;
       case AppLifecycleState.inactive: // inactive
         // Top route trigger inactive
-        //
         // 最上面的route触发inactive
         _sendEventsToLastRoute([LifecycleEvent.inactive]);
         break;
-      case AppLifecycleState.paused: // invisible
-        // Top route trigger invisible
-        //
-        // 最上面的route触发invisible
+      case AppLifecycleState.hidden: // invisible
+        // All views of an application are hidden. This state is synthesized on iOS and Android.
+        // Top route trigger invisible.
+        // 最上面的route触发invisible.
         _sendEventsToLastRoute([LifecycleEvent.invisible]);
         if (_history.last.route is! PageRoute) {
           // Previous PageRoute trigger invisible
-          //
           // 前一个PageRoute触发invisible
           _sendEventsToLastPageRoute([LifecycleEvent.invisible]);
         }
+        break;
+      case AppLifecycleState.paused: // invisible
+        // This state is only entered on iOS and Android. Same as AppLifecycleState.hidden.
+        // 仅在iOS和Android上进入此状态。与AppLifecycleState.hidden相同。
         break;
       case AppLifecycleState.detached:
         break;
