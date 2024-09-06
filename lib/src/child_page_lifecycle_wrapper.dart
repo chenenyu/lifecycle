@@ -17,13 +17,12 @@ class ChildPageLifecycleWrapper extends StatefulWidget {
   final Widget child;
 
   const ChildPageLifecycleWrapper({
-    Key? key,
+    super.key,
     required this.index,
     this.onLifecycleEvent,
     this.wantKeepAlive,
     required this.child,
-  })  : assert(index >= 0),
-        super(key: key);
+  }) : assert(index >= 0);
 
   @override
   State createState() {

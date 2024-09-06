@@ -4,7 +4,7 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class NestedPageView extends StatefulWidget {
-  const NestedPageView({Key? key}) : super(key: key);
+  const NestedPageView({super.key});
 
   @override
   State createState() => _NestedPageViewState();

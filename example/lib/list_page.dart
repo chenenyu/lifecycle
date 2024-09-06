@@ -4,7 +4,7 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class ListPage extends StatefulWidget {
-  const ListPage({Key? key}) : super(key: key);
+  const ListPage({super.key});
 
   @override
   State createState() {
@@ -69,7 +69,7 @@ class _ListPageState extends State<ListPage> {
 }
 
 class ListItem extends StatefulWidget {
-  const ListItem({Key? key, required this.index}) : super(key: key);
+  const ListItem({super.key, required this.index});
 
   final int index;
 

@@ -7,11 +7,11 @@ import 'widget_dispatch_lifecycle_mixin.dart';
 /// Wrapper widget for item of scrollable widget.
 class ScrollViewItemLifecycleWrapper extends StatefulWidget {
   const ScrollViewItemLifecycleWrapper({
-    Key? key,
+    super.key,
     this.onLifecycleEvent,
     this.wantKeepAlive = false,
     required this.child,
-  }) : super(key: key);
+  });
 
   final OnLifecycleEvent? onLifecycleEvent;
   final bool wantKeepAlive;

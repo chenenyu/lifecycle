@@ -4,7 +4,7 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class Sub1Page extends StatefulWidget {
-  const Sub1Page({Key? key}) : super(key: key);
+  const Sub1Page({super.key});
 
   @override
   State createState() {

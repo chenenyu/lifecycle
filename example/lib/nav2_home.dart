@@ -6,7 +6,7 @@ import 'nav2_page2.dart';
 import 'overlay_log.dart';
 
 class Nav2Home extends StatefulWidget {
-  const Nav2Home({Key? key}) : super(key: key);
+  const Nav2Home({super.key});
 
   @override
   State createState() {

@@ -10,10 +10,10 @@ class PageViewLifecycleWrapper extends StatefulWidget {
   final Widget child;
 
   const PageViewLifecycleWrapper({
-    Key? key,
+    super.key,
     this.onLifecycleEvent,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   PageViewLifecycleWrapperState createState() {

@@ -4,7 +4,7 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class Sub2Page extends StatelessWidget {
-  const Sub2Page({Key? key}) : super(key: key);
+  const Sub2Page({super.key});
 
   @override
   Widget build(BuildContext context) {

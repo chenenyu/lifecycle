@@ -10,7 +10,6 @@ topics:
   - widgets-binding-observer
 
 environment:
-  sdk: ">=2.12.0 <4.0.0"
   flutter: ">=3.13.0"
 
 dependencies:

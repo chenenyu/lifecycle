@@ -4,7 +4,7 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class MyTabView extends StatefulWidget {
-  const MyTabView({Key? key}) : super(key: key);
+  const MyTabView({super.key});
 
   @override
   State createState() => _MyTabViewState();

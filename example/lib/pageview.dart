@@ -4,7 +4,7 @@ import 'package:lifecycle/lifecycle.dart';
 import 'overlay_log.dart';
 
 class MyPageView extends StatefulWidget {
-  const MyPageView({Key? key}) : super(key: key);
+  const MyPageView({super.key});
 
   @override
   State createState() => _MyPageViewState();

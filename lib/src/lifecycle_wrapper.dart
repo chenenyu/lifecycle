@@ -10,10 +10,10 @@ class LifecycleWrapper extends StatefulWidget {
   final Widget child;
 
   const LifecycleWrapper({
-    Key? key,
+    super.key,
     required this.onLifecycleEvent,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   State createState() {
