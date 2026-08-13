@@ -1,352 +1,279 @@
 [![Pub Version](https://img.shields.io/pub/v/lifecycle)](https://pub.dev/packages/lifecycle)
 [![pub points](https://img.shields.io/pub/points/lifecycle)](https://pub.dev/packages/lifecycle)
 [![likes](https://img.shields.io/pub/likes/lifecycle)](https://pub.dev/packages/lifecycle)
-![PR](https://img.shields.io/badge/PRs-welcome-blue)
+
+English | [简体中文](https://github.com/chenenyu/lifecycle/blob/main/README_CN.md)
 
 # lifecycle
 
-Lifecycle support for Flutter widgets.
+Composable lifecycle state for Flutter widgets.
 
-### Supported widgets
+`lifecycle` combines app state, Navigator routes, paged containers, and scroll
+viewports into one immutable `LifecycleSnapshot`. A descendant can only be
+active when every containing scope is active:
 
-- [x] `StatefulWidget`.
-- [x] `StatelessWidget`(include `Dialog`).
-- [x] `PageView/TabBarView` and it's children.
-- [x] Nested `PageView`.
-- [x] `Navigator`(Navigator 2.0 pages api).
-- [x] Child of `ListView/GridView/CustomScrollView`.
-
-### Supported lifecycle event
-```dart
-enum LifecycleEvent {
-  push,
-  visible,
-  active,
-  inactive,
-  invisible,
-  pop,
-}
+```text
+App → Navigator route → Page/Tab → Viewport item → Widget
 ```
 
-## Getting Started
+There is no global observer and no event bus. Each Navigator owns an explicit
+controller, nested scopes compose automatically, and callbacks receive both
+the resulting snapshot and the cause of the transition.
 
-### Install
+## Lifecycle model
 
-1. Depend on it
+The current state is represented by:
+
+```dart
+LifecycleSnapshot(
+  phase: LifecyclePhase.active,
+  attached: true,
+  visible: true,
+  active: true,
+  visibleFraction: 1,
+  appState: AppLifecycleState.resumed,
+)
+```
+
+Phases are `detached`, `hidden`, `visible`, `active`, and `disposed`. A single
+state change produces events in deterministic order:
+
+```text
+created → appeared → activated → deactivated → disappeared → disposed
+```
+
+Only events that apply to a transition are emitted. For example, hiding an
+active widget emits `deactivated` and then `disappeared`.
+
+`LifecycleTransition.cause` identifies whether the change came from the app,
+a route, a back gesture, page selection, a viewport, the widget tree, or a
+custom boundary.
+
+## Installation
 
 ```yaml
 dependencies:
-  lifecycle: any  # replace 'any' with version number
+  lifecycle: ^1.0.0
 ```
 
-2. Install it
+```dart
+import 'package:lifecycle/lifecycle.dart';
+```
 
-`flutter pub get`
+## App and Navigator setup
 
-3. Import it
-
-`import 'package:lifecycle/lifecycle.dart';`
-
-### Usage
-
-**First of all, you should register an observer in `WidgetsApp`/`MaterialApp`, and an observer can only be used by one `Navigator`, if you have your own `Navigator`, please use a new instance of LifecycleObserver.**
+Create one `NavigatorLifecycleController` per Navigator. The controller owns
+its observer; dispose the controller where you create it.
 
 ```dart
-import 'package:flutter/material.dart';
-import 'package:lifecycle/lifecycle.dart';
+class AppState extends State<App> {
+  final navigation = NavigatorLifecycleController();
 
-class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorObservers: [defaultLifecycleObserver],
-      ...
+    return LifecycleApp(
+      child: MaterialApp(
+        navigatorObservers: [navigation.observer],
+        builder: (context, child) => NavigatorLifecycleScope(
+          controller: navigation,
+          child: child!,
+        ),
+        home: const HomeScreen(),
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    navigation.dispose();
+    super.dispose();
   }
 }
 ```
 
-* StatefulWidget
+Use a separate controller, observer, and scope for each nested Navigator. Both
+imperative routes and the Navigator `pages` API are supported. Opaque routes
+hide the route below; non-opaque routes such as dialogs keep it visible but
+inactive. Interactive back gestures expose the previous route as visible.
 
-1. Use mixin(Recommend)
+Routes can also be inspected or removed through the controller:
+
 ```dart
-import 'package:flutter/material.dart';
-import 'package:lifecycle/lifecycle.dart';
+final entry = navigation.routeNamed('/checkout');
+final routes = navigation.routes;
 
-// mixin LifecycleAware and LifecycleMixin on State
-class _State extends State<MyStatefulWidget> with LifecycleAware, LifecycleMixin {
-  @override
-  void onLifecycleEvent(LifecycleEvent event) {
-    print(event);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold();
-  }
+if (entry != null) {
+  navigation.removeRoute(entry.route);
 }
 ```
 
-2. Use  wrapper
+## Listen from a widget
+
+For a stateless subtree, use `LifecycleListener`:
 
 ```dart
-import 'package:flutter/material.dart';
-import 'package:lifecycle/lifecycle.dart';
-
-// Wrap widget with LifecycleWrapper
-class _State extends State<MyStatefulWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return LifecycleWrapper(
-      onLifecycleEvent: (event) {
-        print(event);
-      },
-      child: Scaffold(),
-    );
-  }
-}
-```
-
-* StatelessWidget/Dialog
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:lifecycle/lifecycle.dart';
-
-// Normal StatelessWidget
-class MyStatelessWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return LifecycleWrapper(
-      onLifecycleEvent: (event) {
-        print(event);
-      },
-      child: Scaffold(),
-    );
-  }
-}
-
-// Dialog
-showDialog(
-  context: context,
-  routeSettings: RouteSettings(name: 'dialog'),
-  builder: (context) {
-    return LifecycleWrapper(
-      onLifecycleEvent: (event) {
-        print(event);
-      },
-      child: Dialog(),
-    );
+LifecycleListener(
+  onTransition: (transition) {
+    debugPrint('${transition.previous.phase} → ${transition.current.phase}');
   },
+  onEvent: (event, transition) {
+    debugPrint('${event.name} (${transition.cause.name})');
+  },
+  child: const Content(),
+)
+```
+
+For a `State`, use `LifecycleStateMixin`:
+
+```dart
+class ArticleState extends State<Article> with LifecycleStateMixin<Article> {
+  @override
+  void onLifecycleEvent(
+    LifecycleEvent event,
+    LifecycleTransition transition,
+  ) {
+    if (event == LifecycleEvent.activated) {
+      refreshArticle();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => const ArticleView();
+}
+```
+
+`LifecycleBuilder` rebuilds when any snapshot field changes, including
+`visibleFraction`:
+
+```dart
+LifecycleBuilder(
+  builder: (context, lifecycle) {
+    return Text(lifecycle.phase.name);
+  },
+)
+```
+
+## Custom boundaries
+
+Use `LifecycleBoundary` to compose domain state with the surrounding scope.
+It can restrict a descendant, but it cannot make a descendant more active than
+its parent.
+
+```dart
+LifecycleBoundary(
+  visible: panelIsOpen,
+  active: panelHasFocus,
+  visibleFraction: animation.value,
+  child: const Panel(),
+)
+```
+
+## PageView
+
+`LifecyclePageView` owns page scopes and forwards the usual PageView options.
+The selected page becomes active only after scrolling settles. During a drag,
+visible pages expose a fractional visibility and remain inactive.
+
+```dart
+final controller = PageController(initialPage: 1);
+
+LifecyclePageView(
+  controller: controller,
+  onPageTransition: (index, transition) {
+    debugPrint('page $index: ${transition.events}');
+  },
+  children: const [
+    FeedPage(key: ValueKey('feed')),
+    SearchPage(key: ValueKey('search')),
+  ],
+)
+```
+
+The builder constructor supports large and reorderable data sets. Supply a
+stable ID and its reverse lookup when order can change:
+
+```dart
+LifecyclePageView.builder(
+  controller: controller,
+  itemCount: items.length,
+  pageIdBuilder: (index) => items[index].id,
+  findPageIndex: (id) => items.indexWhere((item) => item.id == id),
+  itemBuilder: (context, index) => ItemPage(
+    key: ValueKey(items[index].id),
+    item: items[index],
+  ),
+)
+```
+
+The widget deliberately does not change Flutter's keep-alive policy. A lazy
+page that is disposed emits `disposed`; wrap page content with
+`AutomaticKeepAliveClientMixin` when its State must survive off-screen.
+
+## TabBarView
+
+```dart
+LifecycleTabBarView(
+  controller: tabController,
+  onTabTransition: (index, transition) {
+    debugPrint('tab $index: ${transition.events}');
+  },
+  children: const [OverviewTab(), ActivityTab()],
+)
+```
+
+`LifecycleTabBarView` follows both animated taps and horizontal swipes. A tab
+is active only when the `TabController` is settled.
+
+## ListView, GridView, and CustomScrollView
+
+Place `ViewportLifecycleItem` below the nearest `Scrollable`. Visibility is
+calculated from the item's two-dimensional area inside that viewport, so
+vertical lists, horizontal lists, grids, and slivers share the same behavior.
+
+```dart
+ListView.builder(
+  itemCount: items.length,
+  itemBuilder: (context, index) => ViewportLifecycleItem(
+    visibleThreshold: 0.25,
+    activeThreshold: 0.8,
+    onTransition: (transition) {
+      debugPrint('item $index: ${transition.current.visibleFraction}');
+    },
+    child: ItemTile(item: items[index]),
+  ),
+)
+```
+
+An item is visible when its fraction reaches `visibleThreshold` and active
+when it reaches `activeThreshold`. If `activeThreshold` is omitted, it uses the
+visible threshold. The containing app, route, and page states still apply.
+
+## Direct controller use
+
+Most apps only need widgets, but `LifecycleController` is public for custom
+containers. Child state is composed with its parent, listeners are safe to
+add/remove during delivery, and reentrant updates are queued deterministically.
+
+```dart
+final parent = LifecycleController()..attach();
+final child = LifecycleController(visible: false)
+  ..attach(parent: parent);
+
+child.updateLocal(
+  visible: true,
+  active: true,
+  cause: LifecycleCause.custom,
 );
 ```
 
-* PageView/TabBarView
+See the [example application](https://github.com/chenenyu/lifecycle/tree/main/example)
+and the tests for complete runnable compositions.
 
-```dart
-import 'package:flutter/material.dart';
-import 'package:lifecycle/lifecycle.dart';
+## 1.0 migration
 
-class MyPageView extends StatefulWidget {
-  MyPageView({Key key}) : super(key: key);
-
-  _MyPageViewState createState() => _MyPageViewState();
-}
-
-class _MyPageViewState extends State<MyPageView> {
-  PageController _pageController;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController();
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('MyPageView'),
-      ),
-      // Wrap PageView
-      body: PageViewLifecycleWrapper(
-        child: PageView(
-          controller: _pageController,
-          children: [
-            // Wrap child of PageView
-            ChildPageLifecycleWrapper(
-              index: 0,
-              wantKeepAlive: true,
-              onLifecycleEvent: (event) {
-                print('Page@0#${event.name}');
-              },
-              child: Container(),
-            ),
-            ChildPageLifecycleWrapper(
-              index: 1,
-              wantKeepAlive: true,
-              onLifecycleEvent: (event) {
-                print('Page@1#${event.name}');
-              },
-              child: Container(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-```
-
-* Nested PageView
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:lifecycle/lifecycle.dart';
-
-class NestedPageView extends StatefulWidget {
-  NestedPageView({Key key}) : super(key: key);
-
-  _NestedPageViewState createState() => _NestedPageViewState();
-}
-
-class _NestedPageViewState extends State<NestedPageView> with SingleTickerProviderStateMixin {
-  PageController _pageController;
-  TabController _tabController;
-
-  final List<Tab> myTabs = <Tab>[
-    Tab(text: 'left'),
-    Tab(text: 'right'),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController();
-    _tabController = TabController(vsync: this, length: myTabs.length);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('NestedPageView'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: myTabs,
-        ),
-      ),
-      body: PageViewLifecycleWrapper( // Outer PageView
-        child: TabBarView(
-          controller: _tabController,
-          children: <Widget>[
-            ChildPageLifecycleWrapper(
-              index: 0,
-              wantKeepAlive: true,
-              onLifecycleEvent: (event) {
-                print('OuterPage@0#${event.name}');
-              },
-              child: Container(),
-            ),
-            ChildPageLifecycleWrapper(
-              index: 1,
-              wantKeepAlive: true,
-              onLifecycleEvent: (event) {
-                print('OuterPage@1#${event.name}');
-              },
-              child: PageViewLifecycleWrapper( // Inner PageView
-                child: PageView(
-                  controller: _pageController,
-                  children: [
-                    ChildPageLifecycleWrapper(
-                      index: 0,
-                      wantKeepAlive: false,
-                      onLifecycleEvent: (event) {
-                        log.add('InnerPage@0#${event.name}');
-                      },
-                      child: Container(),
-                    ),
-                    ChildPageLifecycleWrapper(
-                      index: 1,
-                      wantKeepAlive: false,
-                      onLifecycleEvent: (event) {
-                        log.add('InnerPage@1#${event.name}');
-                      },
-                      child: Container(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-```
-
-* ListView
-
-```dart
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: const Text('ListPage'),
-    ),
-    body: ListView.builder(
-      itemCount: _data.length,
-      itemBuilder: (context, index) {
-        return ScrollViewItemLifecycleWrapper(
-          onLifecycleEvent: (LifecycleEvent event) {
-            print('ListPage(item$index)#${event.name}');
-          },
-          wantKeepAlive: false,
-          child: ListTile(
-            title: Text(
-              _data[index],
-            ),
-          ),
-        );
-      },
-    ),
-  );
-}
-```
-
-### Other APIs
-
-* Iterates routes.
-
-```
-defaultLifecycleObserver.iterateRoutes(bool Function(route) callback);
-```
-
-* Remove a route.
-
-```
-defaultLifecycleObserver.removeRoute<T>(Route route, [T? result]);
-```
-
-* Dispose a LifecycleObserver when it will never be used.
-
-```
-defaultLifecycleObserver.dispose();
-```
-
+Version 1.0 is a deliberate API redesign. The global
+`defaultLifecycleObserver`, legacy wrapper classes, and dispatch/subscribe
+mixins were removed. Replace them with explicit `LifecycleApp` and
+`NavigatorLifecycleController` setup, then use `LifecycleListener`,
+`LifecycleStateMixin`, `LifecyclePageView`, `LifecycleTabBarView`, and
+`ViewportLifecycleItem`.
