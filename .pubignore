@@ -18,5 +18,7 @@ pubspec.lock
 .pub-cache/
 .pub/
 build/
+coverage/
+**/Flutter/ephemeral/
 
 # example/

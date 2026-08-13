@@ -21,6 +21,8 @@
 .pub-cache/
 .pub/
 build/
+coverage/
+**/Flutter/ephemeral/
 pubspec.lock
 
 # Android related

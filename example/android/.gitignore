@@ -5,3 +5,8 @@ gradle-wrapper.jar
 /gradlew.bat
 /local.properties
 GeneratedPluginRegistrant.java
+
+# Keep the Gradle wrapper reproducible for fresh clones.
+!gradle/wrapper/gradle-wrapper.jar
+!/gradlew
+!/gradlew.bat

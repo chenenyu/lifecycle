@@ -1,7 +1,9 @@
 name: lifecycle
-description: A flutter package that let you easily add hooks for widget lifecycle.
-version: 0.10.0
+description: Composable app, route, page, and viewport lifecycle for Flutter widgets.
+version: 1.0.0
 homepage: https://github.com/chenenyu/lifecycle
+repository: https://github.com/chenenyu/lifecycle
+issue_tracker: https://github.com/chenenyu/lifecycle/issues
 topics:
   - lifecycle
   - navigator-observer
@@ -10,12 +12,14 @@ topics:
   - widgets-lifecycle
 
 environment:
-  flutter: ">=3.13.0"
-  sdk: ">=2.17.0 <4.0.0"
+  flutter: ">=3.32.0"
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
 dev_dependencies:
-  flutter_lints: ^2.0.0
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0

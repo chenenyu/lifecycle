@@ -1,12 +1,22 @@
-library lifecycle;
+/// Composable app, route, page, viewport, and widget lifecycle for Flutter.
+library;
 
-export 'src/child_page_lifecycle_wrapper.dart';
-export 'src/child_page_subscribe_lifecycle_mixin.dart';
-export 'src/lifecycle_aware.dart';
-export 'src/lifecycle_mixin.dart';
-export 'src/lifecycle_observer.dart';
-export 'src/lifecycle_wrapper.dart';
-export 'src/page_view_lifecycle_wrapper.dart';
-export 'src/scroll_view_item_lifecycle_wrapper.dart';
-export 'src/scroll_view_item_subscribe_lifecycle_mixin.dart';
-export 'src/widget_dispatch_lifecycle_mixin.dart';
+export 'src/app/app_lifecycle_controller.dart';
+export 'src/app/lifecycle_app.dart';
+export 'src/core/lifecycle_controller.dart';
+export 'src/core/lifecycle_event.dart';
+export 'src/core/lifecycle_scope.dart' show LifecycleScope, LifecycleScopeKind;
+export 'src/core/lifecycle_snapshot.dart';
+export 'src/core/lifecycle_transition.dart';
+export 'src/navigation/navigator_lifecycle_controller.dart';
+export 'src/navigation/navigator_lifecycle_observer.dart';
+export 'src/navigation/navigator_lifecycle_scope.dart';
+export 'src/navigation/route_lifecycle_entry.dart';
+export 'src/page/indexed_lifecycle_scope.dart'
+    show IndexedLifecycleTransitionCallback;
+export 'src/page/lifecycle_page_view.dart';
+export 'src/page/lifecycle_tab_bar_view.dart';
+export 'src/viewport/viewport_lifecycle_item.dart';
+export 'src/widgets/lifecycle_boundary.dart';
+export 'src/widgets/lifecycle_listener.dart';
+export 'src/widgets/lifecycle_state_mixin.dart';
