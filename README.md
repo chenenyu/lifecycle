@@ -1,3 +1,5 @@
+
+
 [![Pub Version](https://img.shields.io/pub/v/lifecycle)](https://pub.dev/packages/lifecycle)
 [![pub points](https://img.shields.io/pub/points/lifecycle)](https://pub.dev/packages/lifecycle)
 [![likes](https://img.shields.io/pub/likes/lifecycle)](https://pub.dev/packages/lifecycle)
@@ -11,7 +13,7 @@ Lifecycle support for Flutter widgets.
 
 - [x] `StatefulWidget`.
 - [x] `StatelessWidget`(include `Dialog`).
-- [x] `PageView/TabBarView` and it's children.
+- [x] `PageView/TabBarView` and its children.
 - [x] Nested `PageView`.
 - [x] `Navigator`(Navigator 2.0 pages api).
 - [x] Child of `ListView/GridView/CustomScrollView`.
@@ -349,4 +351,3 @@ defaultLifecycleObserver.removeRoute<T>(Route route, [T? result]);
 ```
 defaultLifecycleObserver.dispose();
 ```
-
