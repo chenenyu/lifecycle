@@ -1,8 +1,8 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import '../core/lifecycle_controller.dart';
 import '../core/lifecycle_event.dart';
+import '../core/lifecycle_node_binding.dart';
 import '../core/lifecycle_scope.dart';
 import '../core/lifecycle_transition.dart';
 
@@ -42,7 +42,7 @@ class ViewportLifecycleItem extends StatefulWidget {
 }
 
 class _ViewportLifecycleItemState extends State<ViewportLifecycleItem> {
-  late final LifecycleController _controller;
+  late final LifecycleNodeBinding _node;
   ScrollPosition? _position;
   ScrollableState? _scrollable;
   bool _measurementScheduled = false;
@@ -52,23 +52,19 @@ class _ViewportLifecycleItemState extends State<ViewportLifecycleItem> {
   @override
   void initState() {
     super.initState();
-    _controller = LifecycleController(
+    _node = LifecycleNodeBinding(
       visible: false,
       active: false,
       visibleFraction: 0,
       debugLabel: 'ViewportLifecycleItem',
-    )..addListener(_handleChanged);
+      onChanged: _handleChanged,
+    );
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final parent = resolveLifecycleParent(context);
-    if (_controller.isAttached) {
-      _controller.reparent(parent);
-    } else {
-      _controller.attach(parent: parent, cause: LifecycleCause.viewport);
-    }
+    _node.syncParent(context, cause: LifecycleCause.viewport);
 
     final scrollable = Scrollable.maybeOf(context);
     if (scrollable == null) {
@@ -148,7 +144,7 @@ class _ViewportLifecycleItemState extends State<ViewportLifecycleItem> {
     }
     _zeroFractionPending = false;
     _appliedFraction = fraction;
-    _controller.updateLocal(
+    _node.update(
       visible: visible,
       active: active,
       visibleFraction: fraction,
@@ -157,25 +153,19 @@ class _ViewportLifecycleItemState extends State<ViewportLifecycleItem> {
   }
 
   void _handleChanged() {
-    final transition = _controller.lastTransition;
-    if (transition == null) return;
-    widget.onTransition?.call(transition);
-    final onEvent = widget.onEvent;
-    if (onEvent != null) {
-      for (final event in transition.events) {
-        onEvent(event, transition);
-      }
-    }
+    _node.dispatch(
+      onTransition: widget.onTransition,
+      onEvent: widget.onEvent,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return _ViewportLayoutObserver(
       onLayout: _scheduleMeasurement,
-      child: LifecycleScope(
-        controller: _controller,
+      child: _node.buildScope(
+        context: context,
         kind: LifecycleScopeKind.viewport,
-        route: ModalRoute.of(context),
         child: widget.child,
       ),
     );
@@ -184,7 +174,7 @@ class _ViewportLifecycleItemState extends State<ViewportLifecycleItem> {
   @override
   void dispose() {
     _position?.removeListener(_scheduleMeasurement);
-    _controller.dispose();
+    _node.dispose();
     super.dispose();
   }
 }

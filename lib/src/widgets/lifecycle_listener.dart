@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import '../core/lifecycle_controller.dart';
-import '../core/lifecycle_scope.dart';
+import '../core/lifecycle_node_binding.dart';
 import '../core/lifecycle_snapshot.dart';
 import '../core/lifecycle_transition.dart';
 
@@ -29,36 +28,28 @@ class LifecycleListener extends StatefulWidget {
 }
 
 class _LifecycleListenerState extends State<LifecycleListener> {
-  late final LifecycleController _controller;
+  late final LifecycleNodeBinding _node;
 
   @override
   void initState() {
     super.initState();
-    _controller = LifecycleController(debugLabel: 'LifecycleListener')
-      ..addListener(_handleChanged);
+    _node = LifecycleNodeBinding(
+      debugLabel: 'LifecycleListener',
+      onChanged: _handleChanged,
+    );
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final parent = resolveLifecycleParent(context);
-    if (_controller.isAttached) {
-      _controller.reparent(parent);
-    } else {
-      _controller.attach(parent: parent);
-    }
+    _node.syncParent(context);
   }
 
   void _handleChanged() {
-    final transition = _controller.lastTransition;
-    if (transition == null) return;
-    widget.onTransition?.call(transition);
-    final onEvent = widget.onEvent;
-    if (onEvent != null) {
-      for (final event in transition.events) {
-        onEvent(event, transition);
-      }
-    }
+    _node.dispatch(
+      onTransition: widget.onTransition,
+      onEvent: widget.onEvent,
+    );
   }
 
   @override
@@ -66,7 +57,7 @@ class _LifecycleListenerState extends State<LifecycleListener> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _node.dispose();
     super.dispose();
   }
 }
@@ -85,24 +76,21 @@ class LifecycleBuilder extends StatefulWidget {
 }
 
 class _LifecycleBuilderState extends State<LifecycleBuilder> {
-  late final LifecycleController _controller;
+  late final LifecycleNodeBinding _node;
 
   @override
   void initState() {
     super.initState();
-    _controller = LifecycleController(debugLabel: 'LifecycleBuilder')
-      ..addListener(_handleChanged);
+    _node = LifecycleNodeBinding(
+      debugLabel: 'LifecycleBuilder',
+      onChanged: _handleChanged,
+    );
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final parent = resolveLifecycleParent(context);
-    if (_controller.isAttached) {
-      _controller.reparent(parent);
-    } else {
-      _controller.attach(parent: parent);
-    }
+    _node.syncParent(context);
   }
 
   void _handleChanged() {
@@ -111,14 +99,13 @@ class _LifecycleBuilderState extends State<LifecycleBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context, _controller.value);
+    return widget.builder(context, _node.value);
   }
 
   @override
   void dispose() {
-    _controller
-      ..removeListener(_handleChanged)
-      ..dispose();
+    // 销毁时会先解除 rebuild 回调，避免在 dispose() 期间_handleChanged()触发无意义的 setState()
+    _node.dispose(deliverTerminalTransition: false);
     super.dispose();
   }
 }
