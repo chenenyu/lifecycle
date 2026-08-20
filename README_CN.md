@@ -93,11 +93,13 @@ class AppState extends State<App> {
 还可以通过控制器检查或删除路由：
 
 ```dart
-final entry = navigation.routeNamed('/checkout');
+final route = navigation.routeNamed('/checkout');
 final routes = navigation.routes;
 
-if (entry != null) {
-  navigation.removeRoute(entry.route);
+if (route != null) {
+  final lifecycle = navigation.lifecycleFor(route);
+  debugPrint('checkout: ${lifecycle?.phase}');
+  navigation.removeRoute(route);
 }
 ```
 

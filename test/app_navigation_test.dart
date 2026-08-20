@@ -204,16 +204,16 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(first.root.value.phase, LifecyclePhase.active);
+      expect(first.lifecycle.phase, LifecyclePhase.active);
 
       fixtureKey.currentState!.swap();
       await tester.pump();
-      expect(first.root.value.phase, LifecyclePhase.hidden);
-      expect(second.root.value.phase, LifecyclePhase.active);
+      expect(first.lifecycle.phase, LifecyclePhase.hidden);
+      expect(second.lifecycle.phase, LifecyclePhase.active);
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
-      expect(second.root.value.phase, LifecyclePhase.hidden);
+      expect(second.lifecycle.phase, LifecyclePhase.hidden);
     });
   });
 
@@ -372,16 +372,16 @@ void main() {
       );
       navigatorKey.currentState!.push<void>(currentRoute);
       await tester.pumpAndSettle();
-      final previousRoute = navigation.routes.first.route;
+      final previousRoute = navigation.routes.first;
       log.clear();
 
-      navigation.handleGestureStarted(currentRoute, previousRoute);
+      navigation.observer.didStartUserGesture(currentRoute, previousRoute);
       await tester.pump();
       expect(log['home'], [LifecycleEvent.appeared]);
       expect(log['current'], isEmpty);
       log.clear();
 
-      navigation.handleGestureStopped();
+      navigation.observer.didStopUserGesture();
       await tester.pump();
       expect(log['home'], [LifecycleEvent.disappeared]);
     });

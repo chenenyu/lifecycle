@@ -1,54 +1,54 @@
-import 'dart:collection';
-
 import 'package:flutter/widgets.dart';
 
 import '../core/lifecycle_controller.dart';
 import '../core/lifecycle_event.dart';
-import 'navigator_lifecycle_observer.dart';
-import 'route_lifecycle_entry.dart';
+import '../core/lifecycle_scope.dart';
+import '../core/lifecycle_snapshot.dart';
 
 /// Owns route lifecycle state for exactly one Flutter Navigator.
 class NavigatorLifecycleController {
   /// Creates a controller and its paired [observer].
   NavigatorLifecycleController({String? debugLabel})
-      : root = LifecycleController(
+      : _root = LifecycleController(
           debugLabel: debugLabel ?? 'NavigatorLifecycleController',
         ) {
-    observer = NavigatorLifecycleObserver(this);
+    observer = _NavigatorLifecycleObserver(this);
     _unknownRouteController = LifecycleController(
       visible: false,
       active: false,
       visibleFraction: 0,
       debugLabel: 'UnknownRoute',
-    )..attach(parent: root, cause: LifecycleCause.route);
+    )..attach(parent: _root, cause: LifecycleCause.route);
   }
 
-  /// Root controller through which containing scopes restrict all routes.
-  final LifecycleController root;
+  final LifecycleController _root;
 
   /// Observer that must be installed on the associated Navigator.
-  late final NavigatorLifecycleObserver observer;
+  late final NavigatorObserver observer;
   late final LifecycleController _unknownRouteController;
-  final List<RouteLifecycleEntry> _history = [];
+  final List<_RouteLifecycleEntry> _history = [];
   Route<dynamic>? _gesturePreviousRoute;
   bool _disposed = false;
 
-  /// Current route entries in bottom-to-top order.
-  UnmodifiableListView<RouteLifecycleEntry> get routes =>
-      UnmodifiableListView(_history);
+  /// Effective state of the Navigator hierarchy itself.
+  LifecycleSnapshot get lifecycle => _root.value;
+
+  /// Current routes in bottom-to-top order.
+  List<Route<dynamic>> get routes =>
+      List<Route<dynamic>>.unmodifiable(_history.map((entry) => entry.route));
 
   /// Navigator currently associated with [observer], if mounted.
   NavigatorState? get navigator => observer.navigator;
 
   /// Attaches the Navigator hierarchy to a containing lifecycle node.
-  void attach(LifecycleController? parent) {
+  void _attach(LifecycleController? parent) {
     _ensureUsable();
-    if (root.isAttached) {
-      root.reparent(parent);
+    if (_root.isAttached) {
+      _root.reparent(parent);
     } else {
-      root.attach(parent: parent);
+      _root.attach(parent: parent);
     }
-    root.updateLocal(
+    _root.updateLocal(
       visible: true,
       active: true,
       visibleFraction: 1,
@@ -57,9 +57,9 @@ class NavigatorLifecycleController {
   }
 
   /// Makes every route inactive while keeping the controller reusable.
-  void detach() {
-    if (_disposed || !root.isAttached) return;
-    root.updateLocal(
+  void _detach() {
+    if (_disposed || !_root.isAttached) return;
+    _root.updateLocal(
       visible: false,
       active: false,
       visibleFraction: 0,
@@ -68,7 +68,7 @@ class NavigatorLifecycleController {
   }
 
   /// Resolves the lifecycle controller for [route].
-  LifecycleController controllerFor(Route<dynamic> route) {
+  LifecycleController _controllerFor(Route<dynamic> route) {
     for (final entry in _history.reversed) {
       if (identical(entry.route, route)) return entry.controller;
     }
@@ -77,43 +77,43 @@ class NavigatorLifecycleController {
     return _unknownRouteController;
   }
 
-  /// Finds the tracked entry for [route].
-  RouteLifecycleEntry? entryFor(Route<dynamic> route) {
+  _RouteLifecycleEntry? _entryFor(Route<dynamic> route) {
     for (final entry in _history.reversed) {
       if (identical(entry.route, route)) return entry;
     }
     return null;
   }
 
-  /// Finds the top-most route whose settings use [name].
-  RouteLifecycleEntry? routeNamed(String name) {
+  /// Returns the top-most route whose settings use [name].
+  Route<dynamic>? routeNamed(String name) {
     for (final entry in _history.reversed) {
-      if (entry.route.settings.name == name) return entry;
+      if (entry.route.settings.name == name) return entry.route;
     }
     return null;
   }
 
-  /// Handles a route push forwarded by [observer].
-  void handlePush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  /// Returns the effective lifecycle for a currently tracked [route].
+  LifecycleSnapshot? lifecycleFor(Route<dynamic> route) {
+    return _entryFor(route)?.lifecycle;
+  }
+
+  void _handlePush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     _ensureUsable();
-    if (entryFor(route) == null) {
-      _history.add(RouteLifecycleEntry(route: route, parent: root));
+    if (_entryFor(route) == null) {
+      _history.add(_RouteLifecycleEntry(route: route, parent: _root));
     }
     _recomputeRoutes(LifecycleCause.route);
   }
 
-  /// Handles a route pop forwarded by [observer].
-  void handlePop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void _handlePop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     _removeRouteEntry(route, LifecycleCause.route);
   }
 
-  /// Handles a route removal forwarded by [observer].
-  void handleRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void _handleRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
     _removeRouteEntry(route, LifecycleCause.route);
   }
 
-  /// Handles route replacement forwarded by [observer].
-  void handleReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+  void _handleReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
     _ensureUsable();
     if (newRoute == null || oldRoute == null) return;
     final index = _history.indexWhere(
@@ -121,14 +121,13 @@ class NavigatorLifecycleController {
     );
     if (index < 0) return;
     final oldEntry = _history[index];
-    final newEntry = RouteLifecycleEntry(route: newRoute, parent: root);
+    final newEntry = _RouteLifecycleEntry(route: newRoute, parent: _root);
     _history[index] = newEntry;
     oldEntry.dispose();
     _recomputeRoutes(LifecycleCause.route);
   }
 
-  /// Reconciles route order when Navigator reports a new top route.
-  void handleTopChanged(
+  void _handleTopChanged(
     Route<dynamic> topRoute,
     Route<dynamic>? previousTopRoute,
   ) {
@@ -143,8 +142,7 @@ class NavigatorLifecycleController {
     _recomputeRoutes(LifecycleCause.route);
   }
 
-  /// Exposes [previousRoute] during an interactive back gesture.
-  void handleGestureStarted(
+  void _handleGestureStarted(
     Route<dynamic> route,
     Route<dynamic>? previousRoute,
   ) {
@@ -153,8 +151,7 @@ class NavigatorLifecycleController {
     _recomputeRoutes(LifecycleCause.routeGesture);
   }
 
-  /// Ends an interactive back gesture without changing route history.
-  void handleGestureStopped() {
+  void _handleGestureStopped() {
     _ensureUsable();
     _gesturePreviousRoute = null;
     _recomputeRoutes(LifecycleCause.routeGesture);
@@ -214,6 +211,135 @@ class NavigatorLifecycleController {
     }
     _history.clear();
     _unknownRouteController.dispose();
-    root.dispose();
+    _root.dispose();
+  }
+}
+
+/// Connects a [NavigatorLifecycleController] to surrounding lifecycle scopes.
+class NavigatorLifecycleScope extends StatefulWidget {
+  /// Creates a Navigator lifecycle scope.
+  const NavigatorLifecycleScope({
+    super.key,
+    required this.controller,
+    required this.child,
+  });
+
+  /// Controller paired with the Navigator below [child].
+  final NavigatorLifecycleController controller;
+
+  /// Typically the Navigator produced by a WidgetsApp or nested Navigator.
+  final Widget child;
+
+  @override
+  State<NavigatorLifecycleScope> createState() =>
+      _NavigatorLifecycleScopeState();
+}
+
+class _NavigatorLifecycleScopeState extends State<NavigatorLifecycleScope> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.controller._attach(resolveLifecycleParent(context));
+  }
+
+  @override
+  void didUpdateWidget(NavigatorLifecycleScope oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller._detach();
+      widget.controller._attach(resolveLifecycleParent(context));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LifecycleRouteResolverScope(
+      resolver: widget.controller._controllerFor,
+      child: widget.child,
+    );
+  }
+
+  @override
+  void dispose() {
+    widget.controller._detach();
+    super.dispose();
+  }
+}
+
+class _NavigatorLifecycleObserver extends NavigatorObserver {
+  _NavigatorLifecycleObserver(this.controller);
+
+  final NavigatorLifecycleController controller;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    controller._handlePush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    controller._handlePop(route, previousRoute);
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    controller._handleRemove(route, previousRoute);
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    controller._handleReplace(newRoute: newRoute, oldRoute: oldRoute);
+  }
+
+  @override
+  void didChangeTop(Route<dynamic> topRoute, Route<dynamic>? previousTopRoute) {
+    controller._handleTopChanged(topRoute, previousTopRoute);
+  }
+
+  @override
+  void didStartUserGesture(
+    Route<dynamic> route,
+    Route<dynamic>? previousRoute,
+  ) {
+    controller._handleGestureStarted(route, previousRoute);
+  }
+
+  @override
+  void didStopUserGesture() {
+    controller._handleGestureStopped();
+  }
+}
+
+class _RouteLifecycleEntry {
+  _RouteLifecycleEntry({
+    required this.route,
+    required LifecycleController parent,
+  }) : controller = LifecycleController(
+          visible: false,
+          active: false,
+          visibleFraction: 0,
+          debugLabel: 'Route(${route.settings.name ?? route.hashCode})',
+        )..attach(parent: parent, cause: LifecycleCause.route);
+
+  final Route<dynamic> route;
+  final LifecycleController controller;
+
+  LifecycleSnapshot get lifecycle => controller.value;
+
+  void update({
+    required bool visible,
+    required bool active,
+    LifecycleCause cause = LifecycleCause.route,
+  }) {
+    controller.updateLocal(
+      visible: visible,
+      active: active,
+      visibleFraction: visible ? 1 : 0,
+      cause: cause,
+    );
+  }
+
+  void dispose({LifecycleCause cause = LifecycleCause.route}) {
+    controller.disposeWithCause(cause);
   }
 }

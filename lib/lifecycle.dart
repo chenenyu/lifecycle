@@ -9,9 +9,6 @@ export 'src/core/lifecycle_scope.dart' show LifecycleScope, LifecycleScopeKind;
 export 'src/core/lifecycle_snapshot.dart';
 export 'src/core/lifecycle_transition.dart';
 export 'src/navigation/navigator_lifecycle_controller.dart';
-export 'src/navigation/navigator_lifecycle_observer.dart';
-export 'src/navigation/navigator_lifecycle_scope.dart';
-export 'src/navigation/route_lifecycle_entry.dart';
 export 'src/page/indexed_lifecycle_scope.dart'
     show IndexedLifecycleTransitionCallback;
 export 'src/page/lifecycle_page_view.dart';
