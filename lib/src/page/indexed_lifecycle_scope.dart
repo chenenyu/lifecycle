@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 
 import '../core/lifecycle_event.dart';
 import '../core/lifecycle_node_binding.dart';
-import '../core/lifecycle_scope.dart';
 import '../core/lifecycle_transition.dart';
 
 /// Receives a lifecycle transition for a page or tab at [index].
@@ -115,8 +114,6 @@ class IndexedLifecycleScopeState extends State<IndexedLifecycleScope> {
   @override
   Widget build(BuildContext context) {
     return _node.buildScope(
-      context: context,
-      kind: LifecycleScopeKind.page,
       child: widget.child,
     );
   }

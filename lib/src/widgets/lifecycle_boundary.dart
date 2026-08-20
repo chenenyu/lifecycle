@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 
 import '../core/lifecycle_event.dart';
 import '../core/lifecycle_node_binding.dart';
-import '../core/lifecycle_scope.dart';
 import '../core/lifecycle_transition.dart';
 
 /// Adds custom local visibility and activity restrictions to a subtree.
@@ -90,8 +89,6 @@ class _LifecycleBoundaryState extends State<LifecycleBoundary> {
   @override
   Widget build(BuildContext context) {
     return _node.buildScope(
-      context: context,
-      kind: LifecycleScopeKind.custom,
       child: widget.child,
     );
   }

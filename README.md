@@ -272,6 +272,11 @@ child.updateLocal(
   active: true,
   cause: LifecycleCause.custom,
 );
+
+final subtree = LifecycleScope(
+  controller: child,
+  child: const CustomContainerContent(),
+);
 ```
 
 `LifecycleController` uses the standard `ChangeNotifier` channel for both
