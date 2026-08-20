@@ -55,7 +55,7 @@ class _LifecycleBoundaryState extends State<LifecycleBoundary> {
       active: widget.active,
       visibleFraction: widget.visibleFraction,
       debugLabel: 'LifecycleBoundary',
-    )..addTransitionListener(_handleTransition);
+    )..addListener(_handleChanged);
   }
 
   @override
@@ -84,7 +84,9 @@ class _LifecycleBoundaryState extends State<LifecycleBoundary> {
     }
   }
 
-  void _handleTransition(LifecycleTransition transition) {
+  void _handleChanged() {
+    final transition = _controller.lastTransition;
+    if (transition == null) return;
     widget.onTransition?.call(transition);
     final onEvent = widget.onEvent;
     if (onEvent != null) {

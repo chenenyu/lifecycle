@@ -57,7 +57,7 @@ class _ViewportLifecycleItemState extends State<ViewportLifecycleItem> {
       active: false,
       visibleFraction: 0,
       debugLabel: 'ViewportLifecycleItem',
-    )..addTransitionListener(_handleTransition);
+    )..addListener(_handleChanged);
   }
 
   @override
@@ -156,7 +156,9 @@ class _ViewportLifecycleItemState extends State<ViewportLifecycleItem> {
     );
   }
 
-  void _handleTransition(LifecycleTransition transition) {
+  void _handleChanged() {
+    final transition = _controller.lastTransition;
+    if (transition == null) return;
     widget.onTransition?.call(transition);
     final onEvent = widget.onEvent;
     if (onEvent != null) {

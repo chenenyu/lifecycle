@@ -248,7 +248,15 @@ ListView.builder(
 
 ```dart
 final parent = LifecycleController()..attach();
-final child = LifecycleController(visible: false)
+final child = LifecycleController(visible: false);
+
+void onChildChanged() {
+  final transition = child.lastTransition!;
+  debugPrint('${transition.previous.phase} -> ${transition.current.phase}');
+}
+
+child
+  ..addListener(onChildChanged)
   ..attach(parent: parent);
 
 child.updateLocal(
@@ -257,6 +265,10 @@ child.updateLocal(
   cause: LifecycleCause.custom,
 );
 ```
+
+`LifecycleController` 使用标准 `ChangeNotifier` 通道统一发送快照和 transition
+变化。在监听回调中，`value` 是最新快照，`lastTransition` 描述产生该快照的原子
+变化。如果监听器可能比 controller 存活更久，请及时调用 `removeListener`。
 
 可以查看[示例应用](https://github.com/chenenyu/lifecycle/tree/main/example)和测试代码，
 了解完整且可运行的组合方式。

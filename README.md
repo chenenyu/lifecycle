@@ -254,7 +254,15 @@ add/remove during delivery, and reentrant updates are queued deterministically.
 
 ```dart
 final parent = LifecycleController()..attach();
-final child = LifecycleController(visible: false)
+final child = LifecycleController(visible: false);
+
+void onChildChanged() {
+  final transition = child.lastTransition!;
+  debugPrint('${transition.previous.phase} -> ${transition.current.phase}');
+}
+
+child
+  ..addListener(onChildChanged)
   ..attach(parent: parent);
 
 child.updateLocal(
@@ -263,6 +271,12 @@ child.updateLocal(
   cause: LifecycleCause.custom,
 );
 ```
+
+`LifecycleController` uses the standard `ChangeNotifier` channel for both
+snapshot and transition changes. During a listener callback, `value` is the
+latest snapshot and `lastTransition` describes the atomic change that produced
+it. Remember to call `removeListener` when the listener can outlive the
+controller.
 
 See the [example application](https://github.com/chenenyu/lifecycle/tree/main/example)
 and the tests for complete runnable compositions.

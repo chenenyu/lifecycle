@@ -8,7 +8,8 @@ void main() {
     test('derives a deterministic event sequence', () {
       final controller = LifecycleController();
       final events = <LifecycleEvent>[];
-      controller.addTransitionListener(events.addAllFromTransition);
+      listenToTransitions(controller, events.addAllFromTransition);
+      expect(controller.lastTransition, isNull);
 
       controller.attach();
       expect(events, [
@@ -16,6 +17,7 @@ void main() {
         LifecycleEvent.appeared,
         LifecycleEvent.activated,
       ]);
+      expect(controller.lastTransition!.current, controller.value);
       expect(controller.value.phase, LifecyclePhase.active);
 
       events.clear();
@@ -85,7 +87,7 @@ void main() {
       )..attach();
       final child = LifecycleController()..attach(parent: parent);
       final transitions = <LifecycleTransition>[];
-      child.addTransitionListener(transitions.add);
+      listenToTransitions(child, transitions.add);
 
       child.disposeWithCause(LifecycleCause.route);
 
@@ -148,7 +150,7 @@ void main() {
     test('is idempotent for unchanged inputs', () {
       final controller = LifecycleController()..attach();
       var transitionCount = 0;
-      controller.addTransitionListener((_) => transitionCount++);
+      listenToTransitions(controller, (_) => transitionCount++);
 
       controller.updateLocal(visible: true, active: true, visibleFraction: 1);
       controller.reparent(null);
@@ -161,7 +163,7 @@ void main() {
     test('queues reentrant updates safely', () {
       final controller = LifecycleController()..attach();
       final events = <LifecycleEvent>[];
-      controller.addTransitionListener((transition) {
+      listenToTransitions(controller, (transition) {
         events.addAll(transition.events);
         if (transition.contains(LifecycleEvent.deactivated)) {
           controller.updateLocal(visible: false);
@@ -181,18 +183,18 @@ void main() {
       var selfRemovingCalls = 0;
       var lateListenerCalls = 0;
 
-      late LifecycleTransitionCallback selfRemoving;
-      void lateListener(LifecycleTransition transition) {
+      late VoidCallback selfRemoving;
+      void lateListener() {
         lateListenerCalls++;
       }
 
-      selfRemoving = (transition) {
+      selfRemoving = () {
         selfRemovingCalls++;
         controller
-          ..removeTransitionListener(selfRemoving)
-          ..addTransitionListener(lateListener);
+          ..removeListener(selfRemoving)
+          ..addListener(lateListener);
       };
-      controller.addTransitionListener(selfRemoving);
+      controller.addListener(selfRemoving);
 
       controller.updateLocal(active: false);
       expect(selfRemovingCalls, 1);
@@ -205,18 +207,18 @@ void main() {
     });
 
     // 验证单个用户回调异常会被报告，但不会中断其他监听器或后续状态更新。
-    test('isolates and reports transition listener errors', () {
+    test('isolates and reports ChangeNotifier listener errors', () {
       final controller = LifecycleController()..attach();
       final reportedErrors = <FlutterErrorDetails>[];
       final previousErrorHandler = FlutterError.onError;
       FlutterError.onError = reportedErrors.add;
       addTearDown(() => FlutterError.onError = previousErrorHandler);
 
-      controller.addTransitionListener((transition) {
+      controller.addListener(() {
         throw StateError('listener failed');
       });
       final transitions = <LifecycleTransition>[];
-      controller.addTransitionListener(transitions.add);
+      listenToTransitions(controller, transitions.add);
 
       controller.updateLocal(active: false);
 
@@ -244,7 +246,8 @@ void main() {
         appState: AppLifecycleState.paused,
       )..attach();
       final controller = LifecycleController()..attach(parent: parent);
-      controller.addTransitionListener((transition) {
+      controller.addListener(() {
+        final transition = controller.lastTransition!;
         if (transition.current.phase == LifecyclePhase.disposed) {
           throw StateError('terminal listener failed');
         }
@@ -269,7 +272,7 @@ void main() {
       final controller = LifecycleController()..attach(parent: parent);
       final events = <LifecycleEvent>[];
       final transitions = <LifecycleTransition>[];
-      controller.addTransitionListener((transition) {
+      listenToTransitions(controller, (transition) {
         transitions.add(transition);
         events.addAll(transition.events);
         if (transition.contains(LifecycleEvent.deactivated)) {
@@ -303,14 +306,14 @@ void main() {
       controller.dispose();
     });
 
-    // 验证 controller 销毁后不允许更新、重新挂接或新增 transition 监听器。
+    // 验证 controller 销毁后不允许更新、重新挂接或新增监听器。
     test('rejects updates after disposal', () {
       final controller = LifecycleController()..attach();
       controller.dispose();
 
       expect(() => controller.updateLocal(visible: false), throwsStateError);
       expect(() => controller.attach(), throwsStateError);
-      expect(() => controller.addTransitionListener((_) {}), throwsStateError);
+      expect(() => controller.addListener(() {}), throwsFlutterError);
     });
 
     // 验证快照按字段进行值比较，并在诊断字符串中输出关键状态。
@@ -466,6 +469,15 @@ void main() {
     expect(() => navigation.attach(null), throwsStateError);
     navigation.dispose();
   });
+}
+
+VoidCallback listenToTransitions(
+  LifecycleController controller,
+  LifecycleTransitionCallback callback,
+) {
+  void listener() => callback(controller.lastTransition!);
+  controller.addListener(listener);
+  return listener;
 }
 
 extension on List<LifecycleEvent> {

@@ -35,7 +35,7 @@ class _LifecycleListenerState extends State<LifecycleListener> {
   void initState() {
     super.initState();
     _controller = LifecycleController(debugLabel: 'LifecycleListener')
-      ..addTransitionListener(_handleTransition);
+      ..addListener(_handleChanged);
   }
 
   @override
@@ -49,7 +49,9 @@ class _LifecycleListenerState extends State<LifecycleListener> {
     }
   }
 
-  void _handleTransition(LifecycleTransition transition) {
+  void _handleChanged() {
+    final transition = _controller.lastTransition;
+    if (transition == null) return;
     widget.onTransition?.call(transition);
     final onEvent = widget.onEvent;
     if (onEvent != null) {
