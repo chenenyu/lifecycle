@@ -316,23 +316,78 @@ void main() {
     // 验证快照按字段进行值比较，并在诊断字符串中输出关键状态。
     test('snapshot implements value equality and diagnostics', () {
       const first = LifecycleSnapshot(
-        attached: true,
-        visible: true,
-        active: false,
-        visibleFraction: 0.5,
         phase: LifecyclePhase.visible,
+        visibleFraction: 0.5,
       );
       const second = LifecycleSnapshot(
-        attached: true,
-        visible: true,
-        active: false,
-        visibleFraction: 0.5,
         phase: LifecyclePhase.visible,
+        visibleFraction: 0.5,
       );
 
       expect(first, second);
       expect(first.hashCode, second.hashCode);
+      expect(first.attached, isTrue);
+      expect(first.visible, isTrue);
+      expect(first.active, isFalse);
       expect(first.toString(), contains('visibleFraction: 0.5'));
+    });
+
+    // 验证 attached、visible 和 active 完全由 phase 推导，不再形成重复状态源。
+    test('snapshot derives state flags from its phase', () {
+      const snapshots = {
+        LifecyclePhase.detached: LifecycleSnapshot.detached(),
+        LifecyclePhase.hidden: LifecycleSnapshot(
+          phase: LifecyclePhase.hidden,
+          visibleFraction: 0,
+        ),
+        LifecyclePhase.visible: LifecycleSnapshot(
+          phase: LifecyclePhase.visible,
+          visibleFraction: 0.5,
+        ),
+        LifecyclePhase.active: LifecycleSnapshot(
+          phase: LifecyclePhase.active,
+          visibleFraction: 1,
+        ),
+        LifecyclePhase.disposed: LifecycleSnapshot(
+          phase: LifecyclePhase.disposed,
+          visibleFraction: 0,
+        ),
+      };
+
+      expect(snapshots[LifecyclePhase.detached]!.attached, isFalse);
+      expect(snapshots[LifecyclePhase.hidden]!.attached, isTrue);
+      expect(snapshots[LifecyclePhase.visible]!.attached, isTrue);
+      expect(snapshots[LifecyclePhase.active]!.attached, isTrue);
+      expect(snapshots[LifecyclePhase.disposed]!.attached, isFalse);
+      expect(snapshots[LifecyclePhase.hidden]!.visible, isFalse);
+      expect(snapshots[LifecyclePhase.visible]!.visible, isTrue);
+      expect(snapshots[LifecyclePhase.active]!.active, isTrue);
+    });
+
+    // 验证构造器拒绝与 phase 矛盾的可见比例和 detached App 状态。
+    test('snapshot rejects states that contradict their phase', () {
+      expect(
+        () => LifecycleSnapshot(
+          phase: LifecyclePhase.hidden,
+          visibleFraction: 0.5,
+        ),
+        throwsAssertionError,
+      );
+      expect(
+        () => LifecycleSnapshot(
+          phase: LifecyclePhase.active,
+          visibleFraction: 0,
+        ),
+        throwsAssertionError,
+      );
+      expect(
+        () => LifecycleSnapshot(
+          phase: LifecyclePhase.detached,
+          visibleFraction: 0,
+          appState: AppLifecycleState.resumed,
+        ),
+        throwsAssertionError,
+      );
     });
 
     // 验证 transition 会复制并冻结事件列表，同时提供事件查询和诊断信息。
@@ -341,11 +396,8 @@ void main() {
       final transition = LifecycleTransition(
         previous: const LifecycleSnapshot.detached(),
         current: const LifecycleSnapshot(
-          attached: true,
-          visible: true,
-          active: false,
-          visibleFraction: 0.5,
           phase: LifecyclePhase.visible,
+          visibleFraction: 0.5,
         ),
         cause: LifecycleCause.custom,
         events: events,

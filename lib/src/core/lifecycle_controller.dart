@@ -219,11 +219,8 @@ class LifecycleController extends ChangeNotifier
   LifecycleSnapshot _buildSnapshot() {
     if (_disposed) {
       return LifecycleSnapshot(
-        attached: false,
-        visible: false,
-        active: false,
-        visibleFraction: 0,
         phase: LifecyclePhase.disposed,
+        visibleFraction: 0,
         appState: _terminalAppState,
       );
     }
@@ -239,16 +236,14 @@ class LifecycleController extends ChangeNotifier
     final visible = _localVisible && parentVisible && visibleFraction > 0;
     final active = visible && _localActive && parentActive;
 
+    final phase = active
+        ? LifecyclePhase.active
+        : visible
+            ? LifecyclePhase.visible
+            : LifecyclePhase.hidden;
     return LifecycleSnapshot(
-      attached: true,
-      visible: visible,
-      active: active,
+      phase: phase,
       visibleFraction: visible ? visibleFraction : 0,
-      phase: active
-          ? LifecyclePhase.active
-          : visible
-              ? LifecyclePhase.visible
-              : LifecyclePhase.hidden,
       appState: _localAppState ?? parentSnapshot?.appState,
     );
   }

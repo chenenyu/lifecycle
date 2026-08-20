@@ -2,7 +2,7 @@
 [![pub points](https://img.shields.io/pub/points/lifecycle)](https://pub.dev/packages/lifecycle)
 [![likes](https://img.shields.io/pub/likes/lifecycle)](https://pub.dev/packages/lifecycle)
 
-English | [简体中文](https://github.com/chenenyu/lifecycle/blob/main/README_CN.md)
+English | [简体中文](README_CN.md)
 
 # lifecycle
 
@@ -27,16 +27,14 @@ The current state is represented by:
 ```dart
 LifecycleSnapshot(
   phase: LifecyclePhase.active,
-  attached: true,
-  visible: true,
-  active: true,
   visibleFraction: 1,
   appState: AppLifecycleState.resumed,
 )
 ```
 
 Phases are `detached`, `hidden`, `visible`, `active`, and `disposed`. A single
-state change produces events in deterministic order:
+phase is the single source of truth; `attached`, `visible`, and `active` are
+derived getters. A single state change produces events in deterministic order:
 
 ```text
 created → appeared → activated → deactivated → disappeared → disposed
