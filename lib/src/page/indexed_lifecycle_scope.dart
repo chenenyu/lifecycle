@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
-import '../core/lifecycle_controller.dart';
 import '../core/lifecycle_event.dart';
+import '../core/lifecycle_node_binding.dart';
 import '../core/lifecycle_scope.dart';
 import '../core/lifecycle_transition.dart';
 
@@ -65,29 +65,25 @@ class IndexedLifecycleScope extends StatefulWidget {
 }
 
 class IndexedLifecycleScopeState extends State<IndexedLifecycleScope> {
-  late final LifecycleController _controller;
+  late final LifecycleNodeBinding _node;
 
   @override
   void initState() {
     super.initState();
-    _controller = LifecycleController(
+    _node = LifecycleNodeBinding(
       visible: false,
       active: false,
       visibleFraction: 0,
       debugLabel: 'IndexedLifecycleScope(${widget.index})',
-    )..addListener(_handleChanged);
+      onChanged: _handleChanged,
+    );
     widget.registry.register(this);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final parent = resolveLifecycleParent(context);
-    if (_controller.isAttached) {
-      _controller.reparent(parent);
-    } else {
-      _controller.attach(parent: parent, cause: widget.cause);
-    }
+    _node.syncParent(context, cause: widget.cause);
   }
 
   @override
@@ -102,7 +98,7 @@ class IndexedLifecycleScopeState extends State<IndexedLifecycleScope> {
   }
 
   void applySignal(IndexedLifecycleSignal signal) {
-    _controller.updateLocal(
+    _node.update(
       visible: signal.visibleFraction > 0,
       active: signal.active,
       visibleFraction: signal.visibleFraction,
@@ -111,17 +107,16 @@ class IndexedLifecycleScopeState extends State<IndexedLifecycleScope> {
   }
 
   void _handleChanged() {
-    final transition = _controller.lastTransition;
+    final transition = _node.lastTransition;
     if (transition == null) return;
     widget.onTransition?.call(widget.index, transition);
   }
 
   @override
   Widget build(BuildContext context) {
-    return LifecycleScope(
-      controller: _controller,
+    return _node.buildScope(
+      context: context,
       kind: LifecycleScopeKind.page,
-      route: ModalRoute.of(context),
       child: widget.child,
     );
   }
@@ -129,7 +124,7 @@ class IndexedLifecycleScopeState extends State<IndexedLifecycleScope> {
   @override
   void dispose() {
     widget.registry.unregister(this);
-    _controller.dispose();
+    _node.dispose();
     super.dispose();
   }
 }
