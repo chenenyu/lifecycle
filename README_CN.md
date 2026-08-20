@@ -25,15 +25,13 @@
 ```dart
 LifecycleSnapshot(
   phase: LifecyclePhase.active,
-  attached: true,
-  visible: true,
-  active: true,
   visibleFraction: 1,
   appState: AppLifecycleState.resumed,
 )
 ```
 
 生命周期阶段包括 `detached`、`hidden`、`visible`、`active` 和 `disposed`。
+`phase` 是唯一状态源，`attached`、`visible` 和 `active` 均为派生 getter。
 一次状态变化会按照确定的顺序产生事件：
 
 ```text

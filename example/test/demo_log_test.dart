@@ -12,19 +12,13 @@ void main() {
     addTearDown(log.dispose);
     final transition = LifecycleTransition(
       previous: const LifecycleSnapshot(
-        attached: true,
-        visible: true,
-        active: false,
-        visibleFraction: 0.8,
         phase: LifecyclePhase.visible,
+        visibleFraction: 0.8,
         appState: AppLifecycleState.resumed,
       ),
       current: const LifecycleSnapshot(
-        attached: true,
-        visible: true,
-        active: false,
-        visibleFraction: 0.4,
         phase: LifecyclePhase.visible,
+        visibleFraction: 0.4,
         appState: AppLifecycleState.resumed,
       ),
       cause: LifecycleCause.viewport,
