@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 
 import '../core/lifecycle_event.dart';
 import '../core/lifecycle_node_binding.dart';
-import '../core/lifecycle_scope.dart';
 import '../core/lifecycle_transition.dart';
 
 /// Tracks the visible area of a child inside its nearest Scrollable.
@@ -164,8 +163,6 @@ class _ViewportLifecycleItemState extends State<ViewportLifecycleItem> {
     return _ViewportLayoutObserver(
       onLayout: _scheduleMeasurement,
       child: _node.buildScope(
-        context: context,
-        kind: LifecycleScopeKind.viewport,
         child: widget.child,
       ),
     );

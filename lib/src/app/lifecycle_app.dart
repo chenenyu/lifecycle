@@ -46,8 +46,6 @@ class _LifecycleAppState extends State<LifecycleApp> {
   Widget build(BuildContext context) {
     return LifecycleScope(
       controller: _controller,
-      kind: LifecycleScopeKind.app,
-      route: null,
       child: widget.child,
     );
   }

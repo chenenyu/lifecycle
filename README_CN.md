@@ -266,6 +266,11 @@ child.updateLocal(
   active: true,
   cause: LifecycleCause.custom,
 );
+
+final subtree = LifecycleScope(
+  controller: child,
+  child: const CustomContainerContent(),
+);
 ```
 
 `LifecycleController` 使用标准 `ChangeNotifier` 通道统一发送快照和 transition

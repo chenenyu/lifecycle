@@ -78,15 +78,9 @@ final class LifecycleNodeBinding {
     }
   }
 
-  Widget buildScope({
-    required BuildContext context,
-    required LifecycleScopeKind kind,
-    required Widget child,
-  }) {
+  Widget buildScope({required Widget child}) {
     return LifecycleScope(
       controller: controller,
-      kind: kind,
-      route: ModalRoute.of(context),
       child: child,
     );
   }

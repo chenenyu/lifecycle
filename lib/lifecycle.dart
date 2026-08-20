@@ -5,7 +5,7 @@ export 'src/app/app_lifecycle_controller.dart';
 export 'src/app/lifecycle_app.dart';
 export 'src/core/lifecycle_controller.dart';
 export 'src/core/lifecycle_event.dart';
-export 'src/core/lifecycle_scope.dart' show LifecycleScope, LifecycleScopeKind;
+export 'src/core/lifecycle_scope.dart' show LifecycleScope;
 export 'src/core/lifecycle_snapshot.dart';
 export 'src/core/lifecycle_transition.dart';
 export 'src/navigation/navigator_lifecycle_controller.dart';

@@ -2,61 +2,64 @@ import 'package:flutter/widgets.dart';
 
 import 'lifecycle_controller.dart';
 
-/// The container represented by a [LifecycleScope].
-enum LifecycleScopeKind {
-  /// Application root scope.
-  app,
-
-  /// Navigator route scope.
-  route,
-
-  /// PageView or TabBarView child scope.
-  page,
-
-  /// Scrollable viewport item scope.
-  viewport,
-
-  /// Application-defined boundary scope.
-  custom,
-}
-
 /// Exposes a lifecycle controller to descendant lifecycle widgets.
-class LifecycleScope extends InheritedWidget {
-  /// Creates a lifecycle scope.
+///
+/// The current route identity is captured automatically from [context]. The
+/// scope does not own [controller]; its creator remains responsible for
+/// disposing it.
+class LifecycleScope extends StatelessWidget {
+  /// Creates a scope for [controller].
   const LifecycleScope({
     super.key,
     required this.controller,
-    required this.kind,
-    required this.route,
-    required super.child,
+    required this.child,
   });
 
   /// The controller provided by this scope.
   final LifecycleController controller;
 
-  /// The type of container represented by the scope.
-  final LifecycleScopeKind kind;
+  /// Subtree that inherits [controller].
+  final Widget child;
 
-  /// Route in which the scope was created, or null above a Navigator.
-  final ModalRoute<dynamic>? route;
-
-  /// Returns the closest declared scope, or null when none exists.
-  static LifecycleScope? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<LifecycleScope>();
+  /// Returns the closest lifecycle controller, or null when none exists.
+  static LifecycleController? maybeOf(BuildContext context) {
+    return _LifecycleScopeData.maybeOf(context)?.controller;
   }
 
-  /// Returns the closest declared scope and asserts that one exists.
-  static LifecycleScope of(BuildContext context) {
+  /// Returns the closest lifecycle controller and asserts that one exists.
+  static LifecycleController of(BuildContext context) {
     final result = maybeOf(context);
     assert(result != null, 'No LifecycleScope found in context.');
     return result!;
   }
 
   @override
-  bool updateShouldNotify(LifecycleScope oldWidget) {
-    return controller != oldWidget.controller ||
-        kind != oldWidget.kind ||
-        route != oldWidget.route;
+  Widget build(BuildContext context) {
+    return _LifecycleScopeData(
+      controller: controller,
+      route: ModalRoute.of(context),
+      child: child,
+    );
+  }
+}
+
+class _LifecycleScopeData extends InheritedWidget {
+  const _LifecycleScopeData({
+    required this.controller,
+    required this.route,
+    required super.child,
+  });
+
+  final LifecycleController controller;
+  final ModalRoute<dynamic>? route;
+
+  static _LifecycleScopeData? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_LifecycleScopeData>();
+  }
+
+  @override
+  bool updateShouldNotify(_LifecycleScopeData oldWidget) {
+    return controller != oldWidget.controller || route != oldWidget.route;
   }
 }
 
@@ -84,7 +87,7 @@ class LifecycleRouteResolverScope extends InheritedWidget {
 }
 
 LifecycleController? resolveLifecycleParent(BuildContext context) {
-  final localScope = LifecycleScope.maybeOf(context);
+  final localScope = _LifecycleScopeData.maybeOf(context);
   final route = ModalRoute.of(context);
 
   if (localScope != null && localScope.route == route) {

@@ -140,18 +140,18 @@ void main() {
       final external = AppLifecycleController(debugLabel: 'external');
       addTearDown(external.dispose);
       final log = LifecycleEventLog();
-      LifecycleScope? capturedScope;
+      LifecycleController? capturedController;
 
       Widget child() => Builder(
             builder: (context) {
-              capturedScope = LifecycleScope.of(context);
+              capturedController = LifecycleScope.of(context);
               return LifecycleProbe(name: 'swap', log: log);
             },
           );
 
       await tester.pumpWidget(LifecycleApp(child: child()));
       await tester.pump();
-      expect(capturedScope!.kind, LifecycleScopeKind.app);
+      expect(capturedController, isA<AppLifecycleController>());
       log.clear();
 
       await tester.pumpWidget(
@@ -159,7 +159,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(capturedScope!.controller, same(external));
+      expect(capturedController, same(external));
       expect(log['swap'], [
         LifecycleEvent.deactivated,
         LifecycleEvent.disappeared,
