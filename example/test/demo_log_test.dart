@@ -38,7 +38,7 @@ void main() {
       ..attach();
     final child = LifecycleController()..attach(parent: parent);
     late LifecycleTransition terminal;
-    child.addTransitionListener((transition) => terminal = transition);
+    child.addListener(() => terminal = child.lastTransition!);
 
     child.dispose();
     final log = DemoLog()..record('dialog', terminal);

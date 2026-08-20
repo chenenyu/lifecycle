@@ -17,7 +17,7 @@ mixin LifecycleStateMixin<T extends StatefulWidget> on State<T> {
   void initState() {
     super.initState();
     _lifecycleController = LifecycleController(debugLabel: '$runtimeType')
-      ..addTransitionListener(_dispatchLifecycleTransition);
+      ..addListener(_dispatchLifecycleTransition);
   }
 
   @override
@@ -31,7 +31,9 @@ mixin LifecycleStateMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
-  void _dispatchLifecycleTransition(LifecycleTransition transition) {
+  void _dispatchLifecycleTransition() {
+    final transition = _lifecycleController.lastTransition;
+    if (transition == null) return;
     onLifecycleTransition(transition);
     for (final event in transition.events) {
       onLifecycleEvent(event, transition);

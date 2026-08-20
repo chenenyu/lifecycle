@@ -28,11 +28,19 @@ class _ControllerLabScreenState extends State<ControllerLabScreen> {
   void initState() {
     super.initState();
     _parent = LifecycleController(debugLabel: 'LabParent')
-      ..addTransitionListener((transition) => _log.record('parent', transition))
+      ..addListener(_recordParentTransition)
       ..attach(cause: LifecycleCause.custom);
     _child = LifecycleController(debugLabel: 'LabChild')
-      ..addTransitionListener((transition) => _log.record('child', transition))
+      ..addListener(_recordChildTransition)
       ..attach(parent: _parent, cause: LifecycleCause.custom);
+  }
+
+  void _recordParentTransition() {
+    _log.record('parent', _parent.lastTransition!);
+  }
+
+  void _recordChildTransition() {
+    _log.record('child', _child.lastTransition!);
   }
 
   void _updateParent() {

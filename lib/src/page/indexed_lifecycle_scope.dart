@@ -75,7 +75,7 @@ class IndexedLifecycleScopeState extends State<IndexedLifecycleScope> {
       active: false,
       visibleFraction: 0,
       debugLabel: 'IndexedLifecycleScope(${widget.index})',
-    )..addTransitionListener(_handleTransition);
+    )..addListener(_handleChanged);
     widget.registry.register(this);
   }
 
@@ -110,7 +110,9 @@ class IndexedLifecycleScopeState extends State<IndexedLifecycleScope> {
     );
   }
 
-  void _handleTransition(LifecycleTransition transition) {
+  void _handleChanged() {
+    final transition = _controller.lastTransition;
+    if (transition == null) return;
     widget.onTransition?.call(widget.index, transition);
   }
 

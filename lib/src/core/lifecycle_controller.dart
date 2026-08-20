@@ -37,8 +37,8 @@ class LifecycleController extends ChangeNotifier
   AppLifecycleState? _terminalAppState;
   LifecycleController? _parent;
   LifecycleSnapshot _value = const LifecycleSnapshot.detached();
+  LifecycleTransition? _lastTransition;
 
-  final Set<LifecycleTransitionCallback> _transitionListeners = {};
   bool _emitting = false;
   bool _recomputePending = false;
   LifecycleCause _pendingCause = LifecycleCause.custom;
@@ -48,6 +48,12 @@ class LifecycleController extends ChangeNotifier
   @override
   LifecycleSnapshot get value => _value;
 
+  /// The most recent transition that caused [value] to change.
+  ///
+  /// This is null until the first snapshot change. Listeners registered with
+  /// [addListener] can read this value synchronously from their callback.
+  LifecycleTransition? get lastTransition => _lastTransition;
+
   /// Whether this node has been attached.
   bool get isAttached => _attached;
 
@@ -56,17 +62,6 @@ class LifecycleController extends ChangeNotifier
 
   /// The parent whose state restricts this node, if any.
   LifecycleController? get parent => _parent;
-
-  /// Adds a listener that receives semantic transitions and events.
-  void addTransitionListener(LifecycleTransitionCallback listener) {
-    _ensureUsable();
-    _transitionListeners.add(listener);
-  }
-
-  /// Removes a transition listener previously added to this controller.
-  void removeTransitionListener(LifecycleTransitionCallback listener) {
-    _transitionListeners.remove(listener);
-  }
 
   /// Attaches this node and computes its first effective snapshot.
   void attach({
@@ -123,9 +118,9 @@ class LifecycleController extends ChangeNotifier
   void _setParent(LifecycleController? parent) {
     if (_parent == parent) return;
     _validateParent(parent);
-    _parent?.removeTransitionListener(_handleParentTransition);
+    _parent?.removeListener(_handleParentChanged);
     _parent = parent;
-    _parent?.addTransitionListener(_handleParentTransition);
+    _parent?.addListener(_handleParentChanged);
   }
 
   void _validateParent(LifecycleController? parent) {
@@ -144,8 +139,10 @@ class LifecycleController extends ChangeNotifier
     }
   }
 
-  void _handleParentTransition(LifecycleTransition transition) {
+  void _handleParentChanged() {
     if (!_attached || _disposed) return;
+    final transition = _parent?.lastTransition;
+    if (transition == null) return;
     _recompute(transition.cause);
   }
 
@@ -166,42 +163,13 @@ class LifecycleController extends ChangeNotifier
           final current = _buildSnapshot();
           if (current != previous) {
             _value = current;
-            final transition = LifecycleTransition(
+            _lastTransition = LifecycleTransition(
               previous: previous,
               current: current,
               cause: nextCause,
               events: _deriveEvents(previous, current),
             );
             notifyListeners();
-            final listeners = List<LifecycleTransitionCallback>.of(
-              _transitionListeners,
-            );
-            for (final listener in listeners) {
-              if (_transitionListeners.contains(listener)) {
-                try {
-                  listener(transition);
-                } catch (exception, stack) {
-                  FlutterError.reportError(
-                    FlutterErrorDetails(
-                      exception: exception,
-                      stack: stack,
-                      library: 'lifecycle',
-                      context: ErrorDescription(
-                        'while dispatching a LifecycleTransition',
-                      ),
-                      informationCollector: debugLabel == null
-                          ? null
-                          : () => [
-                                DiagnosticsProperty<String>(
-                                  'controller',
-                                  debugLabel,
-                                ),
-                              ],
-                    ),
-                  );
-                }
-              }
-            }
           }
         } finally {
           _emitting = false;
@@ -293,7 +261,6 @@ class LifecycleController extends ChangeNotifier
       _beginDispose(LifecycleCause.widgetTree);
     } finally {
       if (!_emitting && !_changeNotifierDisposed) {
-        _transitionListeners.clear();
         _changeNotifierDisposed = true;
         super.dispose();
       }
@@ -332,7 +299,6 @@ class LifecycleController extends ChangeNotifier
 
   void _finalizeDispose() {
     if (_changeNotifierDisposed) return;
-    _transitionListeners.clear();
     _changeNotifierDisposed = true;
     super.dispose();
   }
