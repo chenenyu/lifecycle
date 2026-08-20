@@ -97,11 +97,13 @@ inactive. Interactive back gestures expose the previous route as visible.
 Routes can also be inspected or removed through the controller:
 
 ```dart
-final entry = navigation.routeNamed('/checkout');
+final route = navigation.routeNamed('/checkout');
 final routes = navigation.routes;
 
-if (entry != null) {
-  navigation.removeRoute(entry.route);
+if (route != null) {
+  final lifecycle = navigation.lifecycleFor(route);
+  debugPrint('checkout: ${lifecycle?.phase}');
+  navigation.removeRoute(route);
 }
 ```
 

@@ -417,26 +417,22 @@ void main() {
     });
   });
 
-  // 验证 Navigator 暂时脱离和重新挂接时，已有 Route 会隐藏并恢复活跃，而不会丢失。
-  test('NavigatorLifecycleController detaches and reattaches its routes', () {
-    final app = LifecycleController()..attach();
-    final navigation = NavigatorLifecycleController()..attach(app);
+  // 验证 observer 在 Scope 挂载前仍会记录 Route，并通过只读查询 API 暴露隐藏状态。
+  test('NavigatorLifecycleController exposes read-only route state', () {
+    final navigation = NavigatorLifecycleController();
     final route = PageRouteBuilder<void>(
+      settings: const RouteSettings(name: '/unit'),
       pageBuilder: (context, animation, secondaryAnimation) =>
           const SizedBox.shrink(),
     );
 
-    navigation.handlePush(route, null);
-    expect(navigation.entryFor(route)!.lifecycle.phase, LifecyclePhase.active);
-
-    navigation.detach();
-    expect(navigation.entryFor(route)!.lifecycle.phase, LifecyclePhase.hidden);
-
-    navigation.attach(app);
-    expect(navigation.entryFor(route)!.lifecycle.phase, LifecyclePhase.active);
+    navigation.observer.didPush(route, null);
+    expect(navigation.lifecycleFor(route)!.phase, LifecyclePhase.hidden);
+    expect(navigation.routes, [route]);
+    expect(navigation.routeNamed('/unit'), same(route));
+    expect(() => navigation.routes.clear(), throwsUnsupportedError);
 
     navigation.dispose();
-    app.dispose();
   });
 
   // 验证未挂载或已销毁 Navigator 的非法操作会报错，并覆盖置顶、手势和移除边界场景。
@@ -453,20 +449,19 @@ void main() {
 
     expect(() => navigation.removeRoute(first), throwsStateError);
 
-    navigation
-      ..attach(null)
-      ..handlePush(first, null)
-      ..handlePush(second, first)
-      ..handleTopChanged(first, second);
-    expect(navigation.routes.last.route, same(first));
+    navigation.observer
+      ..didPush(first, null)
+      ..didPush(second, first)
+      ..didChangeTop(first, second);
+    expect(navigation.routes.last, same(first));
 
     navigation.observer.didStartUserGesture(first, second);
-    navigation.handleRemove(second, first);
+    navigation.observer.didRemove(second, first);
     navigation.observer.didStopUserGesture();
-    expect(navigation.entryFor(second), isNull);
+    expect(navigation.lifecycleFor(second), isNull);
 
     navigation.dispose();
-    expect(() => navigation.attach(null), throwsStateError);
+    expect(() => navigation.observer.didPush(first, null), throwsStateError);
     navigation.dispose();
   });
 }
