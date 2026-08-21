@@ -1,3 +1,9 @@
+/*
+ * App 根节点与 Navigator 路由生命周期的 Widget 回归测试。
+ *
+ * 覆盖 opaque/非 opaque 路由、替换移除、Navigator 2.0、嵌套 Navigator、Controller
+ * 替换和 Boundary/Mixin 消费方式，验证路由历史、遮挡规则及 App 状态能组合成一致事件。
+ */
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifecycle/lifecycle.dart';
@@ -460,6 +466,7 @@ NavigatorLifecycleController _testNavigation() {
   return controller;
 }
 
+/// 在两个 Navigator Controller 之间切换，验证旧 Scope 会正确 detach。
 class _NavigationScopeSwapFixture extends StatefulWidget {
   const _NavigationScopeSwapFixture({
     super.key,
@@ -490,6 +497,7 @@ class _NavigationScopeSwapFixtureState
   }
 }
 
+/// 路由测试中统一安装 Probe 的最小页面。
 class _LifecyclePage extends StatelessWidget {
   const _LifecyclePage({required this.name, required this.log});
 
@@ -506,6 +514,7 @@ class _LifecyclePage extends StatelessWidget {
   }
 }
 
+/// 通过外部方法切换 Boundary 约束的测试夹具。
 class _BoundaryFixture extends StatefulWidget {
   const _BoundaryFixture({super.key, required this.log});
 
@@ -546,6 +555,7 @@ class _BoundaryFixtureState extends State<_BoundaryFixture> {
   }
 }
 
+/// 收集 LifecycleStateMixin 回调的测试组件。
 class _MixinProbe extends StatefulWidget {
   const _MixinProbe({required this.log});
 
@@ -570,6 +580,7 @@ class _MixinProbeState extends State<_MixinProbe> with LifecycleStateMixin {
   Widget build(BuildContext context) => const SizedBox.shrink();
 }
 
+/// 通过 Navigator.pages 动态增删声明式路由的夹具。
 class _PagesFixture extends StatefulWidget {
   const _PagesFixture({super.key, required this.navigation, required this.log});
 

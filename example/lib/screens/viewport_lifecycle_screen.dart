@@ -1,3 +1,9 @@
+/*
+ * ViewportLifecycleItem 的交互实验页。
+ *
+ * Grid 同时展示可见阈值、活跃阈值、滚动激活策略和批量日志；默认 settle 后激活，可用
+ * 开关恢复 immediate 行为。只记录少量 item 可避免日志本身干扰快速滚动性能观察。
+ */
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
@@ -6,6 +12,7 @@ import '../widgets/demo_scaffold.dart';
 import '../widgets/demo_widgets.dart';
 import '../widgets/lifecycle_status_card.dart';
 
+/// 可动态调整阈值和激活策略的 Grid 视口实验页。
 class ViewportLifecycleScreen extends StatefulWidget {
   const ViewportLifecycleScreen({super.key, required this.log});
 

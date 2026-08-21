@@ -1,3 +1,10 @@
+/*
+ * Widget 层生命周期节点的内部统一实现。
+ *
+ * Binding 集中负责 Controller 创建、父节点同步、Scope 构建、回调分发和销毁，使
+ * Listener、Builder、Boundary、Mixin 不再复制同一套节点维护代码。它不对外导出，
+ * 从而避免内部装配细节成为公共 API。
+ */
 import 'package:flutter/widgets.dart';
 
 import 'lifecycle_constraint.dart';

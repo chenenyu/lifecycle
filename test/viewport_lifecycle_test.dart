@@ -1,3 +1,9 @@
+/*
+ * ViewportLifecycleItem 的几何、调度和快速滚动回归测试。
+ *
+ * 覆盖 List/Grid/Sliver、阈值、Page 继承、非滚动布局、逐帧 fling、两种激活策略、
+ * fraction 稳定化与大量 KeepAlive item，重点防止漏测、激活风暴和 parked 节点恢复失败。
+ */
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifecycle/lifecycle.dart';
@@ -416,8 +422,10 @@ Future<void> _setSurface(WidgetTester tester, Size size) async {
   addTearDown(() => tester.binding.setSurfaceSize(null));
 }
 
+/// 复用同一组断言的四种 Scrollable 布局。
 enum _ScrollKind { list, horizontal, grid, custom }
 
+/// 构造指定 Scrollable，并保留 item0 以测试 KeepAlive 离屏与恢复。
 class _ScrollableFixture extends StatefulWidget {
   const _ScrollableFixture({
     super.key,
@@ -505,6 +513,7 @@ class _ScrollableFixtureState extends State<_ScrollableFixture> {
   }
 }
 
+/// 强制 child 在 Sliver keep-alive bucket 中保持挂载。
 class _KeepAlive extends StatefulWidget {
   const _KeepAlive({required this.child});
 
@@ -526,6 +535,7 @@ class _KeepAliveState extends State<_KeepAlive>
   }
 }
 
+/// 不改变 ScrollPosition，只通过前置空白移动 item 的布局夹具。
 class _LayoutChangeFixture extends StatefulWidget {
   const _LayoutChangeFixture({super.key, required this.log});
 
@@ -558,6 +568,7 @@ class _LayoutChangeFixtureState extends State<_LayoutChangeFixture> {
   }
 }
 
+/// 把 Viewport item 放入 PageView，验证外层约束优先于局部几何。
 class _ViewportInPageFixture extends StatefulWidget {
   const _ViewportInPageFixture({super.key, required this.log});
 

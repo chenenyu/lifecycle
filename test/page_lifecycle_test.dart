@@ -1,3 +1,9 @@
+/*
+ * LifecyclePageView 与 LifecycleTabBarView 的 Widget 测试。
+ *
+ * 覆盖初始索引、拖动 settle、Controller 迁移、稳定 ID 重排、itemCount 收缩和嵌套页面，
+ * 防止可见比例、选中状态与懒构建页面身份在动画或数据变化时错位。
+ */
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifecycle/lifecycle.dart';
@@ -303,6 +309,7 @@ void main() {
   });
 }
 
+/// 暴露 PageController 操作并记录各 index 事件的基础夹具。
 class _PageFixture extends StatefulWidget {
   const _PageFixture({super.key, required this.initialPage, required this.log});
 
@@ -355,6 +362,7 @@ class _PageFixtureState extends State<_PageFixture> {
   }
 }
 
+/// 使用稳定 ID 反转页面顺序的重排夹具。
 class _ReorderablePageFixture extends StatefulWidget {
   const _ReorderablePageFixture({super.key});
 
@@ -392,6 +400,7 @@ class _ReorderablePageFixtureState extends State<_ReorderablePageFixture> {
   }
 }
 
+/// 带 KeepAlive 和本地 State 的页面，用于检测身份错配。
 class _IdentityPage extends StatefulWidget {
   const _IdentityPage({super.key, required this.id});
 
@@ -418,6 +427,7 @@ class _IdentityPageState extends State<_IdentityPage>
   }
 }
 
+/// 动态缩小 itemCount，验证选中索引会被安全收敛。
 class _ShrinkingPageFixture extends StatefulWidget {
   const _ShrinkingPageFixture({super.key, required this.log});
 
@@ -454,6 +464,7 @@ class _ShrinkingPageFixtureState extends State<_ShrinkingPageFixture> {
   }
 }
 
+/// 在运行时替换 PageController，验证监听器迁移。
 class _SwappablePageFixture extends StatefulWidget {
   const _SwappablePageFixture({super.key, required this.log});
 
@@ -498,6 +509,7 @@ class _SwappablePageFixtureState extends State<_SwappablePageFixture> {
   }
 }
 
+/// 持有 TabController 并暴露动画切换操作的基础夹具。
 class _TabFixture extends StatefulWidget {
   const _TabFixture({super.key, required this.log});
 
@@ -550,6 +562,7 @@ class _TabFixtureState extends State<_TabFixture>
   }
 }
 
+/// 替换 TabController 后检测旧动画是否仍然产生回调。
 class _SwappableTabFixture extends StatefulWidget {
   const _SwappableTabFixture({super.key, required this.log});
 
@@ -599,6 +612,7 @@ class _SwappableTabFixtureState extends State<_SwappableTabFixture>
   }
 }
 
+/// 外层 PageView 中嵌套内层 PageView 的组合传播夹具。
 class _NestedPageFixture extends StatefulWidget {
   const _NestedPageFixture({super.key, required this.log});
 

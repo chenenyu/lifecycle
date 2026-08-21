@@ -1,3 +1,10 @@
+/*
+ * 定义节点的“本地限制”，它尚未与父节点状态合成。
+ *
+ * hidden、visible、active 三个命名构造器从类型入口消除 visible/active/fraction
+ * 的矛盾组合；Controller 只需把该约束与父 Snapshot 取交集。值语义还保证重复提交
+ * 相同约束时不会产生无效 Transition。
+ */
 import 'package:flutter/foundation.dart';
 
 import 'lifecycle_event.dart';

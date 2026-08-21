@@ -1,3 +1,9 @@
+/*
+ * LifecycleController、Snapshot、Transition 和 Navigator 查询 API 的状态机测试。
+ *
+ * 除确定性边界 case 外，还使用固定 seed 的独立参考模型执行随机约束、App 状态和
+ * reparent 操作，验证快照合成、事件顺序、重入通知、异常隔离与终止销毁始终连续。
+ */
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';

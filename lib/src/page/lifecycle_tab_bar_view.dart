@@ -1,3 +1,10 @@
+/*
+ * 为 TabBarView 的每个 Tab 安装索引生命周期节点。
+ *
+ * 同时监听 TabController 与 animation，使用动画值计算相邻 Tab 的可见比例；只有
+ * indexIsChanging 为 false 且 offset 归零时选中 Tab 才 active。Controller 替换时成对
+ * 移除/添加两类监听，防止旧动画继续驱动新界面。
+ */
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -37,6 +44,7 @@ class LifecycleTabBarView extends StatefulWidget {
   State<LifecycleTabBarView> createState() => _LifecycleTabBarViewState();
 }
 
+/// 将 TabController 动画值转换为所有已实例化 Tab 的约束。
 class _LifecycleTabBarViewState extends State<LifecycleTabBarView> {
   final IndexedLifecycleRegistry _registry = IndexedLifecycleRegistry();
 
@@ -72,6 +80,7 @@ class _LifecycleTabBarViewState extends State<LifecycleTabBarView> {
     final value = widget.controller.animation?.value ??
         widget.controller.index.toDouble();
     final fraction = math.max(0.0, 1 - (value - index).abs());
+    // 点击动画和手势 offset 都必须归零，选中 Tab 才能提升为 active。
     final settled = !widget.controller.indexIsChanging &&
         widget.controller.offset.abs() < 0.0001;
     if (fraction <= 0) return const LifecycleConstraint.hidden();

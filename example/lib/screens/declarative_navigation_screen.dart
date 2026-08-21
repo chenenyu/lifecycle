@@ -1,3 +1,9 @@
+/*
+ * 演示 Navigator 2.0 pages API 下的路由生命周期。
+ *
+ * 页面列表作为唯一导航状态，NavigatorLifecycleController 的 observer 接收增删差异；
+ * onDidRemovePage 回写 pages，避免声明式状态与 Navigator 内部历史分叉。
+ */
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
@@ -6,6 +12,7 @@ import '../widgets/demo_scaffold.dart';
 import '../widgets/demo_widgets.dart';
 import '../widgets/lifecycle_status_card.dart';
 
+/// 使用 Navigator.pages 驱动路由生命周期的示例页。
 class DeclarativeNavigationScreen extends StatefulWidget {
   const DeclarativeNavigationScreen({super.key, required this.log});
 
@@ -94,6 +101,7 @@ class _DeclarativeNavigationScreenState
   }
 }
 
+/// 声明式 Navigator 中带生命周期探针的单页内容。
 class _DeclarativePage extends StatelessWidget {
   const _DeclarativePage({
     required this.label,

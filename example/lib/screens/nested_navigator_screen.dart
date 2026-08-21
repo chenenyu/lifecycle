@@ -1,3 +1,9 @@
+/*
+ * 演示嵌套 Navigator 拥有独立生命周期历史。
+ *
+ * 内层 Navigator 使用自己的 Controller、Observer 和 Scope；外层路由变化仍通过父节点
+ * 约束内层所有页面，避免把两个 Navigator 的 Route 栈错误合并。
+ */
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
@@ -6,6 +12,7 @@ import '../widgets/demo_scaffold.dart';
 import '../widgets/demo_widgets.dart';
 import '../widgets/lifecycle_status_card.dart';
 
+/// 为内层 Navigator 安装独立 Controller 的示例页。
 class NestedNavigatorScreen extends StatefulWidget {
   const NestedNavigatorScreen({super.key, required this.log});
 
@@ -102,6 +109,7 @@ class _NestedNavigatorScreenState extends State<NestedNavigatorScreen> {
   }
 }
 
+/// 内层路由的探针页面，通过按钮推进或回退局部历史。
 class _NestedPage extends StatelessWidget {
   const _NestedPage({
     required this.title,

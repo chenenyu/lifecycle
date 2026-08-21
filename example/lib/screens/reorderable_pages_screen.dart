@@ -1,3 +1,9 @@
+/*
+ * 演示分页数据重排时保持 State 和生命周期身份。
+ *
+ * 稳定 pageIdBuilder 与 findPageIndex 成对使用，反转数据后 PageView 能把已有 Element
+ * 迁移到新索引，避免把旧页面 State、计数器或 Controller 错配给另一条数据。
+ */
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
@@ -6,6 +12,7 @@ import '../widgets/demo_scaffold.dart';
 import '../widgets/demo_widgets.dart';
 import '../widgets/lifecycle_status_card.dart';
 
+/// 通过反转数据顺序演示稳定页面身份的示例。
 class ReorderablePagesScreen extends StatefulWidget {
   const ReorderablePagesScreen({super.key, required this.log});
 
@@ -105,6 +112,7 @@ class _ReorderablePagesScreenState extends State<ReorderablePagesScreen> {
   }
 }
 
+/// 带本地计数器的页面，用于观察 State 是否随稳定 ID 正确迁移。
 class _IdentityPage extends StatefulWidget {
   const _IdentityPage({super.key, required this.id});
 

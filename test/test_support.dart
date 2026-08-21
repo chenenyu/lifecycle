@@ -1,6 +1,13 @@
+/*
+ * 框架 Widget 测试共享的应用壳、事件日志和探针组件。
+ *
+ * lifecycleTestApp 统一安装 App/Navigator Scope；LifecycleProbe 将 Event 收集为可断言
+ * 序列；公共 matcher 描述常见 created/active/hidden 轨迹，减少测试间样板和顺序误写。
+ */
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
+/// 按探针名称保存有序 Event，便于断言跨节点传播顺序。
 class LifecycleEventLog {
   final Map<String, List<LifecycleEvent>> _events = {};
   final Map<String, List<LifecycleTransition>> _transitions = {};
@@ -36,6 +43,7 @@ class LifecycleEventLog {
   }
 }
 
+/// 在不改变 child 布局的情况下记录最近作用域的生命周期事件。
 class LifecycleProbe extends StatelessWidget {
   const LifecycleProbe({
     super.key,

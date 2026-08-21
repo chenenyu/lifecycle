@@ -1,3 +1,10 @@
+/*
+ * 声明生命周期阶段、语义事件、变化原因和回调签名。
+ *
+ * Phase 描述稳定快照，Event 描述两个快照之间的语义差异，Cause 描述变化来源；三者
+ * 分离后，调用方既能按当前状态渲染，也能按边沿事件执行一次性副作用，避免把平台
+ * AppLifecycleState、路由状态和 Widget 可见性混为同一枚举。
+ */
 /// The stable state represented by a lifecycle snapshot.
 enum LifecyclePhase {
   /// The controller has not been attached to a lifecycle tree.

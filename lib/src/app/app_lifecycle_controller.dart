@@ -1,3 +1,10 @@
+/*
+ * 将 Flutter 的 AppLifecycleState 转换为生命周期树的根约束。
+ *
+ * Controller 通过 WidgetsBindingObserver 接收平台状态，再原子更新 appState 与
+ * LifecycleConstraint：resumed 为 active，inactive 为 visible，其余状态为 hidden。
+ * 这种单一映射入口可避免应用状态与可见/活跃状态分别更新造成短暂矛盾。
+ */
 import 'package:flutter/widgets.dart';
 
 import '../core/lifecycle_constraint.dart';

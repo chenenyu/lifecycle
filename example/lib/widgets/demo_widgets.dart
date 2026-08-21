@@ -1,5 +1,12 @@
+/*
+ * example 使用的轻量说明和导航组件。
+ *
+ * 这些 Widget 只负责一致的视觉表达，不感知生命周期状态；将展示组件与 demo 的状态机
+ * 分离后，示例代码能把重点放在 Lifecycle API 的接线与事件上。
+ */
 import 'package:flutter/material.dart';
 
+/// 用统一样式描述 demo 操作和预期结果。
 class DemoInstructions extends StatelessWidget {
   const DemoInstructions({
     super.key,
@@ -31,6 +38,7 @@ class DemoInstructions extends StatelessWidget {
   }
 }
 
+/// 首页使用的标准 demo 导航条目。
 class DemoNavigationTile extends StatelessWidget {
   const DemoNavigationTile({
     super.key,

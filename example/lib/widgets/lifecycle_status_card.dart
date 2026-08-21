@@ -1,6 +1,13 @@
+/*
+ * 从最近 LifecycleScope 读取并可视化 Snapshot。
+ *
+ * LifecycleBuilder 确保 phase、fraction 或 appState 任一变化都会刷新卡片；compact 模式
+ * 供 Grid/Page 等受限空间复用，帮助演示父级约束如何影响同一个后代组件。
+ */
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
+/// 实时展示最近作用域 Snapshot 的诊断卡片。
 class LifecycleStatusCard extends StatelessWidget {
   const LifecycleStatusCard({
     super.key,

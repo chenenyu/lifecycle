@@ -1,3 +1,9 @@
+/*
+ * example 的端到端 Widget 测试集合。
+ *
+ * 测试通过真实点击、路由、Dialog、分页重排和视口交互验证 demo 接线，而不是重复框架
+ * 单元测试；每个 case 同时防止示例 Key、日志文案和页面导航在重构中失效。
+ */
 import 'package:example/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
