@@ -237,6 +237,8 @@ ListView.builder(
   itemBuilder: (context, index) => ViewportLifecycleItem(
     visibleThreshold: 0.25,
     activeThreshold: 0.8,
+    activationPolicy:
+        ViewportLifecycleActivationPolicy.whenScrollSettles,
     onTransition: (transition) {
       debugPrint('item $index: ${transition.current.visibleFraction}');
     },
@@ -245,9 +247,13 @@ ListView.builder(
 )
 ```
 
-An item is visible when its fraction reaches `visibleThreshold` and active
-when it reaches `activeThreshold`. If `activeThreshold` is omitted, it uses the
-visible threshold. The containing app, route, and page states still apply.
+An item is visible when its fraction reaches `visibleThreshold`. By default it
+can become active only after scrolling settles and its fraction reaches
+`activeThreshold`; use `ViewportLifecycleActivationPolicy.immediate` to retain
+activation while scrolling. If `activeThreshold` is omitted, it uses the
+visible threshold. Reported fractions are stabilized to one-percent increments
+by default; set `visibleFractionGranularity` to zero for exact measurements.
+The containing app, route, and page states still apply.
 
 ## Direct controller use
 

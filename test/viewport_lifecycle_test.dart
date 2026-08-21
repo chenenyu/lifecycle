@@ -195,6 +195,178 @@ void main() {
       expect(log['layoutItem'], hiddenFromActive);
     });
 
+    // 验证默认策略在持续 fling 的每一帧都只保持 visible，滚动停止后才允许 item 激活。
+    testWidgets('defers activation until a fling settles', (tester) async {
+      await _setSurface(tester, const Size(400, 400));
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      final snapshots = <int, LifecycleSnapshot>{};
+      var activationsDuringScroll = 0;
+
+      await tester.pumpWidget(
+        lifecycleTestApp(
+          home: Scaffold(
+            body: ListView.builder(
+              controller: controller,
+              itemExtent: 100,
+              itemCount: 100,
+              itemBuilder: (context, index) => _KeepAlive(
+                child: ViewportLifecycleItem(
+                  onTransition: (transition) {
+                    snapshots[index] = transition.current;
+                    if (transition.contains(LifecycleEvent.activated) &&
+                        controller.position.isScrollingNotifier.value) {
+                      activationsDuringScroll++;
+                    }
+                  },
+                  child: Text('Fling item $index'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.fling(
+        find.byType(ListView),
+        const Offset(0, -1600),
+        5000,
+      );
+      var observedScrollingFrame = false;
+      for (var frame = 0; frame < 120; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+        if (!controller.position.isScrollingNotifier.value) break;
+        observedScrollingFrame = true;
+        expect(
+          snapshots.values.where((snapshot) => snapshot.visible),
+          everyElement(
+            isA<LifecycleSnapshot>().having(
+              (snapshot) => snapshot.active,
+              'active',
+              isFalse,
+            ),
+          ),
+        );
+      }
+
+      expect(observedScrollingFrame, isTrue);
+      expect(activationsDuringScroll, 0);
+      expect(snapshots.length, greaterThan(10));
+      await tester.pumpAndSettle();
+      expect(snapshots.values.any((snapshot) => snapshot.active), isTrue);
+    });
+
+    // 验证 immediate 策略保留旧行为，允许快速滑入视口的 item 在滚动中直接激活。
+    testWidgets('can activate immediately during a fling', (tester) async {
+      await _setSurface(tester, const Size(400, 400));
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      var activationsDuringScroll = 0;
+
+      await tester.pumpWidget(
+        lifecycleTestApp(
+          home: Scaffold(
+            body: ListView.builder(
+              controller: controller,
+              itemExtent: 100,
+              itemCount: 40,
+              itemBuilder: (context, index) => ViewportLifecycleItem(
+                activationPolicy: ViewportLifecycleActivationPolicy.immediate,
+                onTransition: (transition) {
+                  if (transition.contains(LifecycleEvent.activated) &&
+                      controller.position.isScrollingNotifier.value) {
+                    activationsDuringScroll++;
+                  }
+                },
+                child: Text('Immediate item $index'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.fling(
+        find.byType(ListView),
+        const Offset(0, -1000),
+        4000,
+      );
+      for (var frame = 0; frame < 30; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+        if (!controller.position.isScrollingNotifier.value) break;
+      }
+
+      expect(activationsDuringScroll, greaterThan(0));
+    });
+
+    // 验证真实滚动导致 KeepAlive item 离屏时会在当前测量帧隐藏，不再额外等待零比例确认。
+    testWidgets('hides a kept-alive item in the first post-scroll frame', (
+      tester,
+    ) async {
+      await _setSurface(tester, const Size(400, 400));
+      final log = LifecycleEventLog();
+      final fixtureKey = GlobalKey<_ScrollableFixtureState>();
+      await tester.pumpWidget(
+        lifecycleTestApp(
+          home: Scaffold(
+            body: _ScrollableFixture(
+              key: fixtureKey,
+              kind: _ScrollKind.list,
+              log: log,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      log.clear();
+
+      fixtureKey.currentState!.jumpTo(720);
+      await tester.pump();
+
+      expect(log['item0'], hiddenFromActive);
+    });
+
+    // 验证微小比例抖动会被默认 1% 粒度吸收，而有意义的比例变化仍会派发 transition。
+    testWidgets('stabilizes visible fraction changes by granularity', (
+      tester,
+    ) async {
+      await _setSurface(tester, const Size(400, 50));
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      final transitions = <LifecycleTransition>[];
+      await tester.pumpWidget(
+        lifecycleTestApp(
+          home: ListView(
+            controller: controller,
+            children: [
+              const SizedBox(height: 25),
+              SizedBox(
+                height: 100,
+                child: ViewportLifecycleItem(
+                  onTransition: transitions.add,
+                  child: const Text('Granularity item'),
+                ),
+              ),
+              const SizedBox(height: 500),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      transitions.clear();
+
+      controller.jumpTo(0.2);
+      await tester.pumpAndSettle();
+      expect(transitions, isEmpty);
+
+      controller.jumpTo(2);
+      await tester.pumpAndSettle();
+      expect(transitions, hasLength(1));
+      expect(transitions.single.current.visibleFraction, 0.27);
+      expect(transitions.single.events, isEmpty);
+    });
+
     // 验证缺少 Scrollable 祖先时主动抛出可理解的 FlutterError，而非静默给出错误状态。
     testWidgets('requires a Scrollable ancestor', (tester) async {
       await tester.pumpWidget(
