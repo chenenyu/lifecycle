@@ -6,6 +6,10 @@ import '../core/lifecycle_event.dart';
 import '../core/lifecycle_scope.dart';
 import '../core/lifecycle_snapshot.dart';
 
+part 'navigator_lifecycle_observer.dart';
+part 'navigator_lifecycle_scope.dart';
+part 'route_lifecycle_entry.dart';
+
 /// Owns route lifecycle state for exactly one Flutter Navigator.
 class NavigatorLifecycleController {
   /// Creates a controller and its paired [observer].
@@ -214,129 +218,5 @@ class NavigatorLifecycleController {
     _history.clear();
     _unknownRouteController.dispose();
     _root.dispose();
-  }
-}
-
-/// Connects a [NavigatorLifecycleController] to surrounding lifecycle scopes.
-class NavigatorLifecycleScope extends StatefulWidget {
-  /// Creates a Navigator lifecycle scope.
-  const NavigatorLifecycleScope({
-    super.key,
-    required this.controller,
-    required this.child,
-  });
-
-  /// Controller paired with the Navigator below [child].
-  final NavigatorLifecycleController controller;
-
-  /// Typically the Navigator produced by a WidgetsApp or nested Navigator.
-  final Widget child;
-
-  @override
-  State<NavigatorLifecycleScope> createState() =>
-      _NavigatorLifecycleScopeState();
-}
-
-class _NavigatorLifecycleScopeState extends State<NavigatorLifecycleScope> {
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    widget.controller._attach(resolveLifecycleParent(context));
-  }
-
-  @override
-  void didUpdateWidget(NavigatorLifecycleScope oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      oldWidget.controller._detach();
-      widget.controller._attach(resolveLifecycleParent(context));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return LifecycleRouteResolverScope(
-      resolver: widget.controller._controllerFor,
-      child: widget.child,
-    );
-  }
-
-  @override
-  void dispose() {
-    widget.controller._detach();
-    super.dispose();
-  }
-}
-
-class _NavigatorLifecycleObserver extends NavigatorObserver {
-  _NavigatorLifecycleObserver(this.controller);
-
-  final NavigatorLifecycleController controller;
-
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    controller._handlePush(route, previousRoute);
-  }
-
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    controller._handlePop(route, previousRoute);
-  }
-
-  @override
-  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    controller._handleRemove(route, previousRoute);
-  }
-
-  @override
-  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
-    controller._handleReplace(newRoute: newRoute, oldRoute: oldRoute);
-  }
-
-  @override
-  void didChangeTop(Route<dynamic> topRoute, Route<dynamic>? previousTopRoute) {
-    controller._handleTopChanged(topRoute, previousTopRoute);
-  }
-
-  @override
-  void didStartUserGesture(
-    Route<dynamic> route,
-    Route<dynamic>? previousRoute,
-  ) {
-    controller._handleGestureStarted(route, previousRoute);
-  }
-
-  @override
-  void didStopUserGesture() {
-    controller._handleGestureStopped();
-  }
-}
-
-class _RouteLifecycleEntry {
-  _RouteLifecycleEntry({
-    required this.route,
-    required LifecycleController parent,
-  }) : controller = LifecycleController(
-          constraint: const LifecycleConstraint.hidden(),
-          debugLabel: 'Route(${route.settings.name ?? route.hashCode})',
-        )..attach(parent: parent, cause: LifecycleCause.route);
-
-  final Route<dynamic> route;
-  final LifecycleController controller;
-
-  LifecycleSnapshot get lifecycle => controller.value;
-
-  void update({
-    required LifecycleConstraint constraint,
-    LifecycleCause cause = LifecycleCause.route,
-  }) {
-    controller.updateLocal(
-      constraint: constraint,
-      cause: cause,
-    );
-  }
-
-  void dispose({LifecycleCause cause = LifecycleCause.route}) {
-    controller.disposeWithCause(cause);
   }
 }
