@@ -1,8 +1,15 @@
+/*
+ * example 页面共用的 Scaffold 与可折叠日志面板。
+ *
+ * 统一布局确保每个 demo 的操作方式一致；日志面板监听 DemoLog、支持复制和清空，并用
+ * 稳定 Key 服务 Widget/integration 测试，避免各页面重复实现调试 UI。
+ */
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../logging/demo_log.dart';
 
+/// 在宽窄屏幕上统一组织 demo 内容和日志面板。
 class DemoScaffold extends StatelessWidget {
   const DemoScaffold({
     super.key,
@@ -42,6 +49,7 @@ class DemoScaffold extends StatelessWidget {
   }
 }
 
+/// 窄屏下通过底部面板按需展示日志，避免挤压 demo 内容。
 class _NarrowDemoLayout extends StatefulWidget {
   const _NarrowDemoLayout({
     required this.body,
@@ -106,6 +114,7 @@ class _NarrowDemoLayoutState extends State<_NarrowDemoLayout> {
   }
 }
 
+/// 监听 DemoLog 并渲染可展开的 Transition 列表。
 class LifecycleLogPanel extends StatefulWidget {
   const LifecycleLogPanel({super.key, required this.log});
 
@@ -173,6 +182,7 @@ class _LifecycleLogPanelState extends State<LifecycleLogPanel> {
   }
 }
 
+/// 日志面板的复制、清空和关闭操作栏。
 class _LogToolbar extends StatelessWidget {
   const _LogToolbar({
     required this.log,
@@ -263,6 +273,7 @@ class _LogToolbar extends StatelessWidget {
   }
 }
 
+/// 展示单条 Transition 摘要与前后 Snapshot 细节。
 class _LogEntryTile extends StatelessWidget {
   const _LogEntryTile({required this.entry});
 

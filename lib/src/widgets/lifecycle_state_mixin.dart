@@ -1,3 +1,10 @@
+/*
+ * 将生命周期节点能力直接混入 StatefulWidget 的 State。
+ *
+ * Mixin 在 initState 创建 Binding，在 didChangeDependencies 同步父节点，并把变化拆成
+ * 可覆写的 onLifecycleTransition/onLifecycleEvent。统一的 dispose 顺序确保终止事件
+ * 仍可交付，同时避免业务 State 手动管理 Controller 和监听器。
+ */
 import 'package:flutter/widgets.dart';
 
 import '../core/lifecycle_event.dart';

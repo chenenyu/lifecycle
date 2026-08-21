@@ -1,3 +1,10 @@
+/*
+ * 通过 InheritedWidget 在 Widget 树中传播 LifecycleController。
+ *
+ * 普通后代读取最近节点；导航场景额外用私有 route resolver 将当前 ModalRoute 映射
+ * 到对应 Controller。Scope 只暴露 controller/child，路由识别留在内部，以避免调用方
+ * 构造与 Navigator 历史不一致的作用域。
+ */
 import 'package:flutter/widgets.dart';
 
 import 'lifecycle_controller.dart';
@@ -43,6 +50,7 @@ class LifecycleScope extends StatelessWidget {
   }
 }
 
+/// 实际参与依赖追踪的私有 InheritedWidget，避免公开 Scope 暴露继承实现。
 class _LifecycleScopeData extends InheritedWidget {
   const _LifecycleScopeData({
     required this.controller,
@@ -87,6 +95,8 @@ class LifecycleRouteResolverScope extends InheritedWidget {
 }
 
 LifecycleController? resolveLifecycleParent(BuildContext context) {
+  // Navigator 子树优先按 ModalRoute 解析路由节点；找不到 Route 或 resolver 时才回退到
+  // 最近普通 Scope，避免移除动画中的 route 意外继承 App 根节点。
   final localScope = _LifecycleScopeData.maybeOf(context);
   final route = ModalRoute.of(context);
 

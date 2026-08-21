@@ -1,3 +1,9 @@
+/*
+ * 演示 LifecyclePageView、嵌套 PageView 与视口节点组合。
+ *
+ * 页面滚动期间相邻页仅 visible，settle 后选中页 active；子页面内再放置
+ * ViewportLifecycleItem，用于观察 App→Route→Page→Viewport 的逐层约束传播。
+ */
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
@@ -6,6 +12,7 @@ import '../widgets/demo_scaffold.dart';
 import '../widgets/demo_widgets.dart';
 import '../widgets/lifecycle_status_card.dart';
 
+/// 展示 PageView 生命周期及其与 Viewport 节点组合的页面。
 class PageLifecycleScreen extends StatefulWidget {
   const PageLifecycleScreen({super.key, required this.log});
 
@@ -89,6 +96,7 @@ class _PageLifecycleScreenState extends State<PageLifecycleScreen> {
   }
 }
 
+/// 强制保留 State，用于证明离屏页面只改变生命周期而不被销毁。
 class _KeepAlivePage extends StatefulWidget {
   const _KeepAlivePage({required this.child});
 

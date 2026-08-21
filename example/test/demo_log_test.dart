@@ -1,3 +1,9 @@
+/*
+ * DemoLog 的结构化数据回归测试。
+ *
+ * 重点覆盖无语义 Event 的 fraction-only Transition，以及 Dialog 销毁时继承 appState 的
+ * terminal 记录，防止日志层只显示事件而悄悄丢失快照变化。
+ */
 import 'package:example/logging/demo_log.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';

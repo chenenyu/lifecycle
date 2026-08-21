@@ -1,3 +1,10 @@
+/*
+ * example 的应用级装配：主题、路由表、App 生命周期和 Navigator 生命周期。
+ *
+ * 根 Navigator 使用独立 NavigatorLifecycleController，并同时安装其 observer 与 scope，
+ * 展示生产应用所需的完整接线方式；dispose 负责释放导航 Controller，避免示例掩盖资源
+ * 所有权问题。
+ */
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
@@ -13,6 +20,7 @@ import 'screens/reorderable_pages_screen.dart';
 import 'screens/tab_lifecycle_screen.dart';
 import 'screens/viewport_lifecycle_screen.dart';
 
+/// 安装 lifecycle 根节点并提供全部示例路由的 MaterialApp。
 class LifecycleExampleApp extends StatefulWidget {
   const LifecycleExampleApp({super.key});
 
@@ -20,6 +28,7 @@ class LifecycleExampleApp extends StatefulWidget {
   State<LifecycleExampleApp> createState() => _LifecycleExampleAppState();
 }
 
+/// 持有与根 Navigator 同生命周期的导航 Controller。
 class _LifecycleExampleAppState extends State<LifecycleExampleApp> {
   final NavigatorLifecycleController _navigation = NavigatorLifecycleController(
     debugLabel: 'ExampleNavigator',

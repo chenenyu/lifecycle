@@ -1,3 +1,10 @@
+/*
+ * LifecycleController 父子合成实验页。
+ *
+ * 页面允许分别编辑父子本地约束，并实时展示有效 Snapshot，用来观察 phase 交集、可见
+ * 比例取最小值和事件传播。布尔 UI 会先规范化为 LifecycleConstraint，避免实验页构造
+ * 框架本身不允许的矛盾状态。
+ */
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
@@ -5,6 +12,7 @@ import '../logging/demo_log.dart';
 import '../widgets/demo_scaffold.dart';
 import '../widgets/demo_widgets.dart';
 
+/// 可交互编辑父子约束的 Controller 合成实验页。
 class ControllerLabScreen extends StatefulWidget {
   const ControllerLabScreen({super.key});
 
@@ -149,6 +157,7 @@ LifecycleConstraint _constraintFor({
   return LifecycleConstraint.visible(visibleFraction: fraction);
 }
 
+/// 编辑单个本地约束的布尔状态和可见比例。
 class _ControllerEditor extends StatelessWidget {
   const _ControllerEditor({
     required this.label,
@@ -213,6 +222,7 @@ class _ControllerEditor extends StatelessWidget {
   }
 }
 
+/// 以诊断友好的格式展示有效 Snapshot。
 class _SnapshotCard extends StatelessWidget {
   const _SnapshotCard({required this.label, required this.snapshot});
 

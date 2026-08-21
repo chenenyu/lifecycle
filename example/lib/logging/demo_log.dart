@@ -1,8 +1,16 @@
+/*
+ * example 的结构化生命周期日志模型。
+ *
+ * 日志保存完整 Transition 而不是只保存 Event，因此 visibleFraction-only 变化和 terminal
+ * appState 也不会丢失；ChangeNotifier 驱动日志面板刷新，固定容量队列避免长时间演示
+ * 导致内存无限增长。
+ */
 import 'dart:collection';
 
 import 'package:flutter/widgets.dart';
 import 'package:lifecycle/lifecycle.dart';
 
+/// 一条可展示、可复制的不可变 Transition 日志。
 class DemoLogEntry {
   const DemoLogEntry({
     required this.sequence,
@@ -35,6 +43,7 @@ class DemoLogEntry {
   }
 }
 
+/// 有容量上限、可通知 UI 的内存日志仓库。
 class DemoLog extends ChangeNotifier {
   static const maximumEntries = 200;
 

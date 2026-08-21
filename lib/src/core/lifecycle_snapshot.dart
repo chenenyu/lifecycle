@@ -1,3 +1,10 @@
+/*
+ * 表示节点与全部祖先合成后的不可变有效状态。
+ *
+ * 每个 Phase 使用独立命名构造器，并从 phase 派生 attached/visible/active，避免重复
+ * 状态源。Snapshot 采用值相等，因此 Controller 能过滤幂等更新，同时仍会识别
+ * visibleFraction 或 appState 的真实变化。
+ */
 import 'package:flutter/widgets.dart';
 
 import 'lifecycle_event.dart';

@@ -1,3 +1,11 @@
+/*
+ * 测量 Scrollable 内元素的二维可见比例，并转换为生命周期约束。
+ *
+ * 同一 Scrollable 的 item 共用 Coordinator：滚动与布局信号按帧合并、viewport 几何只
+ * 读取一次，再批量计算候选节点。滚动中默认禁止 active，比例按粒度稳定；Sliver
+ * KeepAlive bucket 使用 parked 快速路径，既避免激活风暴和浮点抖动，也控制快速 fling
+ * 时 getTransformTo 的成本。非滚动瞬时零几何会二次确认，真实滚动离屏则立即隐藏。
+ */
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -64,6 +72,7 @@ class ViewportLifecycleItem extends StatefulWidget {
   State<ViewportLifecycleItem> createState() => _ViewportLifecycleItemState();
 }
 
+/// 保存单个 item 的稳定比例、零比例确认状态和 Coordinator 注册关系。
 class _ViewportLifecycleItemState extends State<ViewportLifecycleItem> {
   late final LifecycleNodeBinding _node;
   _ViewportMeasurementCoordinator? _coordinator;
@@ -187,6 +196,8 @@ class _ViewportLifecycleItemState extends State<ViewportLifecycleItem> {
   }
 
   bool get _isKeptAlive {
+    // KeepAlive 标记位于 Sliver 直接子节点的 ParentData；当前 RenderBox 可能被多层
+    // Padding/RepaintBoundary 包裹，因此沿 RenderObject 父链查找。
     RenderObject? renderObject = context.findRenderObject();
     while (renderObject != null) {
       final parentData = renderObject.parentData;
@@ -203,6 +214,7 @@ class _ViewportLifecycleItemState extends State<ViewportLifecycleItem> {
     if (fraction <= 0) return 0;
     final granularity = widget.visibleFractionGranularity;
     if (granularity == 0) return fraction;
+    // 量化只影响对外 Snapshot；visible/active 阈值始终使用未经量化的真实 fraction。
     final quantized =
         ((fraction / granularity).round() * granularity).clamp(0.0, 1.0);
     return quantized > 0 ? quantized : granularity;
@@ -290,6 +302,7 @@ class _ViewportMeasurementCoordinator {
   }
 
   void _handlePositionChanged() {
+    // 标记本批由真实滚动触发，使离屏 item 跳过非滚动场景的二次零确认。
     _positionChanged = true;
     scheduleMeasurement();
   }
@@ -316,6 +329,8 @@ class _ViewportMeasurementCoordinator {
   }
 
   void didPark(_ViewportLifecycleItemState item) {
+    // KeepAlive bucket 中的 RenderBox 仍 attached，但其变换可能陈旧；park 后不再执行
+    // 昂贵的 getTransformTo，只在滚动批次廉价探测它是否恢复。
     _parkedItems.add(item);
     _geometricallyVisibleItems.remove(item);
   }
@@ -331,11 +346,13 @@ class _ViewportMeasurementCoordinator {
       _measurementScheduled = false;
       if (_items.isEmpty) return;
       _syncPosition();
+      // 可见节点持续跟踪；layout/paint 标记的脏节点用于发现新进入视口的 item。
       final candidates = <_ViewportLifecycleItemState>{
         ..._geometricallyVisibleItems,
         ..._dirtyItems,
       };
       if (_positionChanged || isScrolling) {
+        // 普通候选执行完整几何测量；parked 节点只检查 ParentData，恢复后再重新测量。
         candidates.addAll(_items.where((item) => !_parkedItems.contains(item)));
         for (final item in List<_ViewportLifecycleItemState>.of(_parkedItems)) {
           if (!item._isKeptAlive) {
@@ -362,6 +379,7 @@ class _ViewportMeasurementCoordinator {
   }
 }
 
+/// 在布局或实际绘制发生时，把 item 标记为下一批测量候选。
 class _ViewportLayoutObserver extends SingleChildRenderObjectWidget {
   const _ViewportLayoutObserver({
     required this.onMeasurementNeeded,
@@ -384,6 +402,7 @@ class _ViewportLayoutObserver extends SingleChildRenderObjectWidget {
   }
 }
 
+/// 不改变布局/绘制结果，只观察 RenderObject 生命周期中的几何失效信号。
 class _RenderViewportLayoutObserver extends RenderProxyBox {
   _RenderViewportLayoutObserver(this.onMeasurementNeeded);
 

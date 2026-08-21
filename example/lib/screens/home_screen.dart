@@ -1,3 +1,9 @@
+/*
+ * example 首页和功能导航入口。
+ *
+ * 页面集中展示当前根生命周期、跳转各专项 demo，并提供 Boundary 与 Dialog 的就地实验。
+ * 所有交互都写入共享 DemoLog，方便对照操作前后的 Transition 顺序。
+ */
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
@@ -7,6 +13,7 @@ import '../widgets/demo_scaffold.dart';
 import '../widgets/demo_widgets.dart';
 import '../widgets/lifecycle_status_card.dart';
 
+/// 汇总所有 demo 入口并展示当前生命周期的首页。
 class LifecycleHomeScreen extends StatefulWidget {
   const LifecycleHomeScreen({super.key, required this.log});
 

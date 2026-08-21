@@ -1,3 +1,10 @@
+/*
+ * 在任意 Widget 子树上叠加业务侧 LifecycleConstraint。
+ *
+ * Boundary 通过内部 LifecycleNodeBinding 与父状态取交集，因此只能收窄、不能提升父级
+ * 生命周期；constraint 作为单一输入避免 visible/active/fraction 分别更新产生矛盾。
+ * Widget 更新时依赖值相等过滤重复通知。
+ */
 import 'package:flutter/widgets.dart';
 
 import '../core/lifecycle_constraint.dart';
@@ -36,6 +43,7 @@ class LifecycleBoundary extends StatefulWidget {
   State<LifecycleBoundary> createState() => _LifecycleBoundaryState();
 }
 
+/// 把 Widget 参数同步为节点本地约束，并交付由此产生的回调。
 class _LifecycleBoundaryState extends State<LifecycleBoundary> {
   late final LifecycleNodeBinding _node;
 

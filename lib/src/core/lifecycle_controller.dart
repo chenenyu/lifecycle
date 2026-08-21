@@ -1,3 +1,10 @@
+/*
+ * 生命周期树的核心状态机，负责父子合成、事件推导、通知和安全销毁。
+ *
+ * 节点保存一个本地 LifecycleConstraint，通过 min(fraction) 与父 Snapshot 合成有效
+ * 状态；每次有效变化生成唯一 LifecycleTransition，并借助队列处理回调中的重入更新。
+ * 父环校验、监听器隔离和延迟 finalize 共同规避递归通知、悬挂父引用及派发中销毁。
+ */
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -35,6 +42,9 @@ class LifecycleController extends ChangeNotifier
   LifecycleTransition? _lastTransition;
 
   bool _emitting = false;
+
+  // 回调可能再次更新当前节点。待处理标记把递归调用合并为下一轮计算，保证每个
+  // Transition.previous 都等于上一轮已经交付的 current。
   bool _recomputePending = false;
   LifecycleCause _pendingCause = LifecycleCause.custom;
   bool _disposeAfterEmission = false;
@@ -118,6 +128,7 @@ class LifecycleController extends ChangeNotifier
   void _validateParent(LifecycleController? parent) {
     if (parent == null) return;
     parent._ensureUsable();
+    // 先沿候选父链检查环，再解除旧父监听；失败时原树结构保持不变。
     for (LifecycleController? ancestor = parent;
         ancestor != null;
         ancestor = ancestor._parent) {
@@ -146,6 +157,8 @@ class LifecycleController extends ChangeNotifier
     }
 
     try {
+      // do/while 消费通知期间产生的最后一批更新。监听器保持同步调用，但不会形成
+      // 深层递归栈或交付中间的半成品状态。
       LifecycleCause nextCause = cause;
       do {
         _recomputePending = false;
@@ -190,6 +203,7 @@ class LifecycleController extends ChangeNotifier
     final parentVisible = parentSnapshot?.visible ?? true;
     final parentActive = parentSnapshot?.active ?? true;
     final parentFraction = parentSnapshot?.visibleFraction ?? 1;
+    // 子节点不能比父节点拥有更高可见比例，visible/active 也只能逐层收窄。
     final visibleFraction =
         math.min(parentFraction, _localConstraint.visibleFraction);
     final visible =
@@ -217,6 +231,7 @@ class LifecycleController extends ChangeNotifier
     LifecycleSnapshot current,
   ) {
     final events = <LifecycleEvent>[];
+    // 顺序固定为“先退出旧状态，再进入新状态”，terminal disposed 始终最后交付。
     if (!previous.attached && current.attached) {
       events.add(LifecycleEvent.created);
     }
@@ -280,6 +295,8 @@ class LifecycleController extends ChangeNotifier
     _disposed = true;
     _attached = false;
     if (_emitting) {
+      // ChangeNotifier 正在遍历监听器时不能立即 finalize；先排队 terminal Snapshot，
+      // 等当前通知结束后再调用 super.dispose()。
       _recomputePending = true;
       _pendingCause = cause;
       _disposeAfterEmission = true;

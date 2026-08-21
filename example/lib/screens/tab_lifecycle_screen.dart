@@ -1,3 +1,9 @@
+/*
+ * 演示 LifecycleTabBarView 的点击动画和手势切换。
+ *
+ * TabController 动画驱动可见比例，只有动画稳定后的选中 Tab 才 active；页面记录每个
+ * index 的 Transition，用于对照快速点击、滑动与初始索引行为。
+ */
 import 'package:flutter/material.dart';
 import 'package:lifecycle/lifecycle.dart';
 
@@ -6,6 +12,7 @@ import '../widgets/demo_scaffold.dart';
 import '../widgets/demo_widgets.dart';
 import '../widgets/lifecycle_status_card.dart';
 
+/// 展示 Tab 动画、手势与生命周期约束的页面。
 class TabLifecycleScreen extends StatefulWidget {
   const TabLifecycleScreen({super.key, required this.log});
 
@@ -66,6 +73,7 @@ class _TabLifecycleScreenState extends State<TabLifecycleScreen>
   }
 }
 
+/// 单个 Tab 的生命周期状态和说明内容。
 class _TabContent extends StatelessWidget {
   const _TabContent({required this.index});
 

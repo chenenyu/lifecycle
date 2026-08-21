@@ -1,3 +1,10 @@
+/*
+ * 为 Flutter PageView 的每个已实例化页面安装可组合生命周期节点。
+ *
+ * PageController.page 决定相邻页面的可见比例；拖动中页面保持 visible，滚动结束且命中
+ * selectedIndex 后才 active。稳定 page ID 与 findChildIndex 配对，规避列表重排时
+ * State 和生命周期身份错配；Controller 替换时会迁移监听并重新同步初始页。
+ */
 // ignore_for_file: prefer_initializing_formals
 
 import 'dart:math' as math;
@@ -144,6 +151,7 @@ class _LifecyclePageViewState extends State<LifecyclePageView> {
   }
 
   double get _page {
+    // Controller 尚未 attach 时 page 为 null，回退 initialPage 可让首帧约束保持确定。
     if (widget.itemCount == 0) return 0;
     final rawPage = !widget.controller.hasClients
         ? widget.controller.initialPage.toDouble()
@@ -178,6 +186,7 @@ class _LifecyclePageViewState extends State<LifecyclePageView> {
   }
 
   LifecycleConstraint _constraintFor(int index) {
+    // 相邻页按到当前浮点 page 的距离线性计算比例；滚动期间所有页面保持 inactive。
     final fraction = math.max(0.0, 1 - (_page - index).abs());
     if (fraction <= 0) return const LifecycleConstraint.hidden();
     if (!_scrolling && index == _selectedIndex) {
@@ -192,6 +201,7 @@ class _LifecyclePageViewState extends State<LifecyclePageView> {
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
+    // 只处理本 PageView 的 PageMetrics，忽略页面内部嵌套 Scrollable 的通知。
     final metrics = notification.metrics;
     if (notification.depth != 0 || metrics is! PageMetrics) {
       return false;

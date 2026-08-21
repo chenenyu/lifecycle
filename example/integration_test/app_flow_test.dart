@@ -1,3 +1,9 @@
+/*
+ * 在真实 Flutter Engine 上串联验证 example 的主要交互流程。
+ *
+ * 用例跨越命名路由、非透明 Dialog、快速滚动、PageView 手势和日志面板，补足 Widget
+ * test 无法完全覆盖的平台帧调度与原生 Navigator 动画；断言聚焦关键结果以降低时序抖动。
+ */
 import 'package:example/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

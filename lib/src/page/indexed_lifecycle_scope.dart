@@ -1,3 +1,10 @@
+/*
+ * PageView 与 TabBarView 共用的索引节点注册表和作用域。
+ *
+ * Registry 只保存已实例化页面，容器通过 resolveConstraint 按 index 提供最新约束；
+ * 页面 State 保持自己的 Controller 身份，重排或懒加载时不会因 rebuild 丢失生命周期。
+ * 集中同步还能避免两个分页组件分别维护相同的 host 列表。
+ */
 import 'package:flutter/widgets.dart';
 
 import '../core/lifecycle_constraint.dart';
@@ -9,6 +16,7 @@ import '../core/lifecycle_transition.dart';
 typedef IndexedLifecycleTransitionCallback = void Function(
     int index, LifecycleTransition transition);
 
+/// 已实例化索引节点的轻量注册表；不会主动创建离屏页面。
 class IndexedLifecycleRegistry {
   LifecycleConstraint Function(int index)? resolveConstraint;
   final Set<IndexedLifecycleScopeState> _hosts = {};
@@ -34,6 +42,7 @@ class IndexedLifecycleRegistry {
   }
 }
 
+/// 为单个 index 安装稳定生命周期节点。
 class IndexedLifecycleScope extends StatefulWidget {
   const IndexedLifecycleScope({
     super.key,
@@ -54,6 +63,7 @@ class IndexedLifecycleScope extends StatefulWidget {
   State<IndexedLifecycleScope> createState() => IndexedLifecycleScopeState();
 }
 
+/// 在 registry 变化或 index 重排时迁移注册关系，并保留 Controller 身份。
 class IndexedLifecycleScopeState extends State<IndexedLifecycleScope> {
   late final LifecycleNodeBinding _node;
 

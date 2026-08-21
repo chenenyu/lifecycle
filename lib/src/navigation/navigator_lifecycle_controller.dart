@@ -1,3 +1,10 @@
+/*
+ * 管理单个 Navigator 的路由生命周期历史和有效状态。
+ *
+ * 主 Controller 维护路由栈、遮挡关系和返回手势；Observer、Scope、RouteEntry 拆为
+ * part 文件但仍属于同一 library，因此可以共享私有 API 而不扩大公开面。自顶向下
+ * 计算 opaque 遮挡可正确处理普通页面、非透明 Dialog 和交互式返回。
+ */
 import 'package:flutter/widgets.dart';
 
 import '../core/lifecycle_constraint.dart';
@@ -169,6 +176,8 @@ class NavigatorLifecycleController {
   }
 
   void _recomputeRoutes(LifecycleCause cause) {
+    // 从栈顶向下扫描：遇到首个 opaque route 后，更低层路由全部隐藏；返回手势中的
+    // previousRoute 是例外，它需要提前恢复可见但仍保持 inactive。
     var coveredByOpaqueRoute = false;
     for (var index = _history.length - 1; index >= 0; index--) {
       final entry = _history[index];
