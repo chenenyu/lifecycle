@@ -529,8 +529,11 @@ class _BoundaryFixtureState extends State<_BoundaryFixture> {
   @override
   Widget build(BuildContext context) {
     return LifecycleBoundary(
-      visible: visible,
-      active: active,
+      constraint: !visible
+          ? const LifecycleConstraint.hidden()
+          : active
+              ? const LifecycleConstraint.active()
+              : const LifecycleConstraint.visible(),
       onEvent: (event, _) => widget.log.add('boundary', event),
       child: LifecycleProbe(
         name: 'child',

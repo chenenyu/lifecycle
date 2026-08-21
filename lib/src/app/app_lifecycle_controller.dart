@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../core/lifecycle_constraint.dart';
 import '../core/lifecycle_controller.dart';
 import '../core/lifecycle_event.dart';
 
@@ -32,18 +33,14 @@ class AppLifecycleController extends LifecycleController
     switch (state) {
       case AppLifecycleState.resumed:
         updateLocal(
-          visible: true,
-          active: true,
-          visibleFraction: 1,
+          constraint: const LifecycleConstraint.active(),
           appState: state,
           cause: LifecycleCause.app,
         );
         return;
       case AppLifecycleState.inactive:
         updateLocal(
-          visible: true,
-          active: false,
-          visibleFraction: 1,
+          constraint: const LifecycleConstraint.visible(),
           appState: state,
           cause: LifecycleCause.app,
         );
@@ -52,9 +49,7 @@ class AppLifecycleController extends LifecycleController
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
         updateLocal(
-          visible: false,
-          active: false,
-          visibleFraction: 0,
+          constraint: const LifecycleConstraint.hidden(),
           appState: state,
           cause: LifecycleCause.app,
         );

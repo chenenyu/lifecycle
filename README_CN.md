@@ -23,8 +23,7 @@
 当前状态由以下对象表示：
 
 ```dart
-LifecycleSnapshot(
-  phase: LifecyclePhase.active,
+LifecycleSnapshot.active(
   visibleFraction: 1,
   appState: AppLifecycleState.resumed,
 )
@@ -156,9 +155,11 @@ LifecycleBuilder(
 
 ```dart
 LifecycleBoundary(
-  visible: panelIsOpen,
-  active: panelHasFocus,
-  visibleFraction: animation.value,
+  constraint: !panelIsOpen || animation.value <= 0
+      ? const LifecycleConstraint.hidden()
+      : panelHasFocus
+          ? LifecycleConstraint.active(visibleFraction: animation.value)
+          : LifecycleConstraint.visible(visibleFraction: animation.value),
   child: const Panel(),
 )
 ```
@@ -250,7 +251,9 @@ ListView.builder(
 
 ```dart
 final parent = LifecycleController()..attach();
-final child = LifecycleController(visible: false);
+final child = LifecycleController(
+  constraint: const LifecycleConstraint.hidden(),
+);
 
 void onChildChanged() {
   final transition = child.lastTransition!;
@@ -262,8 +265,7 @@ child
   ..attach(parent: parent);
 
 child.updateLocal(
-  visible: true,
-  active: true,
+  constraint: const LifecycleConstraint.active(),
   cause: LifecycleCause.custom,
 );
 

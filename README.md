@@ -25,8 +25,7 @@ the resulting snapshot and the cause of the transition.
 The current state is represented by:
 
 ```dart
-LifecycleSnapshot(
-  phase: LifecyclePhase.active,
+LifecycleSnapshot.active(
   visibleFraction: 1,
   appState: AppLifecycleState.resumed,
 )
@@ -161,9 +160,11 @@ its parent.
 
 ```dart
 LifecycleBoundary(
-  visible: panelIsOpen,
-  active: panelHasFocus,
-  visibleFraction: animation.value,
+  constraint: !panelIsOpen || animation.value <= 0
+      ? const LifecycleConstraint.hidden()
+      : panelHasFocus
+          ? LifecycleConstraint.active(visibleFraction: animation.value)
+          : LifecycleConstraint.visible(visibleFraction: animation.value),
   child: const Panel(),
 )
 ```
@@ -256,7 +257,9 @@ add/remove during delivery, and reentrant updates are queued deterministically.
 
 ```dart
 final parent = LifecycleController()..attach();
-final child = LifecycleController(visible: false);
+final child = LifecycleController(
+  constraint: const LifecycleConstraint.hidden(),
+);
 
 void onChildChanged() {
   final transition = child.lastTransition!;
@@ -268,8 +271,7 @@ child
   ..attach(parent: parent);
 
 child.updateLocal(
-  visible: true,
-  active: true,
+  constraint: const LifecycleConstraint.active(),
   cause: LifecycleCause.custom,
 );
 

@@ -203,8 +203,11 @@ class _LifecycleHomeScreenState extends State<LifecycleHomeScreen>
                 : null,
           ),
           LifecycleBoundary(
-            visible: _boundaryVisible,
-            active: _boundaryActive,
+            constraint: !_boundaryVisible
+                ? const LifecycleConstraint.hidden()
+                : _boundaryActive
+                ? const LifecycleConstraint.active()
+                : const LifecycleConstraint.visible(),
             onTransition: (transition) =>
                 widget.log.record('custom boundary', transition),
             child: const LifecycleStatusCard(label: 'Boundary child'),

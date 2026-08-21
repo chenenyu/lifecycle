@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../core/lifecycle_constraint.dart';
 import '../core/lifecycle_controller.dart';
 import '../core/lifecycle_event.dart';
 import '../core/lifecycle_scope.dart';
@@ -14,9 +15,7 @@ class NavigatorLifecycleController {
         ) {
     observer = _NavigatorLifecycleObserver(this);
     _unknownRouteController = LifecycleController(
-      visible: false,
-      active: false,
-      visibleFraction: 0,
+      constraint: const LifecycleConstraint.hidden(),
       debugLabel: 'UnknownRoute',
     )..attach(parent: _root, cause: LifecycleCause.route);
   }
@@ -49,9 +48,7 @@ class NavigatorLifecycleController {
       _root.attach(parent: parent);
     }
     _root.updateLocal(
-      visible: true,
-      active: true,
-      visibleFraction: 1,
+      constraint: const LifecycleConstraint.active(),
       cause: LifecycleCause.route,
     );
   }
@@ -60,9 +57,7 @@ class NavigatorLifecycleController {
   void _detach() {
     if (_disposed || !_root.isAttached) return;
     _root.updateLocal(
-      visible: false,
-      active: false,
-      visibleFraction: 0,
+      constraint: const LifecycleConstraint.hidden(),
       cause: LifecycleCause.route,
     );
   }
@@ -176,7 +171,14 @@ class NavigatorLifecycleController {
       final gestureVisible = identical(entry.route, _gesturePreviousRoute);
       final visible = !coveredByOpaqueRoute || gestureVisible;
       final active = index == _history.length - 1;
-      entry.update(visible: visible, active: active, cause: cause);
+      entry.update(
+        constraint: !visible
+            ? const LifecycleConstraint.hidden()
+            : active
+                ? const LifecycleConstraint.active()
+                : const LifecycleConstraint.visible(),
+        cause: cause,
+      );
       if (_isOpaque(entry.route)) {
         coveredByOpaqueRoute = true;
       }
@@ -315,9 +317,7 @@ class _RouteLifecycleEntry {
     required this.route,
     required LifecycleController parent,
   }) : controller = LifecycleController(
-          visible: false,
-          active: false,
-          visibleFraction: 0,
+          constraint: const LifecycleConstraint.hidden(),
           debugLabel: 'Route(${route.settings.name ?? route.hashCode})',
         )..attach(parent: parent, cause: LifecycleCause.route);
 
@@ -327,14 +327,11 @@ class _RouteLifecycleEntry {
   LifecycleSnapshot get lifecycle => controller.value;
 
   void update({
-    required bool visible,
-    required bool active,
+    required LifecycleConstraint constraint,
     LifecycleCause cause = LifecycleCause.route,
   }) {
     controller.updateLocal(
-      visible: visible,
-      active: active,
-      visibleFraction: visible ? 1 : 0,
+      constraint: constraint,
       cause: cause,
     );
   }

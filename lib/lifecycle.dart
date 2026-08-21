@@ -4,6 +4,7 @@ library;
 export 'src/app/app_lifecycle_controller.dart';
 export 'src/app/lifecycle_app.dart';
 export 'src/core/lifecycle_controller.dart';
+export 'src/core/lifecycle_constraint.dart';
 export 'src/core/lifecycle_event.dart';
 export 'src/core/lifecycle_scope.dart' show LifecycleScope;
 export 'src/core/lifecycle_snapshot.dart';
