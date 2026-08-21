@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'lifecycle_constraint.dart';
 import 'lifecycle_event.dart';
 import 'lifecycle_snapshot.dart';
 import 'lifecycle_transition.dart';
@@ -14,22 +15,16 @@ class LifecycleController extends ChangeNotifier
     implements ValueListenable<LifecycleSnapshot> {
   /// Creates a detached controller with the supplied local restrictions.
   LifecycleController({
-    bool visible = true,
-    bool active = true,
-    double visibleFraction = 1,
+    LifecycleConstraint constraint = const LifecycleConstraint.active(),
     AppLifecycleState? appState,
     this.debugLabel,
-  })  : _localVisible = visible,
-        _localActive = active,
-        _localVisibleFraction = _normalizeFraction(visibleFraction),
+  })  : _localConstraint = constraint,
         _localAppState = appState;
 
   /// Optional label used when inspecting lifecycle trees in a debugger.
   final String? debugLabel;
 
-  bool _localVisible;
-  bool _localActive;
-  double _localVisibleFraction;
+  LifecycleConstraint _localConstraint;
   AppLifecycleState? _localAppState;
 
   bool _attached = false;
@@ -53,6 +48,9 @@ class LifecycleController extends ChangeNotifier
   /// This is null until the first snapshot change. Listeners registered with
   /// [addListener] can read this value synchronously from their callback.
   LifecycleTransition? get lastTransition => _lastTransition;
+
+  /// The normalized local restriction composed with the parent snapshot.
+  LifecycleConstraint get localConstraint => _localConstraint;
 
   /// Whether this node has been attached.
   bool get isAttached => _attached;
@@ -92,19 +90,13 @@ class LifecycleController extends ChangeNotifier
   /// Set [clearAppState] to remove a local app-state override and inherit it
   /// from the parent again.
   void updateLocal({
-    bool? visible,
-    bool? active,
-    double? visibleFraction,
+    LifecycleConstraint? constraint,
     AppLifecycleState? appState,
     bool clearAppState = false,
     LifecycleCause cause = LifecycleCause.custom,
   }) {
     _ensureUsable();
-    if (visible != null) _localVisible = visible;
-    if (active != null) _localActive = active;
-    if (visibleFraction != null) {
-      _localVisibleFraction = _normalizeFraction(visibleFraction);
-    }
+    if (constraint != null) _localConstraint = constraint;
     if (clearAppState) {
       _localAppState = null;
     } else if (appState != null) {
@@ -186,9 +178,7 @@ class LifecycleController extends ChangeNotifier
 
   LifecycleSnapshot _buildSnapshot() {
     if (_disposed) {
-      return LifecycleSnapshot(
-        phase: LifecyclePhase.disposed,
-        visibleFraction: 0,
+      return LifecycleSnapshot.disposed(
         appState: _terminalAppState,
       );
     }
@@ -200,20 +190,26 @@ class LifecycleController extends ChangeNotifier
     final parentVisible = parentSnapshot?.visible ?? true;
     final parentActive = parentSnapshot?.active ?? true;
     final parentFraction = parentSnapshot?.visibleFraction ?? 1;
-    final visibleFraction = math.min(parentFraction, _localVisibleFraction);
-    final visible = _localVisible && parentVisible && visibleFraction > 0;
-    final active = visible && _localActive && parentActive;
+    final visibleFraction =
+        math.min(parentFraction, _localConstraint.visibleFraction);
+    final visible =
+        _localConstraint.visible && parentVisible && visibleFraction > 0;
+    final active = visible && _localConstraint.active && parentActive;
+    final appState = _localAppState ?? parentSnapshot?.appState;
 
-    final phase = active
-        ? LifecyclePhase.active
-        : visible
-            ? LifecyclePhase.visible
-            : LifecyclePhase.hidden;
-    return LifecycleSnapshot(
-      phase: phase,
-      visibleFraction: visible ? visibleFraction : 0,
-      appState: _localAppState ?? parentSnapshot?.appState,
-    );
+    if (active) {
+      return LifecycleSnapshot.active(
+        visibleFraction: visibleFraction,
+        appState: appState,
+      );
+    }
+    if (visible) {
+      return LifecycleSnapshot.visible(
+        visibleFraction: visibleFraction,
+        appState: appState,
+      );
+    }
+    return LifecycleSnapshot.hidden(appState: appState);
   }
 
   static List<LifecycleEvent> _deriveEvents(
@@ -241,11 +237,6 @@ class LifecycleController extends ChangeNotifier
       events.add(LifecycleEvent.disposed);
     }
     return events;
-  }
-
-  static double _normalizeFraction(double value) {
-    if (value.isNaN) return 0;
-    return value.clamp(0.0, 1.0).toDouble();
   }
 
   void _ensureUsable() {

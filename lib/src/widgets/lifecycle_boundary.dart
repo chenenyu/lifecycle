@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../core/lifecycle_constraint.dart';
 import '../core/lifecycle_event.dart';
 import '../core/lifecycle_node_binding.dart';
 import '../core/lifecycle_transition.dart';
@@ -9,23 +10,15 @@ class LifecycleBoundary extends StatefulWidget {
   /// Creates a custom lifecycle boundary.
   const LifecycleBoundary({
     super.key,
-    this.visible = true,
-    this.active = true,
-    this.visibleFraction = 1,
+    this.constraint = const LifecycleConstraint.active(),
     this.cause = LifecycleCause.custom,
     this.onTransition,
     this.onEvent,
     required this.child,
   });
 
-  /// Local visibility restriction.
-  final bool visible;
-
-  /// Local activity restriction.
-  final bool active;
-
-  /// Local visible fraction in the range 0–1.
-  final double visibleFraction;
+  /// Normalized local restriction composed with the parent lifecycle.
+  final LifecycleConstraint constraint;
 
   /// Cause reported for boundary updates.
   final LifecycleCause cause;
@@ -50,9 +43,7 @@ class _LifecycleBoundaryState extends State<LifecycleBoundary> {
   void initState() {
     super.initState();
     _node = LifecycleNodeBinding(
-      visible: widget.visible,
-      active: widget.active,
-      visibleFraction: widget.visibleFraction,
+      constraint: widget.constraint,
       debugLabel: 'LifecycleBoundary',
       onChanged: _handleChanged,
     );
@@ -67,13 +58,9 @@ class _LifecycleBoundaryState extends State<LifecycleBoundary> {
   @override
   void didUpdateWidget(LifecycleBoundary oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.visible != widget.visible ||
-        oldWidget.active != widget.active ||
-        oldWidget.visibleFraction != widget.visibleFraction) {
+    if (oldWidget.constraint != widget.constraint) {
       _node.update(
-        visible: widget.visible,
-        active: widget.active,
-        visibleFraction: widget.visibleFraction,
+        constraint: widget.constraint,
         cause: widget.cause,
       );
     }

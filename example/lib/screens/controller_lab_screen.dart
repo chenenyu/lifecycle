@@ -45,18 +45,22 @@ class _ControllerLabScreenState extends State<ControllerLabScreen> {
 
   void _updateParent() {
     _parent.updateLocal(
-      visible: _parentVisible,
-      active: _parentActive,
-      visibleFraction: _parentFraction,
+      constraint: _constraintFor(
+        visible: _parentVisible,
+        active: _parentActive,
+        fraction: _parentFraction,
+      ),
       cause: LifecycleCause.custom,
     );
   }
 
   void _updateChild() {
     _child.updateLocal(
-      visible: _childVisible,
-      active: _childActive,
-      visibleFraction: _childFraction,
+      constraint: _constraintFor(
+        visible: _childVisible,
+        active: _childActive,
+        fraction: _childFraction,
+      ),
       cause: LifecycleCause.custom,
     );
   }
@@ -133,6 +137,16 @@ class _ControllerLabScreenState extends State<ControllerLabScreen> {
     _log.dispose();
     super.dispose();
   }
+}
+
+LifecycleConstraint _constraintFor({
+  required bool visible,
+  required bool active,
+  required double fraction,
+}) {
+  if (!visible || fraction <= 0) return const LifecycleConstraint.hidden();
+  if (active) return LifecycleConstraint.active(visibleFraction: fraction);
+  return LifecycleConstraint.visible(visibleFraction: fraction);
 }
 
 class _ControllerEditor extends StatelessWidget {

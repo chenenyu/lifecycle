@@ -11,13 +11,11 @@ void main() {
     final log = DemoLog();
     addTearDown(log.dispose);
     final transition = LifecycleTransition(
-      previous: const LifecycleSnapshot(
-        phase: LifecyclePhase.visible,
+      previous: const LifecycleSnapshot.visible(
         visibleFraction: 0.8,
         appState: AppLifecycleState.resumed,
       ),
-      current: const LifecycleSnapshot(
-        phase: LifecyclePhase.visible,
+      current: const LifecycleSnapshot.visible(
         visibleFraction: 0.4,
         appState: AppLifecycleState.resumed,
       ),

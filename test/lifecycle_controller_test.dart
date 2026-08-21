@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lifecycle/lifecycle.dart';
@@ -21,17 +23,17 @@ void main() {
       expect(controller.value.phase, LifecyclePhase.active);
 
       events.clear();
-      controller.updateLocal(active: false);
+      controller.updateLocal(constraint: const LifecycleConstraint.visible());
       expect(events, [LifecycleEvent.deactivated]);
       expect(controller.value.phase, LifecyclePhase.visible);
 
-      controller.updateLocal(visible: false);
+      controller.updateLocal(constraint: const LifecycleConstraint.hidden());
       expect(events, [LifecycleEvent.deactivated, LifecycleEvent.disappeared]);
       expect(controller.value.phase, LifecyclePhase.hidden);
 
       events.clear();
-      controller.updateLocal(visible: true);
-      controller.updateLocal(active: true);
+      controller.updateLocal(constraint: const LifecycleConstraint.visible());
+      controller.updateLocal(constraint: const LifecycleConstraint.active());
       expect(events, [LifecycleEvent.appeared, LifecycleEvent.activated]);
 
       events.clear();
@@ -47,11 +49,12 @@ void main() {
     // 验证子节点会继承父节点的可见性、活跃状态和 App 状态，并取较小的可见比例。
     test('composes parent state and visible fractions', () {
       final parent = LifecycleController(
-        visibleFraction: 0.8,
+        constraint: const LifecycleConstraint.active(visibleFraction: 0.8),
         appState: AppLifecycleState.resumed,
       )..attach();
-      final child = LifecycleController(visibleFraction: 0.5)
-        ..attach(parent: parent);
+      final child = LifecycleController(
+        constraint: const LifecycleConstraint.active(visibleFraction: 0.5),
+      )..attach(parent: parent);
 
       expect(child.value.active, isTrue);
       expect(child.value.visibleFraction, 0.5);
@@ -59,8 +62,7 @@ void main() {
       expect(child.parent, same(parent));
 
       parent.updateLocal(
-        active: false,
-        visibleFraction: 0.25,
+        constraint: const LifecycleConstraint.visible(visibleFraction: 0.25),
         appState: AppLifecycleState.inactive,
         cause: LifecycleCause.app,
       );
@@ -70,7 +72,7 @@ void main() {
       expect(child.value.visibleFraction, 0.25);
       expect(child.value.appState, AppLifecycleState.inactive);
 
-      parent.updateLocal(visible: false, visibleFraction: 0);
+      parent.updateLocal(constraint: const LifecycleConstraint.hidden());
       expect(child.value.phase, LifecyclePhase.hidden);
 
       child.updateLocal(clearAppState: true);
@@ -103,14 +105,18 @@ void main() {
     // 验证节点换父级后立即采用新父级状态，且不再响应旧父级的后续变化。
     test('reparents without retaining the old parent', () {
       final visibleParent = LifecycleController()..attach();
-      final hiddenParent = LifecycleController(visible: false)..attach();
+      final hiddenParent = LifecycleController(
+        constraint: const LifecycleConstraint.hidden(),
+      )..attach();
       final child = LifecycleController()..attach(parent: hiddenParent);
 
       expect(child.value.phase, LifecyclePhase.hidden);
       child.reparent(visibleParent);
       expect(child.value.phase, LifecyclePhase.active);
 
-      hiddenParent.updateLocal(visible: true);
+      hiddenParent.updateLocal(
+        constraint: const LifecycleConstraint.active(),
+      );
       expect(child.value.phase, LifecyclePhase.active);
 
       child.dispose();
@@ -152,7 +158,7 @@ void main() {
       var transitionCount = 0;
       listenToTransitions(controller, (_) => transitionCount++);
 
-      controller.updateLocal(visible: true, active: true, visibleFraction: 1);
+      controller.updateLocal(constraint: const LifecycleConstraint.active());
       controller.reparent(null);
 
       expect(transitionCount, 0);
@@ -166,11 +172,13 @@ void main() {
       listenToTransitions(controller, (transition) {
         events.addAll(transition.events);
         if (transition.contains(LifecycleEvent.deactivated)) {
-          controller.updateLocal(visible: false);
+          controller.updateLocal(
+            constraint: const LifecycleConstraint.hidden(),
+          );
         }
       });
 
-      controller.updateLocal(active: false);
+      controller.updateLocal(constraint: const LifecycleConstraint.visible());
 
       expect(events, [LifecycleEvent.deactivated, LifecycleEvent.disappeared]);
       expect(controller.value.phase, LifecyclePhase.hidden);
@@ -196,11 +204,11 @@ void main() {
       };
       controller.addListener(selfRemoving);
 
-      controller.updateLocal(active: false);
+      controller.updateLocal(constraint: const LifecycleConstraint.visible());
       expect(selfRemovingCalls, 1);
       expect(lateListenerCalls, 0);
 
-      controller.updateLocal(active: true);
+      controller.updateLocal(constraint: const LifecycleConstraint.active());
       expect(selfRemovingCalls, 1);
       expect(lateListenerCalls, 1);
       controller.dispose();
@@ -220,7 +228,7 @@ void main() {
       final transitions = <LifecycleTransition>[];
       listenToTransitions(controller, transitions.add);
 
-      controller.updateLocal(active: false);
+      controller.updateLocal(constraint: const LifecycleConstraint.visible());
 
       expect(reportedErrors, hasLength(1));
       expect(reportedErrors.single.exception, isA<StateError>());
@@ -228,7 +236,7 @@ void main() {
       expect(transitions.single.events, [LifecycleEvent.deactivated]);
 
       transitions.clear();
-      controller.updateLocal(active: true);
+      controller.updateLocal(constraint: const LifecycleConstraint.active());
 
       expect(transitions, hasLength(1));
       expect(transitions.single.events, [LifecycleEvent.activated]);
@@ -280,7 +288,7 @@ void main() {
         }
       });
 
-      controller.updateLocal(active: false);
+      controller.updateLocal(constraint: const LifecycleConstraint.visible());
 
       expect(events, [
         LifecycleEvent.deactivated,
@@ -292,18 +300,21 @@ void main() {
       parent.dispose();
     });
 
-    // 验证 NaN、超上限和低于零的可见比例会被规范化到 0～1。
-    test('normalizes invalid visible fractions', () {
-      final controller = LifecycleController(visibleFraction: double.nan)
-        ..attach();
-      expect(controller.value.visibleFraction, 0);
-
-      controller.updateLocal(visibleFraction: 2);
-      expect(controller.value.visibleFraction, 1);
-
-      controller.updateLocal(visibleFraction: -1);
-      expect(controller.value.visibleFraction, 0);
-      controller.dispose();
+    // 验证约束只能表达 hidden、visible、active 三种规范状态，并拒绝非法比例。
+    test('constraint rejects invalid visible fractions', () {
+      expect(const LifecycleConstraint.hidden().visibleFraction, 0);
+      expect(
+        () => LifecycleConstraint.visible(visibleFraction: double.nan),
+        throwsAssertionError,
+      );
+      expect(
+        () => LifecycleConstraint.visible(visibleFraction: 0),
+        throwsAssertionError,
+      );
+      expect(
+        () => LifecycleConstraint.active(visibleFraction: 2),
+        throwsAssertionError,
+      );
     });
 
     // 验证 controller 销毁后不允许更新、重新挂接或新增监听器。
@@ -311,19 +322,22 @@ void main() {
       final controller = LifecycleController()..attach();
       controller.dispose();
 
-      expect(() => controller.updateLocal(visible: false), throwsStateError);
+      expect(
+        () => controller.updateLocal(
+          constraint: const LifecycleConstraint.hidden(),
+        ),
+        throwsStateError,
+      );
       expect(() => controller.attach(), throwsStateError);
       expect(() => controller.addListener(() {}), throwsFlutterError);
     });
 
     // 验证快照按字段进行值比较，并在诊断字符串中输出关键状态。
     test('snapshot implements value equality and diagnostics', () {
-      const first = LifecycleSnapshot(
-        phase: LifecyclePhase.visible,
+      const first = LifecycleSnapshot.visible(
         visibleFraction: 0.5,
       );
-      const second = LifecycleSnapshot(
-        phase: LifecyclePhase.visible,
+      const second = LifecycleSnapshot.visible(
         visibleFraction: 0.5,
       );
 
@@ -339,22 +353,12 @@ void main() {
     test('snapshot derives state flags from its phase', () {
       const snapshots = {
         LifecyclePhase.detached: LifecycleSnapshot.detached(),
-        LifecyclePhase.hidden: LifecycleSnapshot(
-          phase: LifecyclePhase.hidden,
-          visibleFraction: 0,
-        ),
-        LifecyclePhase.visible: LifecycleSnapshot(
-          phase: LifecyclePhase.visible,
+        LifecyclePhase.hidden: LifecycleSnapshot.hidden(),
+        LifecyclePhase.visible: LifecycleSnapshot.visible(
           visibleFraction: 0.5,
         ),
-        LifecyclePhase.active: LifecycleSnapshot(
-          phase: LifecyclePhase.active,
-          visibleFraction: 1,
-        ),
-        LifecyclePhase.disposed: LifecycleSnapshot(
-          phase: LifecyclePhase.disposed,
-          visibleFraction: 0,
-        ),
+        LifecyclePhase.active: LifecycleSnapshot.active(),
+        LifecyclePhase.disposed: LifecycleSnapshot.disposed(),
       };
 
       expect(snapshots[LifecyclePhase.detached]!.attached, isFalse);
@@ -367,29 +371,20 @@ void main() {
       expect(snapshots[LifecyclePhase.active]!.active, isTrue);
     });
 
-    // 验证构造器拒绝与 phase 矛盾的可见比例和 detached App 状态。
-    test('snapshot rejects states that contradict their phase', () {
+    // 验证命名构造器固定 phase，并拒绝 visible/active 的非法可见比例。
+    test('snapshot named constructors enforce their phase invariants', () {
       expect(
-        () => LifecycleSnapshot(
-          phase: LifecyclePhase.hidden,
-          visibleFraction: 0.5,
-        ),
+        () => LifecycleSnapshot.visible(visibleFraction: 0),
         throwsAssertionError,
       );
       expect(
-        () => LifecycleSnapshot(
-          phase: LifecyclePhase.active,
-          visibleFraction: 0,
-        ),
+        () => LifecycleSnapshot.active(visibleFraction: double.nan),
         throwsAssertionError,
       );
+      expect(const LifecycleSnapshot.hidden().phase, LifecyclePhase.hidden);
       expect(
-        () => LifecycleSnapshot(
-          phase: LifecyclePhase.detached,
-          visibleFraction: 0,
-          appState: AppLifecycleState.resumed,
-        ),
-        throwsAssertionError,
+        const LifecycleSnapshot.disposed().phase,
+        LifecyclePhase.disposed,
       );
     });
 
@@ -398,8 +393,7 @@ void main() {
       final events = <LifecycleEvent>[LifecycleEvent.appeared];
       final transition = LifecycleTransition(
         previous: const LifecycleSnapshot.detached(),
-        current: const LifecycleSnapshot(
-          phase: LifecyclePhase.visible,
+        current: const LifecycleSnapshot.visible(
           visibleFraction: 0.5,
         ),
         cause: LifecycleCause.custom,
@@ -414,6 +408,131 @@ void main() {
         throwsUnsupportedError,
       );
       expect(transition.toString(), contains('LifecycleCause.custom'));
+    });
+
+    // 使用固定 seed 随机组合约束、App 状态和 reparent，验证实现始终符合独立参考模型且 transition 连续。
+    test('matches the lifecycle model across randomized state changes', () {
+      const seed = 0x1C1EC0DE;
+      final random = math.Random(seed);
+      final firstRoot = LifecycleController(
+        appState: AppLifecycleState.resumed,
+      )..attach();
+      final secondRoot = LifecycleController(
+        constraint: const LifecycleConstraint.visible(visibleFraction: 0.7),
+        appState: AppLifecycleState.inactive,
+      )..attach();
+      final child = LifecycleController()..attach(parent: firstRoot);
+      final controllers = [firstRoot, secondRoot, child];
+      final constraints = <LifecycleController, LifecycleConstraint>{
+        firstRoot: const LifecycleConstraint.active(),
+        secondRoot: const LifecycleConstraint.visible(visibleFraction: 0.7),
+        child: const LifecycleConstraint.active(),
+      };
+      final appStates = <LifecycleController, AppLifecycleState?>{
+        firstRoot: AppLifecycleState.resumed,
+        secondRoot: AppLifecycleState.inactive,
+        child: null,
+      };
+      final parents = <LifecycleController, LifecycleController?>{
+        firstRoot: null,
+        secondRoot: null,
+        child: firstRoot,
+      };
+      final lastSnapshots = <LifecycleController, LifecycleSnapshot>{
+        for (final controller in controllers) controller: controller.value,
+      };
+
+      LifecycleSnapshot modelFor(LifecycleController controller) {
+        final parent = parents[controller];
+        final parentSnapshot = parent == null ? null : modelFor(parent);
+        final constraint = constraints[controller]!;
+        final fraction = math.min(
+          constraint.visibleFraction,
+          parentSnapshot?.visibleFraction ?? 1,
+        );
+        final visible = constraint.visible &&
+            (parentSnapshot?.visible ?? true) &&
+            fraction > 0;
+        final active =
+            visible && constraint.active && (parentSnapshot?.active ?? true);
+        final appState = appStates[controller] ?? parentSnapshot?.appState;
+        if (active) {
+          return LifecycleSnapshot.active(
+            visibleFraction: fraction,
+            appState: appState,
+          );
+        }
+        if (visible) {
+          return LifecycleSnapshot.visible(
+            visibleFraction: fraction,
+            appState: appState,
+          );
+        }
+        return LifecycleSnapshot.hidden(appState: appState);
+      }
+
+      for (final controller in controllers) {
+        controller.addListener(() {
+          final transition = controller.lastTransition!;
+          expect(transition.previous, lastSnapshots[controller]);
+          expect(
+            transition.events,
+            lifecycleEventsBetween(transition.previous, transition.current),
+          );
+          expect(transition.current, controller.value);
+          lastSnapshots[controller] = transition.current;
+        });
+      }
+
+      LifecycleConstraint randomConstraint() {
+        final fraction = (random.nextInt(100) + 1) / 100;
+        return switch (random.nextInt(3)) {
+          0 => const LifecycleConstraint.hidden(),
+          1 => LifecycleConstraint.visible(visibleFraction: fraction),
+          _ => LifecycleConstraint.active(visibleFraction: fraction),
+        };
+      }
+
+      const appStateValues = AppLifecycleState.values;
+      for (var iteration = 0; iteration < 1000; iteration++) {
+        switch (random.nextInt(4)) {
+          case 0:
+          case 1:
+            final target = controllers[random.nextInt(controllers.length)];
+            final constraint = randomConstraint();
+            constraints[target] = constraint;
+            target.updateLocal(
+              constraint: constraint,
+              cause: LifecycleCause.custom,
+            );
+          case 2:
+            final target = controllers[random.nextInt(controllers.length)];
+            final state = appStateValues[random.nextInt(appStateValues.length)];
+            appStates[target] = state;
+            target.updateLocal(
+              appState: state,
+              cause: LifecycleCause.app,
+            );
+          case 3:
+            final nextParent = [null, firstRoot, secondRoot][random.nextInt(3)];
+            parents[child] = nextParent;
+            child.reparent(nextParent, cause: LifecycleCause.widgetTree);
+        }
+
+        for (final controller in controllers) {
+          expect(
+            controller.value,
+            modelFor(controller),
+            reason: 'seed=$seed iteration=$iteration '
+                'controller=${controller.debugLabel ?? controllers.indexOf(controller)}',
+          );
+          expect(controller.value.visibleFraction, inInclusiveRange(0, 1));
+        }
+      }
+
+      child.dispose();
+      firstRoot.dispose();
+      secondRoot.dispose();
     });
   });
 
@@ -479,4 +598,20 @@ extension on List<LifecycleEvent> {
   void addAllFromTransition(LifecycleTransition transition) {
     addAll(transition.events);
   }
+}
+
+List<LifecycleEvent> lifecycleEventsBetween(
+  LifecycleSnapshot previous,
+  LifecycleSnapshot current,
+) {
+  return [
+    if (!previous.attached && current.attached) LifecycleEvent.created,
+    if (previous.active && !current.active) LifecycleEvent.deactivated,
+    if (previous.visible && !current.visible) LifecycleEvent.disappeared,
+    if (!previous.visible && current.visible) LifecycleEvent.appeared,
+    if (!previous.active && current.active) LifecycleEvent.activated,
+    if (previous.phase != LifecyclePhase.disposed &&
+        current.phase == LifecyclePhase.disposed)
+      LifecycleEvent.disposed,
+  ];
 }

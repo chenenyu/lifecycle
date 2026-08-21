@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../core/lifecycle_constraint.dart';
 import '../core/lifecycle_event.dart';
 import '../core/lifecycle_node_binding.dart';
 import '../core/lifecycle_transition.dart';
@@ -8,18 +9,8 @@ import '../core/lifecycle_transition.dart';
 typedef IndexedLifecycleTransitionCallback = void Function(
     int index, LifecycleTransition transition);
 
-class IndexedLifecycleSignal {
-  const IndexedLifecycleSignal({
-    required this.visibleFraction,
-    required this.active,
-  });
-
-  final double visibleFraction;
-  final bool active;
-}
-
 class IndexedLifecycleRegistry {
-  IndexedLifecycleSignal Function(int index)? resolveSignal;
+  LifecycleConstraint Function(int index)? resolveConstraint;
   final Set<IndexedLifecycleScopeState> _hosts = {};
 
   void register(IndexedLifecycleScopeState host) {
@@ -32,8 +23,8 @@ class IndexedLifecycleRegistry {
   }
 
   void syncHost(IndexedLifecycleScopeState host) {
-    final signal = resolveSignal?.call(host.widget.index);
-    if (signal != null) host.applySignal(signal);
+    final constraint = resolveConstraint?.call(host.widget.index);
+    if (constraint != null) host.applyConstraint(constraint);
   }
 
   void syncAll() {
@@ -70,9 +61,7 @@ class IndexedLifecycleScopeState extends State<IndexedLifecycleScope> {
   void initState() {
     super.initState();
     _node = LifecycleNodeBinding(
-      visible: false,
-      active: false,
-      visibleFraction: 0,
+      constraint: const LifecycleConstraint.hidden(),
       debugLabel: 'IndexedLifecycleScope(${widget.index})',
       onChanged: _handleChanged,
     );
@@ -96,11 +85,9 @@ class IndexedLifecycleScopeState extends State<IndexedLifecycleScope> {
     }
   }
 
-  void applySignal(IndexedLifecycleSignal signal) {
+  void applyConstraint(LifecycleConstraint constraint) {
     _node.update(
-      visible: signal.visibleFraction > 0,
-      active: signal.active,
-      visibleFraction: signal.visibleFraction,
+      constraint: constraint,
       cause: widget.cause,
     );
   }

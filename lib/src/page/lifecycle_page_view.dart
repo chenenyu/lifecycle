@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import '../core/lifecycle_constraint.dart';
 import '../core/lifecycle_event.dart';
 import 'indexed_lifecycle_scope.dart';
 
@@ -112,7 +113,7 @@ class _LifecyclePageViewState extends State<LifecyclePageView> {
   void initState() {
     super.initState();
     _selectedIndex = _clampIndex(widget.controller.initialPage);
-    _registry.resolveSignal = _signalFor;
+    _registry.resolveConstraint = _constraintFor;
     widget.controller.addListener(_syncPages);
     WidgetsBinding.instance.addPostFrameCallback((_) => _syncPages());
   }
@@ -176,12 +177,13 @@ class _LifecyclePageViewState extends State<LifecyclePageView> {
     return null;
   }
 
-  IndexedLifecycleSignal _signalFor(int index) {
+  LifecycleConstraint _constraintFor(int index) {
     final fraction = math.max(0.0, 1 - (_page - index).abs());
-    return IndexedLifecycleSignal(
-      visibleFraction: fraction,
-      active: !_scrolling && index == _selectedIndex && fraction > 0,
-    );
+    if (fraction <= 0) return const LifecycleConstraint.hidden();
+    if (!_scrolling && index == _selectedIndex) {
+      return LifecycleConstraint.active(visibleFraction: fraction);
+    }
+    return LifecycleConstraint.visible(visibleFraction: fraction);
   }
 
   void _syncPages() {

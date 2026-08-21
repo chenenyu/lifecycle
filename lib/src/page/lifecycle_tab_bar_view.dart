@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../core/lifecycle_constraint.dart';
 import '../core/lifecycle_event.dart';
 import 'indexed_lifecycle_scope.dart';
 
@@ -42,7 +43,7 @@ class _LifecycleTabBarViewState extends State<LifecycleTabBarView> {
   @override
   void initState() {
     super.initState();
-    _registry.resolveSignal = _signalFor;
+    _registry.resolveConstraint = _constraintFor;
     _addControllerListener(widget.controller);
     WidgetsBinding.instance.addPostFrameCallback((_) => _syncTabs());
   }
@@ -67,16 +68,17 @@ class _LifecycleTabBarViewState extends State<LifecycleTabBarView> {
     controller.animation?.removeListener(_syncTabs);
   }
 
-  IndexedLifecycleSignal _signalFor(int index) {
+  LifecycleConstraint _constraintFor(int index) {
     final value = widget.controller.animation?.value ??
         widget.controller.index.toDouble();
     final fraction = math.max(0.0, 1 - (value - index).abs());
     final settled = !widget.controller.indexIsChanging &&
         widget.controller.offset.abs() < 0.0001;
-    return IndexedLifecycleSignal(
-      visibleFraction: fraction,
-      active: settled && index == widget.controller.index,
-    );
+    if (fraction <= 0) return const LifecycleConstraint.hidden();
+    if (settled && index == widget.controller.index) {
+      return LifecycleConstraint.active(visibleFraction: fraction);
+    }
+    return LifecycleConstraint.visible(visibleFraction: fraction);
   }
 
   void _syncTabs() {

@@ -5,29 +5,42 @@ import 'lifecycle_event.dart';
 /// An immutable, normalized view of a lifecycle node's effective state.
 @immutable
 class LifecycleSnapshot {
-  /// Creates a lifecycle snapshot.
-  const LifecycleSnapshot({
+  const LifecycleSnapshot._({
     required this.phase,
     required this.visibleFraction,
     this.appState,
-  })  : assert(visibleFraction >= 0 && visibleFraction <= 1),
-        assert(
-          phase == LifecyclePhase.visible || phase == LifecyclePhase.active
-              ? visibleFraction > 0
-              : visibleFraction == 0,
-          'Only visible and active snapshots can have a visible fraction.',
-        ),
-        assert(
-          phase != LifecyclePhase.detached || appState == null,
-          'A detached snapshot cannot inherit an application state.',
-        );
+  });
 
   /// Creates the initial state of a controller that is not attached.
   const LifecycleSnapshot.detached()
-      : this(
+      : this._(
           phase: LifecyclePhase.detached,
           visibleFraction: 0,
         );
+
+  /// Creates an attached snapshot that is neither visible nor active.
+  const LifecycleSnapshot.hidden({this.appState})
+      : phase = LifecyclePhase.hidden,
+        visibleFraction = 0;
+
+  /// Creates an attached, visible snapshot that is not active.
+  const LifecycleSnapshot.visible({
+    this.visibleFraction = 1,
+    this.appState,
+  })  : assert(visibleFraction > 0 && visibleFraction <= 1),
+        phase = LifecyclePhase.visible;
+
+  /// Creates an attached, visible, and active snapshot.
+  const LifecycleSnapshot.active({
+    this.visibleFraction = 1,
+    this.appState,
+  })  : assert(visibleFraction > 0 && visibleFraction <= 1),
+        phase = LifecyclePhase.active;
+
+  /// Creates the terminal snapshot of a disposed controller.
+  const LifecycleSnapshot.disposed({this.appState})
+      : phase = LifecyclePhase.disposed,
+        visibleFraction = 0;
 
   /// The node's stable lifecycle phase.
   final LifecyclePhase phase;

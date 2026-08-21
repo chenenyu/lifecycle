@@ -1,6 +1,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../core/lifecycle_constraint.dart';
 import '../core/lifecycle_event.dart';
 import '../core/lifecycle_node_binding.dart';
 import '../core/lifecycle_transition.dart';
@@ -52,9 +53,7 @@ class _ViewportLifecycleItemState extends State<ViewportLifecycleItem> {
   void initState() {
     super.initState();
     _node = LifecycleNodeBinding(
-      visible: false,
-      active: false,
-      visibleFraction: 0,
+      constraint: const LifecycleConstraint.hidden(),
       debugLabel: 'ViewportLifecycleItem',
       onChanged: _handleChanged,
     );
@@ -143,10 +142,13 @@ class _ViewportLifecycleItemState extends State<ViewportLifecycleItem> {
     }
     _zeroFractionPending = false;
     _appliedFraction = fraction;
+    final constraint = !visible
+        ? const LifecycleConstraint.hidden()
+        : active
+            ? LifecycleConstraint.active(visibleFraction: fraction)
+            : LifecycleConstraint.visible(visibleFraction: fraction);
     _node.update(
-      visible: visible,
-      active: active,
-      visibleFraction: fraction,
+      constraint: constraint,
       cause: LifecycleCause.viewport,
     );
   }

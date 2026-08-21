@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import 'lifecycle_constraint.dart';
 import 'lifecycle_controller.dart';
 import 'lifecycle_event.dart';
 import 'lifecycle_scope.dart';
@@ -13,16 +14,12 @@ import 'lifecycle_transition.dart';
 /// mixins. It is intentionally not exported from the package library.
 final class LifecycleNodeBinding {
   LifecycleNodeBinding({
-    bool visible = true,
-    bool active = true,
-    double visibleFraction = 1,
+    LifecycleConstraint constraint = const LifecycleConstraint.active(),
     String? debugLabel,
     VoidCallback? onChanged,
   })  : _onChanged = onChanged,
         controller = LifecycleController(
-          visible: visible,
-          active: active,
-          visibleFraction: visibleFraction,
+          constraint: constraint,
           debugLabel: debugLabel,
         ) {
     if (onChanged != null) controller.addListener(onChanged);
@@ -51,15 +48,11 @@ final class LifecycleNodeBinding {
   }
 
   void update({
-    bool? visible,
-    bool? active,
-    double? visibleFraction,
+    LifecycleConstraint? constraint,
     LifecycleCause cause = LifecycleCause.custom,
   }) {
     controller.updateLocal(
-      visible: visible,
-      active: active,
-      visibleFraction: visibleFraction,
+      constraint: constraint,
       cause: cause,
     );
   }
