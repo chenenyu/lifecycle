@@ -42,6 +42,7 @@ class _PageLifecycleScreenState extends State<PageLifecycleScreen> {
           ),
           Expanded(
             child: LifecyclePageView(
+              key: const ValueKey('page-lifecycle-view'),
               controller: _controller,
               onPageTransition: (index, transition) =>
                   widget.log.record('page $index', transition),
