@@ -116,6 +116,90 @@ void main() {
       );
     });
 
+    // 验证 Scope 在缺失时可安全返回 null、of 会明确失败，存在时则返回同一个 controller。
+    testWidgets('LifecycleScope lookup distinguishes absent and present scope',
+        (
+      tester,
+    ) async {
+      LifecycleController? maybeWithoutScope;
+
+      await tester.pumpWidget(
+        Builder(
+          builder: (context) {
+            maybeWithoutScope = LifecycleScope.maybeOf(context);
+            expect(() => LifecycleScope.of(context), throwsAssertionError);
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      expect(maybeWithoutScope, isNull);
+
+      final controller = LifecycleController()..attach();
+      addTearDown(controller.dispose);
+      LifecycleController? resolved;
+      await tester.pumpWidget(
+        LifecycleScope(
+          controller: controller,
+          child: Builder(
+            builder: (context) {
+              resolved = LifecycleScope.of(context);
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      expect(resolved, same(controller));
+    });
+
+    // 验证 Mixin 的默认空回调无需覆写即可使用，并能通过 lifecycle getter 读取当前状态。
+    testWidgets('LifecycleStateMixin default callbacks and getter are safe', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const LifecycleApp(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: _DefaultMixinProbe(),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.text('active'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    });
+
+    // 验证 Builder 从树中移除时不会因终止 transition 在 dispose 阶段调用 setState。
+    testWidgets('LifecycleBuilder can be removed without a terminal rebuild', (
+      tester,
+    ) async {
+      var buildCount = 0;
+      await tester.pumpWidget(
+        LifecycleApp(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: LifecycleBuilder(
+              builder: (context, lifecycle) {
+                buildCount++;
+                return Text(lifecycle.phase.name);
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      final countBeforeRemoval = buildCount;
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+
+      expect(buildCount, countBeforeRemoval);
+      expect(tester.takeException(), isNull);
+    });
+
     // 验证 LifecycleListener 从 Widget 树移除时会收到最终 disposed 事件序列。
     testWidgets('LifecycleListener emits disposed when removed', (
       tester,
@@ -220,6 +304,41 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
       expect(second.lifecycle.phase, LifecyclePhase.hidden);
+    });
+
+    // 验证 Navigator controller 不变而外层 Scope 更换时，根节点会 reparent 到新父状态。
+    testWidgets('NavigatorLifecycleScope reparents when its parent changes', (
+      tester,
+    ) async {
+      final visibleParent = LifecycleController()..attach();
+      final hiddenParent = LifecycleController(
+        constraint: const LifecycleConstraint.hidden(),
+      )..attach();
+      final navigation = NavigatorLifecycleController();
+      addTearDown(visibleParent.dispose);
+      addTearDown(hiddenParent.dispose);
+      addTearDown(navigation.dispose);
+      final fixtureKey = GlobalKey<_NavigatorParentSwapFixtureState>();
+
+      await tester.pumpWidget(
+        _NavigatorParentSwapFixture(
+          key: fixtureKey,
+          visibleParent: visibleParent,
+          hiddenParent: hiddenParent,
+          navigation: navigation,
+        ),
+      );
+      await tester.pump();
+      expect(navigation.lifecycle.phase, LifecyclePhase.active);
+
+      fixtureKey.currentState!.useHiddenParent();
+      await tester.pump();
+      expect(navigation.lifecycle.phase, LifecyclePhase.hidden);
+
+      hiddenParent.updateLocal(
+        constraint: const LifecycleConstraint.active(),
+      );
+      expect(navigation.lifecycle.phase, LifecyclePhase.active);
     });
   });
 
@@ -578,6 +697,56 @@ class _MixinProbeState extends State<_MixinProbe> with LifecycleStateMixin {
 
   @override
   Widget build(BuildContext context) => const SizedBox.shrink();
+}
+
+/// 不覆写任何回调，只读取 Mixin getter，用于覆盖默认实现与安全销毁路径。
+class _DefaultMixinProbe extends StatefulWidget {
+  const _DefaultMixinProbe();
+
+  @override
+  State<_DefaultMixinProbe> createState() => _DefaultMixinProbeState();
+}
+
+class _DefaultMixinProbeState extends State<_DefaultMixinProbe>
+    with LifecycleStateMixin {
+  @override
+  Widget build(BuildContext context) => Text(lifecycle.phase.name);
+}
+
+/// 在两个普通 LifecycleScope 之间迁移同一个 Navigator controller。
+class _NavigatorParentSwapFixture extends StatefulWidget {
+  const _NavigatorParentSwapFixture({
+    super.key,
+    required this.visibleParent,
+    required this.hiddenParent,
+    required this.navigation,
+  });
+
+  final LifecycleController visibleParent;
+  final LifecycleController hiddenParent;
+  final NavigatorLifecycleController navigation;
+
+  @override
+  State<_NavigatorParentSwapFixture> createState() =>
+      _NavigatorParentSwapFixtureState();
+}
+
+class _NavigatorParentSwapFixtureState
+    extends State<_NavigatorParentSwapFixture> {
+  bool _hidden = false;
+
+  void useHiddenParent() => setState(() => _hidden = true);
+
+  @override
+  Widget build(BuildContext context) {
+    return LifecycleScope(
+      controller: _hidden ? widget.hiddenParent : widget.visibleParent,
+      child: NavigatorLifecycleScope(
+        controller: widget.navigation,
+        child: const SizedBox.shrink(),
+      ),
+    );
+  }
 }
 
 /// 通过 Navigator.pages 动态增删声明式路由的夹具。

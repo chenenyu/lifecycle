@@ -35,10 +35,14 @@ class _ControllerLabScreenState extends State<ControllerLabScreen> {
   @override
   void initState() {
     super.initState();
-    _parent = LifecycleController(debugLabel: 'LabParent')
+    // 先完成 late final 赋值再 attach；attach 会同步通知监听器，级联写法会让
+    // 回调在字段赋值完成前读取字段并触发 LateInitializationError。
+    _parent = LifecycleController(debugLabel: 'LabParent');
+    _parent
       ..addListener(_recordParentTransition)
       ..attach(cause: LifecycleCause.custom);
-    _child = LifecycleController(debugLabel: 'LabChild')
+    _child = LifecycleController(debugLabel: 'LabChild');
+    _child
       ..addListener(_recordChildTransition)
       ..attach(parent: _parent, cause: LifecycleCause.custom);
   }
