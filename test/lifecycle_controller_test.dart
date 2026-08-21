@@ -88,6 +88,80 @@ void main() {
       parent.dispose();
     });
 
+    // 验证本地 App 状态会覆盖父节点，clearAppState 后重新继承父状态，并保留父更新的 cause。
+    test('overrides and clears inherited app state deterministically', () {
+      final parent = LifecycleController(
+        appState: AppLifecycleState.inactive,
+      )..attach();
+      final child = LifecycleController(
+        appState: AppLifecycleState.paused,
+      )..attach(parent: parent);
+      final transitions = <LifecycleTransition>[];
+      listenToTransitions(child, transitions.add);
+
+      expect(child.value.appState, AppLifecycleState.paused);
+
+      child.updateLocal(
+        appState: AppLifecycleState.resumed,
+        clearAppState: true,
+      );
+      expect(child.value.appState, AppLifecycleState.inactive);
+
+      parent.updateLocal(
+        appState: AppLifecycleState.resumed,
+        cause: LifecycleCause.app,
+      );
+      expect(child.value.appState, AppLifecycleState.resumed);
+      expect(transitions.last.cause, LifecycleCause.app);
+
+      child.dispose();
+      parent.dispose();
+    });
+
+    // 验证父节点销毁会让仍挂接的子节点隐藏，子节点随后仍可安全脱离并恢复本地状态。
+    test('keeps children valid when their parent is disposed first', () {
+      final parent = LifecycleController(
+        appState: AppLifecycleState.resumed,
+      )..attach();
+      final child = LifecycleController()..attach(parent: parent);
+      final transitions = <LifecycleTransition>[];
+      listenToTransitions(child, transitions.add);
+
+      parent.disposeWithCause(LifecycleCause.custom);
+
+      expect(child.value.phase, LifecyclePhase.hidden);
+      expect(child.value.appState, AppLifecycleState.resumed);
+      expect(transitions.last.cause, LifecycleCause.custom);
+      expect(transitions.last.events, [
+        LifecycleEvent.deactivated,
+        LifecycleEvent.disappeared,
+      ]);
+
+      child.reparent(null);
+      expect(child.value.phase, LifecyclePhase.active);
+      expect(child.value.appState, isNull);
+      child.dispose();
+    });
+
+    // 验证从未 attach 的节点销毁时只派发 disposed，且重复销毁不会产生第二个终止事件。
+    test('disposes a detached controller exactly once', () {
+      final controller = LifecycleController(
+        appState: AppLifecycleState.paused,
+      );
+      final transitions = <LifecycleTransition>[];
+      listenToTransitions(controller, transitions.add);
+
+      controller.disposeWithCause(LifecycleCause.custom);
+      controller.disposeWithCause(LifecycleCause.route);
+
+      expect(transitions, hasLength(1));
+      expect(transitions.single.previous.phase, LifecyclePhase.detached);
+      expect(transitions.single.current.phase, LifecyclePhase.disposed);
+      expect(transitions.single.current.appState, AppLifecycleState.paused);
+      expect(transitions.single.events, [LifecycleEvent.disposed]);
+      expect(transitions.single.cause, LifecycleCause.custom);
+    });
+
     // 验证继承的 App 状态会保留在最终 disposed 快照中，即使父节点已先解除绑定。
     test('preserves inherited app state in the terminal snapshot', () {
       final parent = LifecycleController(
@@ -321,6 +395,28 @@ void main() {
         () => LifecycleConstraint.active(visibleFraction: 2),
         throwsAssertionError,
       );
+    });
+
+    // 验证规范化约束按 phase 和比例进行值比较，并能从 controller 读取当前本地约束。
+    test('constraint implements value equality and diagnostics', () {
+      final first = LifecycleConstraint.visible(visibleFraction: 0.5);
+      final same = LifecycleConstraint.visible(visibleFraction: 0.5);
+      final differentFraction =
+          LifecycleConstraint.visible(visibleFraction: 0.75);
+      final differentPhase = LifecycleConstraint.active(visibleFraction: 0.5);
+      final controller = LifecycleController(constraint: first)..attach();
+
+      expect(first, same);
+      expect(first.hashCode, same.hashCode);
+      expect(first, isNot(differentFraction));
+      expect(first, isNot(differentPhase));
+      expect(first, isNot('visible'));
+      expect(first.toString(), contains('visibleFraction: 0.5'));
+      expect(controller.localConstraint, first);
+
+      controller.updateLocal(constraint: differentPhase);
+      expect(controller.localConstraint, differentPhase);
+      controller.dispose();
     });
 
     // 验证 controller 销毁后不允许更新、重新挂接或新增监听器。

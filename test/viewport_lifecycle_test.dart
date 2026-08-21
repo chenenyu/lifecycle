@@ -12,6 +12,32 @@ import 'test_support.dart';
 
 void main() {
   group('ViewportLifecycleItem', () {
+    // 验证阈值、激活阈值关系和比例粒度只接受规范区间，尽早阻止无意义配置。
+    test('rejects invalid threshold and granularity configurations', () {
+      expect(
+        () => ViewportLifecycleItem(
+          visibleThreshold: -0.1,
+          child: SizedBox.shrink(),
+        ),
+        throwsAssertionError,
+      );
+      expect(
+        () => ViewportLifecycleItem(
+          visibleThreshold: 0.8,
+          activeThreshold: 0.5,
+          child: SizedBox.shrink(),
+        ),
+        throwsAssertionError,
+      );
+      expect(
+        () => ViewportLifecycleItem(
+          visibleFractionGranularity: 1.1,
+          child: SizedBox.shrink(),
+        ),
+        throwsAssertionError,
+      );
+    });
+
     // 验证垂直 ListView 双向跳转时，离屏 item 隐藏、进入视口的 item 激活并传播给子节点。
     testWidgets('tracks ListView items after jumpTo in both directions', (
       tester,
@@ -373,6 +399,88 @@ void main() {
       expect(transitions.single.events, isEmpty);
     });
 
+    // 验证粒度设为零时保留真实测量比例，适合需要精确曝光进度的调用方。
+    testWidgets('reports exact visible fractions when granularity is zero', (
+      tester,
+    ) async {
+      await _setSurface(tester, const Size(400, 50));
+      final transitions = <LifecycleTransition>[];
+
+      await tester.pumpWidget(
+        lifecycleTestApp(
+          home: ListView(
+            children: [
+              const SizedBox(height: 25),
+              SizedBox(
+                height: 100,
+                child: ViewportLifecycleItem(
+                  visibleFractionGranularity: 0,
+                  onTransition: transitions.add,
+                  child: const Text('Exact fraction item'),
+                ),
+              ),
+              const SizedBox(height: 500),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(transitions.last.current.visibleFraction, closeTo(0.25, 0.0001));
+    });
+
+    // 验证零面积 item 不会发生除零或错误激活，只保持 created 后的 hidden 状态。
+    testWidgets('keeps zero-area items hidden without throwing', (
+      tester,
+    ) async {
+      final events = <LifecycleEvent>[];
+      await tester.pumpWidget(
+        lifecycleTestApp(
+          home: ListView(
+            children: [
+              ViewportLifecycleItem(
+                onEvent: (event, transition) => events.add(event),
+                child: const SizedBox(height: 0),
+              ),
+              const SizedBox(height: 600),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(events, [LifecycleEvent.created]);
+      expect(tester.takeException(), isNull);
+    });
+
+    // 验证同一个 Scrollable 更换 ScrollController/ScrollPosition 后会解绑旧位置并重新测量。
+    testWidgets('migrates measurement when ScrollPosition changes', (
+      tester,
+    ) async {
+      await _setSurface(tester, const Size(400, 400));
+      final log = LifecycleEventLog();
+      final fixtureKey = GlobalKey<_SwappableScrollFixtureState>();
+
+      await tester.pumpWidget(
+        lifecycleTestApp(
+          home: Scaffold(
+            body: _SwappableScrollFixture(key: fixtureKey, log: log),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(log['swapItem0'], createdAndActive);
+      log.clear();
+
+      fixtureKey.currentState!.swapToScrolledController();
+      await tester.pumpAndSettle();
+
+      expect(fixtureKey.currentState!.offset, 600);
+      expect(log['swapItem0'], hiddenFromActive);
+      expect(log['swapItem5'], contains(LifecycleEvent.activated));
+      expect(tester.takeException(), isNull);
+    });
+
     // 验证缺少 Scrollable 祖先时主动抛出可理解的 FlutterError，而非静默给出错误状态。
     testWidgets('requires a Scrollable ancestor', (tester) async {
       await tester.pumpWidget(
@@ -532,6 +640,57 @@ class _KeepAliveState extends State<_KeepAlive>
   Widget build(BuildContext context) {
     super.build(context);
     return widget.child;
+  }
+}
+
+/// 在保留同一个 ListView 元素的同时替换 ScrollController，触发 ScrollPosition 迁移。
+class _SwappableScrollFixture extends StatefulWidget {
+  const _SwappableScrollFixture({super.key, required this.log});
+
+  final LifecycleEventLog log;
+
+  @override
+  State<_SwappableScrollFixture> createState() =>
+      _SwappableScrollFixtureState();
+}
+
+class _SwappableScrollFixtureState extends State<_SwappableScrollFixture> {
+  ScrollController _controller = ScrollController(keepScrollOffset: false);
+
+  double get offset => _controller.offset;
+
+  void swapToScrolledController() {
+    final oldController = _controller;
+    setState(() {
+      _controller = ScrollController(keepScrollOffset: false);
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controller.jumpTo(600);
+      oldController.dispose();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      controller: _controller,
+      itemExtent: 120,
+      itemCount: 20,
+      itemBuilder: (context, index) {
+        final item = ViewportLifecycleItem(
+          onEvent: (event, transition) =>
+              widget.log.add('swapItem$index', event),
+          child: Text('Swap item $index'),
+        );
+        return index == 0 ? _KeepAlive(child: item) : item;
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
 

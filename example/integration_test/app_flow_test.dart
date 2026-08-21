@@ -53,5 +53,33 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('lifecycle-log-toggle')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('lifecycle-log-list')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('lifecycle-log-toggle')));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('open-viewport-demo')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const ValueKey('open-viewport-demo')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Activate while scrolling'));
+    await tester.fling(
+      find.byKey(const ValueKey('viewport-grid')),
+      const Offset(0, -900),
+      3000,
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .state<ScrollableState>(find.byType(Scrollable).last)
+          .position
+          .pixels,
+      greaterThan(0),
+    );
+    expect(tester.takeException(), isNull);
   });
 }

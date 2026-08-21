@@ -12,6 +12,23 @@ import 'test_support.dart';
 
 void main() {
   group('LifecyclePageView', () {
+    // 验证空数据源不会访问不存在的 page 或产生越界约束，便于异步列表加载前安全占位。
+    testWidgets('supports an empty page collection', (tester) async {
+      final controller = PageController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        lifecycleTestApp(
+          home: Scaffold(
+            body: LifecyclePageView(controller: controller, children: const []),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PageView), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     // 验证 initialPage 决定初始活跃页，切换后只有最终选中页处于 active。
     testWidgets('honors initialPage and activates only the selected page', (
       tester,
@@ -244,6 +261,33 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(log['tab1'], contains(LifecycleEvent.deactivated));
+      expect(log['tab0'], contains(LifecycleEvent.activated));
+    });
+
+    // 验证 Tab 点击动画的中间帧只让相邻页 visible，目标页必须等动画 settle 后才 active。
+    testWidgets('keeps adjacent tabs inactive during controller animation', (
+      tester,
+    ) async {
+      final log = LifecycleEventLog();
+      final fixtureKey = GlobalKey<_TabFixtureState>();
+
+      await tester.pumpWidget(
+        lifecycleTestApp(
+          home: _TabFixture(key: fixtureKey, log: log),
+        ),
+      );
+      await tester.pumpAndSettle();
+      log.clear();
+
+      fixtureKey.currentState!.showFirstTab();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(log['tab1'], contains(LifecycleEvent.deactivated));
+      expect(log['tab0'], contains(LifecycleEvent.appeared));
+      expect(log['tab0'], isNot(contains(LifecycleEvent.activated)));
+
+      await tester.pumpAndSettle();
       expect(log['tab0'], contains(LifecycleEvent.activated));
     });
 

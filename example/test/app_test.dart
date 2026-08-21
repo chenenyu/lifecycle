@@ -60,6 +60,148 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('alpha: 1'), findsOneWidget);
   });
+
+  // 验证独立 Viewport demo 可切换滚动激活策略、快速滚动并把网格 transition 写入日志。
+  testWidgets('runs the configurable viewport demo', (tester) async {
+    await _pumpApp(tester);
+    await _scrollHomeTo(
+      tester,
+      find.byKey(const ValueKey('open-viewport-demo')),
+    );
+    await tester.tap(find.byKey(const ValueKey('open-viewport-demo')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Viewport lifecycle'), findsOneWidget);
+    await tester.tap(find.text('Activate while scrolling'));
+    await tester.pump();
+    expect(
+      tester
+          .widget<SwitchListTile>(
+            find.widgetWithText(SwitchListTile, 'Activate while scrolling'),
+          )
+          .value,
+      isTrue,
+    );
+
+    await tester.fling(
+      find.byKey(const ValueKey('viewport-grid')),
+      const Offset(0, -900),
+      3000,
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .state<ScrollableState>(find.byType(Scrollable).last)
+          .position
+          .pixels,
+      greaterThan(0),
+    );
+
+    await tester.tap(find.byKey(const ValueKey('lifecycle-log-toggle')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('grid item'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
+  // 验证嵌套 Navigator 的 push/pop 只切换内层内容，返回后仍停留在同一个专项 demo。
+  testWidgets('runs the nested navigator demo flow', (tester) async {
+    await _pumpApp(tester);
+    await _scrollHomeTo(
+      tester,
+      find.byKey(const ValueKey('open-nested-navigator-demo')),
+    );
+    await tester.tap(find.byKey(const ValueKey('open-nested-navigator-demo')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nested home'), findsWidgets);
+    await tester.tap(find.byKey(const ValueKey('nested-push')));
+    await tester.pumpAndSettle();
+    expect(find.text('Nested details'), findsWidgets);
+
+    await tester.tap(find.byKey(const ValueKey('nested-pop')));
+    await tester.pumpAndSettle();
+    expect(find.text('Nested home'), findsWidgets);
+    expect(find.text('Nested Navigator'), findsOneWidget);
+  });
+
+  // 验证 Navigator.pages demo 的列表增删能真实创建和移除 details 页面。
+  testWidgets('runs the declarative Navigator pages flow', (tester) async {
+    await _pumpApp(tester);
+    await _scrollHomeTo(
+      tester,
+      find.byKey(const ValueKey('open-pages-api-demo')),
+    );
+    await tester.tap(find.byKey(const ValueKey('open-pages-api-demo')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Declarative home'), findsWidgets);
+    await tester.tap(find.byKey(const ValueKey('add-declarative-page')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Declarative details'), findsWidgets);
+
+    await tester.tap(find.byKey(const ValueKey('remove-declarative-page')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Declarative details'), findsNothing);
+    expect(find.textContaining('Declarative home'), findsWidgets);
+  });
+
+  // 验证 Controller 实验页修改父约束后，子节点有效状态也按父子交集同步隐藏。
+  testWidgets('composes parent changes in the controller lab', (tester) async {
+    await _pumpApp(tester);
+    await _scrollHomeTo(
+      tester,
+      find.byKey(const ValueKey('open-controller-lab')),
+    );
+    await tester.tap(find.byKey(const ValueKey('open-controller-lab')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Parent effective: active'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilterChip, 'visible').first);
+    await tester.pump();
+
+    expect(find.text('Parent effective: hidden'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.textContaining('Child effective:'),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Child effective: hidden'), findsOneWidget);
+  });
+
+  // 验证普通命名路由和 Tab 专项入口均已正确接入 demo 根 Navigator 与生命周期组件。
+  testWidgets('runs the route and tab demo entries', (tester) async {
+    await _pumpApp(tester);
+    await tester.tap(find.byKey(const ValueKey('open-route-demo')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('status-Details route')), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await _scrollHomeTo(tester, find.byKey(const ValueKey('open-tab-demo')));
+    await tester.tap(find.byKey(const ValueKey('open-tab-demo')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('SECOND'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('status-Tab 1')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  // 验证首页自定义 Boundary 关闭 visible 时，其后代状态卡同步进入 hidden。
+  testWidgets('updates the custom boundary demo', (tester) async {
+    await _pumpApp(tester);
+    final visibleSwitch = find.byKey(const ValueKey('boundary-visible-switch'));
+    await _scrollHomeTo(tester, visibleSwitch);
+    await tester.tap(visibleSwitch);
+    await tester.pump();
+
+    final boundaryCard = find.byKey(const ValueKey('status-Boundary child'));
+    expect(
+      find.descendant(of: boundaryCard, matching: find.text('hidden')),
+      findsOneWidget,
+    );
+  });
 }
 
 Future<void> _pumpApp(WidgetTester tester) async {

@@ -34,34 +34,61 @@ class LifecycleStatusCard extends StatelessWidget {
           color: color.withValues(alpha: 0.12),
           child: Padding(
             padding: EdgeInsets.all(compact ? 8 : 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
+            child: compact
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
                         label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                    ),
-                    Chip(
-                      visualDensity: VisualDensity.compact,
-                      avatar: CircleAvatar(backgroundColor: color, radius: 5),
-                      label: Text(lifecycle.phase.name),
-                    ),
-                  ],
-                ),
-                Text(
-                  'visible: ${lifecycle.visible}  ·  '
-                  'active: ${lifecycle.active}  ·  '
-                  'fraction: ${lifecycle.visibleFraction.toStringAsFixed(2)}',
-                ),
-                if (!compact)
-                  Text('app state: ${lifecycle.appState?.name ?? 'unknown'}'),
-              ],
-            ),
+                      Text(
+                        '${lifecycle.phase.name} · '
+                        '${lifecycle.visibleFraction.toStringAsFixed(2)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              label,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Chip(
+                            visualDensity: VisualDensity.compact,
+                            avatar: CircleAvatar(
+                              backgroundColor: color,
+                              radius: 5,
+                            ),
+                            label: Text(lifecycle.phase.name),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        'visible: ${lifecycle.visible}  ·  '
+                        'active: ${lifecycle.active}  ·  '
+                        'fraction: '
+                        '${lifecycle.visibleFraction.toStringAsFixed(2)}',
+                      ),
+                      Text(
+                        'app state: '
+                        '${lifecycle.appState?.name ?? 'unknown'}',
+                      ),
+                    ],
+                  ),
           ),
         );
       },
