@@ -19,6 +19,7 @@ class ViewportLifecycleScreen extends StatefulWidget {
 class _ViewportLifecycleScreenState extends State<ViewportLifecycleScreen> {
   double _visibleThreshold = 0.2;
   double _activeThreshold = 0.8;
+  bool _activateWhileScrolling = false;
   bool _recordEveryItem = false;
 
   @override
@@ -33,9 +34,10 @@ class _ViewportLifecycleScreenState extends State<ViewportLifecycleScreen> {
             child: Column(
               children: [
                 const DemoInstructions(
-                  action: 'scroll slowly until an item is partly clipped.',
+                  action:
+                      'scroll or fling until an item is partly clipped, then let the grid settle.',
                   expected:
-                      'visible and active change independently when the two-dimensional area crosses each threshold.',
+                      'visible follows its area threshold; active also waits for scrolling to settle unless immediate activation is enabled.',
                 ),
                 Row(
                   children: [
@@ -78,6 +80,17 @@ class _ViewportLifecycleScreenState extends State<ViewportLifecycleScreen> {
                 SwitchListTile(
                   dense: true,
                   contentPadding: EdgeInsets.zero,
+                  title: const Text('Activate while scrolling'),
+                  subtitle: const Text(
+                    'Off keeps visible items inactive until scrolling settles.',
+                  ),
+                  value: _activateWhileScrolling,
+                  onChanged: (value) =>
+                      setState(() => _activateWhileScrolling = value),
+                ),
+                SwitchListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
                   title: const Text('Record every grid item'),
                   subtitle: const Text(
                     'Off records only items 0–3 to reduce noise.',
@@ -103,6 +116,9 @@ class _ViewportLifecycleScreenState extends State<ViewportLifecycleScreen> {
               itemBuilder: (context, index) => ViewportLifecycleItem(
                 visibleThreshold: _visibleThreshold,
                 activeThreshold: _activeThreshold,
+                activationPolicy: _activateWhileScrolling
+                    ? ViewportLifecycleActivationPolicy.immediate
+                    : ViewportLifecycleActivationPolicy.whenScrollSettles,
                 onTransition: _recordEveryItem || index < 4
                     ? (transition) =>
                           widget.log.record('grid item $index', transition)

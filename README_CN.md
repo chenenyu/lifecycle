@@ -231,6 +231,8 @@ ListView.builder(
   itemBuilder: (context, index) => ViewportLifecycleItem(
     visibleThreshold: 0.25,
     activeThreshold: 0.8,
+    activationPolicy:
+        ViewportLifecycleActivationPolicy.whenScrollSettles,
     onTransition: (transition) {
       debugPrint('item $index: ${transition.current.visibleFraction}');
     },
@@ -239,9 +241,11 @@ ListView.builder(
 )
 ```
 
-元素的可见比例达到 `visibleThreshold` 时会变为可见，达到 `activeThreshold` 时会
-变为活跃。如果没有指定 `activeThreshold`，则使用可见阈值。外层应用、路由和页面
-的生命周期状态仍然会参与最终状态计算。
+元素的可见比例达到 `visibleThreshold` 时会变为可见。默认只有滚动停止且比例达到
+`activeThreshold` 后才会变为活跃；如需保留滚动中的即时激活行为，可使用
+`ViewportLifecycleActivationPolicy.immediate`。如果没有指定 `activeThreshold`，则使用
+可见阈值。默认以 1% 为粒度稳定输出的可见比例；将 `visibleFractionGranularity` 设为
+零可以恢复精确比例。外层应用、路由和页面的生命周期状态仍然会参与最终状态计算。
 
 ## 直接使用控制器
 
