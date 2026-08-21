@@ -116,6 +116,35 @@ void main() {
       );
     });
 
+    // 验证 Boundary 更新使用调用方指定的 cause，而不是丢失为默认 custom。
+    testWidgets('LifecycleBoundary preserves a custom transition cause', (
+      tester,
+    ) async {
+      final causes = <LifecycleCause>[];
+      final fixtureKey = GlobalKey<_BoundaryFixtureState>();
+
+      await tester.pumpWidget(
+        LifecycleApp(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: _BoundaryFixture(
+              key: fixtureKey,
+              log: LifecycleEventLog(),
+              cause: LifecycleCause.route,
+              causes: causes,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      causes.clear();
+
+      fixtureKey.currentState!.show();
+      await tester.pump();
+
+      expect(causes, contains(LifecycleCause.route));
+    });
+
     // 验证 Scope 在缺失时可安全返回 null、of 会明确失败，存在时则返回同一个 controller。
     testWidgets('LifecycleScope lookup distinguishes absent and present scope',
         (
@@ -339,6 +368,35 @@ void main() {
         constraint: const LifecycleConstraint.active(),
       );
       expect(navigation.lifecycle.phase, LifecyclePhase.active);
+    });
+
+    // 验证 Navigator 销毁后，仍在重建的 Route 子树不会挂到已销毁的 unknown controller。
+    testWidgets('falls back safely when a disposed Navigator resolves a route',
+        (
+      tester,
+    ) async {
+      final navigation = NavigatorLifecycleController();
+      final fixtureKey = GlobalKey<_DisposedNavigatorResolverFixtureState>();
+      addTearDown(navigation.dispose);
+
+      await tester.pumpWidget(
+        LifecycleApp(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: _DisposedNavigatorResolverFixture(
+              key: fixtureKey,
+              navigation: navigation,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      navigation.dispose();
+      fixtureKey.currentState!.rebuildRouteTree();
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
     });
   });
 
@@ -635,9 +693,16 @@ class _LifecyclePage extends StatelessWidget {
 
 /// 通过外部方法切换 Boundary 约束的测试夹具。
 class _BoundaryFixture extends StatefulWidget {
-  const _BoundaryFixture({super.key, required this.log});
+  const _BoundaryFixture({
+    super.key,
+    required this.log,
+    this.cause = LifecycleCause.custom,
+    this.causes,
+  });
 
   final LifecycleEventLog log;
+  final LifecycleCause cause;
+  final List<LifecycleCause>? causes;
 
   @override
   State<_BoundaryFixture> createState() => _BoundaryFixtureState();
@@ -662,12 +727,51 @@ class _BoundaryFixtureState extends State<_BoundaryFixture> {
           : active
               ? const LifecycleConstraint.active()
               : const LifecycleConstraint.visible(),
+      cause: widget.cause,
+      onTransition: (transition) => widget.causes?.add(transition.cause),
       onEvent: (event, _) => widget.log.add('boundary', event),
       child: LifecycleProbe(
         name: 'child',
         log: widget.log,
         child: LifecycleBuilder(
           builder: (context, lifecycle) => Text(lifecycle.phase.name),
+        ),
+      ),
+    );
+  }
+}
+
+/// 保留 Navigator Scope 但销毁其 controller，再重建带 ModalRoute 的子树。
+class _DisposedNavigatorResolverFixture extends StatefulWidget {
+  const _DisposedNavigatorResolverFixture({
+    super.key,
+    required this.navigation,
+  });
+
+  final NavigatorLifecycleController navigation;
+
+  @override
+  State<_DisposedNavigatorResolverFixture> createState() =>
+      _DisposedNavigatorResolverFixtureState();
+}
+
+class _DisposedNavigatorResolverFixtureState
+    extends State<_DisposedNavigatorResolverFixture> {
+  int _version = 0;
+
+  void rebuildRouteTree() => setState(() => _version++);
+
+  @override
+  Widget build(BuildContext context) {
+    return NavigatorLifecycleScope(
+      controller: widget.navigation,
+      child: Navigator(
+        key: ValueKey(_version),
+        onGenerateRoute: (_) => MaterialPageRoute<void>(
+          builder: (_) => LifecycleListener(
+            key: ValueKey(_version),
+            child: const SizedBox.shrink(),
+          ),
         ),
       ),
     );

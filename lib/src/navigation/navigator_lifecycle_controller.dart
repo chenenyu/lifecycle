@@ -74,7 +74,8 @@ class NavigatorLifecycleController {
   }
 
   /// Resolves the lifecycle controller for [route].
-  LifecycleController _controllerFor(Route<dynamic> route) {
+  LifecycleController? _controllerFor(Route<dynamic> route) {
+    if (_disposed) return null;
     for (final entry in _history.reversed) {
       if (identical(entry.route, route)) return entry.controller;
     }
@@ -122,6 +123,9 @@ class NavigatorLifecycleController {
   void _handleReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
     _ensureUsable();
     if (newRoute == null || oldRoute == null) return;
+    // Navigator callbacks can be repeated during route reconciliation. Never create
+    // a second lifecycle entry for a Route that is already tracked in the history.
+    if (_entryFor(newRoute) != null) return;
     final index = _history.indexWhere(
       (entry) => identical(entry.route, oldRoute),
     );
