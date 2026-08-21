@@ -47,7 +47,7 @@ created → appeared → activated → deactivated → disappeared → disposed
 
 ```yaml
 dependencies:
-  lifecycle: ^1.0.0
+  lifecycle: ^1.0.0-alpha1
 ```
 
 ```dart

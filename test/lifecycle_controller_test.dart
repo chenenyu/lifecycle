@@ -238,7 +238,12 @@ void main() {
       var transitionCount = 0;
       listenToTransitions(controller, (_) => transitionCount++);
 
+      expect(
+        identical(controller.value, const LifecycleSnapshot.active()),
+        isTrue,
+      );
       controller.updateLocal(constraint: const LifecycleConstraint.active());
+      controller.updateLocal(appState: null);
       controller.reparent(null);
 
       expect(transitionCount, 0);
@@ -653,6 +658,31 @@ void main() {
     expect(navigation.routeNamed('/unit'), same(route));
     expect(() => navigation.routes.clear(), throwsUnsupportedError);
 
+    navigation.dispose();
+  });
+
+  // 验证 didReplace 重复传入历史中已有 Route 时不会创建重复 entry 或破坏栈顺序。
+  test('ignores replacement with an already tracked route', () {
+    final navigation = NavigatorLifecycleController();
+    final first = PageRouteBuilder<void>(
+      settings: const RouteSettings(name: '/first'),
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          const SizedBox.shrink(),
+    );
+    final second = PageRouteBuilder<void>(
+      settings: const RouteSettings(name: '/second'),
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          const SizedBox.shrink(),
+    );
+
+    navigation.observer
+      ..didPush(first, null)
+      ..didPush(second, first);
+    navigation.observer.didReplace(newRoute: first, oldRoute: second);
+
+    expect(navigation.routes, [first, second]);
+    expect(navigation.lifecycleFor(first), isNotNull);
+    expect(navigation.lifecycleFor(second), isNotNull);
     navigation.dispose();
   });
 

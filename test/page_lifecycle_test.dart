@@ -12,6 +12,33 @@ import 'test_support.dart';
 
 void main() {
   group('LifecyclePageView', () {
+    // 验证 PageView 的方向、reverse 和 padEnds 配置完整转发到底层 Flutter PageView。
+    testWidgets('forwards layout configuration to PageView', (tester) async {
+      final controller = PageController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        lifecycleTestApp(
+          home: SizedBox(
+            height: 400,
+            child: LifecyclePageView(
+              controller: controller,
+              scrollDirection: Axis.vertical,
+              reverse: true,
+              padEnds: false,
+              children: const [Text('Only page')],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final pageView = tester.widget<PageView>(find.byType(PageView));
+      expect(pageView.scrollDirection, Axis.vertical);
+      expect(pageView.reverse, isTrue);
+      expect(pageView.padEnds, isFalse);
+    });
+
     // 验证空数据源不会访问不存在的 page 或产生越界约束，便于异步列表加载前安全占位。
     testWidgets('supports an empty page collection', (tester) async {
       final controller = PageController();
@@ -195,6 +222,32 @@ void main() {
 
       expect(log['swap1'], contains(LifecycleEvent.activated));
       expect(log['swap0'], contains(LifecycleEvent.deactivated));
+    });
+
+    // 验证 controller 替换和 itemCount 收缩同时发生时，索引会收敛且剩余页仍能 active。
+    testWidgets('combines PageController replacement with item shrink', (
+      tester,
+    ) async {
+      final fixtureKey = GlobalKey<_CombinedPageFixtureState>();
+      final log = LifecycleEventLog();
+
+      await tester.pumpWidget(
+        lifecycleTestApp(
+          home: Scaffold(
+            body: _CombinedPageFixture(key: fixtureKey, log: log),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(log['combined1'], createdAndActive);
+      log.clear();
+
+      fixtureKey.currentState!.swapAndShrink();
+      await tester.pumpAndSettle();
+
+      expect(log['combined0'], contains(LifecycleEvent.activated));
+      expect(find.text('Combined 0'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     // 验证 Dialog 下切换 Page 时目标页只能 visible，必须等 Route 恢复后才能 active。
@@ -550,6 +603,51 @@ class _SwappablePageFixtureState extends State<_SwappablePageFixture> {
       },
       children: const [Text('Swap 0'), Text('Swap 1')],
     );
+  }
+}
+
+/// 同时替换 PageController 和数据长度，覆盖 didUpdateWidget 的组合更新路径。
+class _CombinedPageFixture extends StatefulWidget {
+  const _CombinedPageFixture({super.key, required this.log});
+
+  final LifecycleEventLog log;
+
+  @override
+  State<_CombinedPageFixture> createState() => _CombinedPageFixtureState();
+}
+
+class _CombinedPageFixtureState extends State<_CombinedPageFixture> {
+  PageController _controller = PageController(initialPage: 1);
+  int _itemCount = 2;
+
+  void swapAndShrink() {
+    final oldController = _controller;
+    setState(() {
+      _controller = PageController(initialPage: 0, keepPage: false);
+      _itemCount = 1;
+    });
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => oldController.dispose());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LifecyclePageView.builder(
+      controller: _controller,
+      itemCount: _itemCount,
+      onPageTransition: (index, transition) {
+        for (final event in transition.events) {
+          widget.log.add('combined$index', event);
+        }
+      },
+      itemBuilder: (context, index) => Text('Combined $index'),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
 

@@ -332,6 +332,66 @@ void main() {
       expect(activationsDuringScroll, greaterThan(0));
     });
 
+    // 验证 GridView 在逐帧 fling 时也遵守默认 settled 策略，不会在滚动中激活 item。
+    testWidgets('defers activation during a GridView fling', (tester) async {
+      await _setSurface(tester, const Size(400, 400));
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      final snapshots = <int, LifecycleSnapshot>{};
+      var activationsDuringScroll = 0;
+
+      await tester.pumpWidget(
+        lifecycleTestApp(
+          home: GridView.builder(
+            controller: controller,
+            itemCount: 80,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisExtent: 100,
+            ),
+            itemBuilder: (context, index) => ViewportLifecycleItem(
+              onTransition: (transition) {
+                snapshots[index] = transition.current;
+                if (transition.contains(LifecycleEvent.activated) &&
+                    controller.position.isScrollingNotifier.value) {
+                  activationsDuringScroll++;
+                }
+              },
+              child: Text('Grid fling item $index'),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.fling(
+        find.byType(GridView),
+        const Offset(0, -1600),
+        5000,
+      );
+      var observedScrollingFrame = false;
+      for (var frame = 0; frame < 120; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+        if (!controller.position.isScrollingNotifier.value) break;
+        observedScrollingFrame = true;
+        expect(
+          snapshots.values.where((snapshot) => snapshot.visible),
+          everyElement(
+            isA<LifecycleSnapshot>().having(
+              (snapshot) => snapshot.active,
+              'active',
+              isFalse,
+            ),
+          ),
+        );
+      }
+
+      expect(observedScrollingFrame, isTrue);
+      expect(activationsDuringScroll, 0);
+      await tester.pumpAndSettle();
+      expect(snapshots.values.any((snapshot) => snapshot.active), isTrue);
+    });
+
     // 验证真实滚动导致 KeepAlive item 离屏时会在当前测量帧隐藏，不再额外等待零比例确认。
     testWidgets('hides a kept-alive item in the first post-scroll frame', (
       tester,

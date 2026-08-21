@@ -69,6 +69,11 @@ class LifecycleController extends ChangeNotifier
   bool get isDisposed => _disposed;
 
   /// The parent whose state restricts this node, if any.
+  ///
+  /// If the parent is disposed first, this reference remains until this node
+  /// is explicitly [reparent]ed. Its effective snapshot is already detached
+  /// from the disposed parent, so the reference is only diagnostic and does
+  /// not keep the parent usable.
   LifecycleController? get parent => _parent;
 
   /// Attaches this node and computes its first effective snapshot.
@@ -106,11 +111,19 @@ class LifecycleController extends ChangeNotifier
     LifecycleCause cause = LifecycleCause.custom,
   }) {
     _ensureUsable();
+    final previousConstraint = _localConstraint;
+    final previousAppState = _localAppState;
     if (constraint != null) _localConstraint = constraint;
     if (clearAppState) {
       _localAppState = null;
     } else if (appState != null) {
       _localAppState = appState;
+    }
+    // Viewport/Page 节点会在每帧提交量化后的约束。输入没有改变时不需要重新构造
+    // Snapshot，也不需要触发父子通知；父节点变化仍由 _handleParentChanged 独立处理。
+    if (_localConstraint == previousConstraint &&
+        _localAppState == previousAppState) {
+      return;
     }
     if (_attached) {
       _recompute(cause);
