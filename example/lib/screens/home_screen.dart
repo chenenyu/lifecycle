@@ -72,6 +72,7 @@ class _LifecycleHomeScreenState extends State<LifecycleHomeScreen>
       title: 'Lifecycle Lab',
       log: widget.log,
       body: ListView(
+        key: const ValueKey('home-scroll'),
         padding: const EdgeInsets.all(16),
         children: [
           Text(

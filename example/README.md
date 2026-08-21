@@ -44,12 +44,17 @@ Run the example's unit and Widget tests:
 flutter test
 ```
 
-Run the integration flow on a connected emulator, device, desktop, or browser:
+Run the integration smoke flows on a connected emulator, device, desktop, or browser:
 
 ```sh
 flutter devices
 flutter test integration_test -d <device-id>
 ```
+
+The smoke suite starts each case with a fresh app tree and covers the native
+Dialog route, PageView gesture, Viewport fling, nested Navigator, and
+declarative `Navigator.pages` flows. Detailed state-machine and frame-by-frame
+assertions remain in the package Widget tests so failures stay deterministic.
 
 The package tests live one directory above the example and are run separately:
 
