@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.0.0-alpha1] - 2026/08/24
+
+Complete, API-incompatible redesign of the package.
+
+### Breaking changes
+
+* Replace the 0.x observer and wrapper APIs with a composable lifecycle tree
+  built around `LifecycleController`, `LifecycleScope`, normalized
+  `LifecycleConstraint`, and immutable `LifecycleSnapshot` values.
+* Use deterministic `LifecycleEvent` and `LifecycleTransition` notifications
+  through the standard `ChangeNotifier` API.
+* Defer viewport activation until scrolling settles by default; use
+  `ViewportLifecycleActivationPolicy.immediate` for immediate activation.
+* Require Flutter 3.32 or newer.
+
+### Added
+
+* Support App, Navigator 1.0/2.0, PageView, TabBarView, and scrollable viewport
+  lifecycle composition.
+* Add `LifecycleApp`, `LifecycleBoundary`, `LifecycleListener`,
+  `LifecycleBuilder`, and `LifecycleStateMixin`.
+* Add stable page identity, nested Navigator support, batched viewport
+  measurement, an interactive example, and comprehensive test suites.
+
 ## [0.10.0] - 2025/03/28
 
 * Fix issue #27: Custom `initialPage` in `PageController`(also `initialIndex` in `TabController`)
