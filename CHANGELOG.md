@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0-alpha1] - 2026/08/24
+## [1.0.0] - 2026/09/02
 
 Complete, API-incompatible redesign of the package.
 
