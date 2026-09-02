@@ -1,6 +1,6 @@
 name: lifecycle
 description: Composable app, route, page, and viewport lifecycle for Flutter widgets.
-version: 1.0.0-alpha1
+version: 1.0.0
 homepage: https://github.com/chenenyu/lifecycle
 repository: https://github.com/chenenyu/lifecycle
 issue_tracker: https://github.com/chenenyu/lifecycle/issues
